@@ -1,0 +1,84 @@
+# Lint and test every change, on every branch that matters (RELEASING.md).
+# The job names are the required status checks of the `main` ruleset.
+name: CI
+
+on:
+  push:
+    branches: [devel, main]
+  pull_request:
+    branches: [devel, main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pyyaml==6.0.2 jsonschema==4.23.0
+      - name: OKF schemas (what unifai-operator validates before emitting)
+        run: python3 platform/okf/validate_okf_schema.py
+      - name: Bundle structure and corp policy references
+        run: python3 platform/supply-chain/validate_okf_bundle.py
+      - name: Quota policy and task quota-class references
+        run: python3 platform/okf/validate_quota_policy.py
+      - name: Authorization matrices match regeneration
+        run: python3 platform/okf/generate_authorization_matrix.py --check --all
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pyyaml==6.0.2 jsonschema==4.23.0
+      - name: Agent contract suites
+        run: python3 platform/okf/run_agent_contract_tests.py
+      - name: Release tooling
+        run: python3 -m unittest discover -s platform/release/tests
+      - name: Builds are reproducible
+        run: |
+          python3 platform/release/okf_release.py build --out "$RUNNER_TEMP/b1"
+          python3 platform/release/okf_release.py build --out "$RUNNER_TEMP/b2"
+          diff -r "$RUNNER_TEMP/b1" "$RUNNER_TEMP/b2"
+
+  secrets:
+    name: secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: No secret in the history
+        run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.21.2 detect --source /repo --redact --no-banner
+
+  # A merge to main IS a release (release.yml), so the PR that makes it must
+  # come from devel and carry releasable versions.
+  version-gate:
+    name: version-gate
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Only devel is merged into main
+        if: github.head_ref != 'devel'
+        run: |
+          echo "::error::main only accepts pull requests from devel (got ${{ github.head_ref }})"
+          exit 1
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pyyaml==6.0.2
+      - name: VERSION and agent versions are releasable
+        run: python3 platform/release/okf_release.py check-versions

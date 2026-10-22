@@ -1,0 +1,111 @@
+# Run the published dev artifacts on the dev cluster (demo333): apply one
+# UnifaiAgentBundle per agent in a scratch namespace, wait for the operator to
+# pull, verify, validate and emit it (Ready), then clean up.
+#
+# - After a devel publish: never blocking. A cluster that is off or
+#   unreachable only produces a warning.
+# - On a pull request to main: blocking when OKF_RUN_DEV_REQUIRED is true, so
+#   nothing reaches a release without a successful run.
+#
+# Needs unifai-operator with keyless verification (zuno-demo WP-162). Until
+# then keep OKF_RUN_DEV_ENABLED unset: the job reports itself skipped.
+name: Run on dev cluster
+
+on:
+  workflow_run:
+    workflows: ["Publish dev"]
+    types: [completed]
+    branches: [devel]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    name: run-dev
+    runs-on: ubuntu-latest
+    environment: dev-demo333
+    env:
+      OKF_REGISTRY: ${{ vars.OKF_REGISTRY || 'quay.io/zuno' }}
+      NAMESPACE: ${{ vars.OKF_DEV_NAMESPACE || 'okf-dev' }}
+      BLOCKING: ${{ github.event_name == 'pull_request' && vars.OKF_RUN_DEV_REQUIRED == 'true' }}
+      SHA: ${{ github.event.workflow_run.head_sha || github.event.pull_request.head.sha }}
+    steps:
+      - name: Decide whether to run
+        id: gate
+        run: |
+          if [ "${{ vars.OKF_RUN_DEV_ENABLED }}" != "true" ]; then
+            echo "::notice::dev run disabled (OKF_RUN_DEV_ENABLED is not true)"
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "workflow_run" ] && [ "${{ github.event.workflow_run.conclusion }}" != "success" ]; then
+            echo "::notice::the publish run did not succeed, nothing to run"
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.run == 'true'
+        with:
+          ref: ${{ env.SHA }}
+      - uses: actions/setup-python@v5
+        if: steps.gate.outputs.run == 'true'
+        with:
+          python-version: "3.11"
+      - if: steps.gate.outputs.run == 'true'
+        run: pip install pyyaml==6.0.2
+      - uses: oras-project/setup-oras@v1
+        if: steps.gate.outputs.run == 'true'
+        with:
+          version: 1.2.2
+      - name: Install oc
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          curl -fsSL https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-4.20/openshift-client-linux.tar.gz \
+            | sudo tar -xz -C /usr/local/bin oc
+      - name: Log in to the dev cluster
+        id: login
+        if: steps.gate.outputs.run == 'true'
+        env:
+          API: ${{ secrets.DEMO333_API_URL }}
+          TOKEN: ${{ secrets.DEMO333_TOKEN }}
+          CA: ${{ secrets.DEMO333_CA }}
+        run: |
+          printf '%s\n' "$CA" > "$RUNNER_TEMP/ca.crt"
+          if oc login "$API" --token="$TOKEN" --certificate-authority="$RUNNER_TEMP/ca.crt" --request-timeout=20s >/dev/null; then
+            echo "up=true" >> "$GITHUB_OUTPUT"
+          elif [ "$BLOCKING" = "true" ]; then
+            echo "::error::dev cluster unreachable, and a successful run is required before main"
+            exit 1
+          else
+            echo "::warning::dev cluster unreachable (powered off?): run skipped"
+            echo "up=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Render the bundles of this run
+        if: steps.login.outputs.up == 'true'
+        run: |
+          branch=devel
+          corp="$OKF_REGISTRY/okf-corp:$branch-${SHA:0:12}"
+          oras pull "$corp" -o "$RUNNER_TEMP/corp"
+          oc -n "$NAMESPACE" get configmap okf-dev-bundle-template -o jsonpath='{.data.spec\.yaml}' > "$RUNNER_TEMP/spec.yaml"
+          python3 platform/release/render_dev_bundles.py \
+            --index "$RUNNER_TEMP/corp/okf-index.json" --template "$RUNNER_TEMP/spec.yaml" \
+            --namespace "$NAMESPACE" --run-id "${SHA:0:12}" \
+            --identity-regexp '^https://github\.com/startxfr/zuno-demo-agents/\.github/workflows/publish-dev\.yml@refs/heads/devel$' \
+            > "$RUNNER_TEMP/bundles.yaml"
+      - name: Apply and wait for Ready
+        if: steps.login.outputs.up == 'true'
+        run: |
+          oc apply -f "$RUNNER_TEMP/bundles.yaml"
+          rc=0
+          for b in $(oc -n "$NAMESPACE" get unifaiagentbundle -l "zuno.startx.fr/okf-dev-run=${SHA:0:12}" -o name); do
+            if ! oc -n "$NAMESPACE" wait "$b" --for=condition=Ready --timeout=5m; then
+              rc=1
+              oc -n "$NAMESPACE" get "$b" -o jsonpath='{range .status.conditions[*]}{.type}={.status} {.reason}: {.message}{"\n"}{end}'
+            fi
+          done
+          exit $rc
+      - name: Clean up
+        if: always() && steps.login.outputs.up == 'true'
+        run: oc -n "$NAMESPACE" delete unifaiagentbundle -l "zuno.startx.fr/okf-dev-run=${SHA:0:12}" --ignore-not-found

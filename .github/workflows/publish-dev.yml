@@ -1,0 +1,69 @@
+# Publish every push to devel and main as signed, non-release artifacts:
+# tags `<branch>-<sha12>` in the release repositories. They are signed
+# keyless with THIS workflow's identity on that branch, which the release
+# verification policy (publish.yml@refs/tags/v*) refuses, so a dev artifact
+# can be pulled and run but never admitted as a release.
+name: Publish dev
+
+on:
+  push:
+    branches: [devel, main]
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: publish-dev-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: publish-dev
+    # Off until the registry and its robot exist (RELEASING.md, setup).
+    if: vars.OKF_PUBLISH_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    env:
+      OKF_REGISTRY: ${{ vars.OKF_REGISTRY || 'quay.io/zuno' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pyyaml==6.0.2
+      - uses: oras-project/setup-oras@v1
+        with:
+          version: 1.2.2
+      - uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: v2.4.1
+      - name: Log in to the registry
+        env:
+          QUAY_USER: ${{ secrets.QUAY_ROBOT_USERNAME }}
+          QUAY_TOKEN: ${{ secrets.QUAY_ROBOT_TOKEN }}
+        run: |
+          host="${OKF_REGISTRY%%/*}"
+          echo "$QUAY_TOKEN" | oras login "$host" -u "$QUAY_USER" --password-stdin
+          echo "$QUAY_TOKEN" | cosign login "$host" -u "$QUAY_USER" --password-stdin
+      - name: Publish the ${{ github.ref_name }} artifacts
+        run: >
+          python3 platform/release/okf_release.py publish
+          --registry "$OKF_REGISTRY" --channel "${{ github.ref_name }}"
+          --sha "$GITHUB_SHA" --output refs.json
+      - name: Sign keyless
+        run: jq -r '.corp, .agents[]' refs.json | xargs -n1 cosign sign --yes
+      - name: Summary
+        run: |
+          {
+            echo "### ${{ github.ref_name }} artifacts"
+            echo
+            echo "Corp: \`$(jq -r .corp refs.json)\`"
+            echo
+            jq -r '.agents | to_entries[] | "- `\(.key)`: `\(.value)`"' refs.json
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: okf-refs-${{ github.ref_name }}
+          path: refs.json

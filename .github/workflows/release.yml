@@ -1,0 +1,95 @@
+# The release chain: every push to main is a release (RELEASING.md).
+#
+#   1. merge main into stable (--no-ff);
+#   2. write the CHANGELOG section of VERSION on stable, push stable;
+#   3. cut the immutable tag: a commit whose tree is exactly stable's and
+#      whose parents are the previous release tag and stable, so that release
+#      tags form their own lineage (`git log v1.2.0` lists releases only);
+#      tag it vVERSION, plus <agent>-v<version> for every agent version not
+#      released yet; push the tags, which starts publish.yml.
+#
+# Pushes are made with the zuno-release-bot GitHub App token, the only
+# identity the `stable` and release-tag rulesets let through, and the only
+# kind of push that starts the next workflow (GITHUB_TOKEN pushes do not).
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: release
+    # Off until the GitHub App exists (RELEASING.md, setup).
+    if: vars.OKF_RELEASE_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - uses: actions/create-github-app-token@v1
+        id: app
+        with:
+          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ steps.app.outputs.token }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pyyaml==6.0.2
+      - name: Commit identity
+        run: |
+          git config user.name "${{ steps.app.outputs.app-slug }}[bot]"
+          git config user.email "${{ steps.app.outputs.app-slug }}[bot]@users.noreply.github.com"
+      - name: Versions are releasable
+        run: python3 platform/release/okf_release.py check-versions
+      - name: Merge main into stable
+        run: |
+          VERSION="$(cat VERSION)"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          if git ls-remote --exit-code --heads origin stable >/dev/null; then
+            git checkout -B stable origin/stable
+            git merge --no-ff origin/main -m "Merge branch 'main' into stable for v$VERSION"
+          else
+            git checkout -B stable origin/main
+          fi
+      - name: Write the changelog on stable
+        run: |
+          prev="$(python3 -c 'import sys; sys.path.insert(0, "platform/release"); import okf_release as r; t = r.latest_tag("v"); print(t[0] if t else "")')"
+          echo "PREVIOUS=$prev" >> "$GITHUB_ENV"
+          args=(--date "$(date -u +%F)")
+          if [ -n "$prev" ]; then args+=(--previous "$prev"); fi
+          python3 platform/release/okf_release.py changelog "${args[@]}" > "$RUNNER_TEMP/section.md"
+          { head -n 4 CHANGELOG.md; cat "$RUNNER_TEMP/section.md"; tail -n +5 CHANGELOG.md; } > "$RUNNER_TEMP/CHANGELOG.md"
+          mv "$RUNNER_TEMP/CHANGELOG.md" CHANGELOG.md
+          git add CHANGELOG.md
+          git commit -m "release: v$VERSION"
+          git push origin stable
+      - name: Cut the immutable release tags
+        run: |
+          if [ -n "$PREVIOUS" ]; then
+            commit="$(git commit-tree "stable^{tree}" -p "$PREVIOUS^{commit}" -p stable -m "Release v$VERSION")"
+          else
+            commit="$(git rev-parse stable)"
+          fi
+          git tag -a "v$VERSION" "$commit" -m "Release v$VERSION"
+          tags=("v$VERSION")
+          for dir in agents/*/; do
+            agent="$(basename "$dir")"
+            version="$(cat "$dir/VERSION")"
+            if ! git rev-parse -q --verify "refs/tags/$agent-v$version" >/dev/null; then
+              git tag -a "$agent-v$version" "$commit" -m "$agent $version (release v$VERSION)"
+              tags+=("$agent-v$version")
+            fi
+          done
+          git push origin "${tags[@]}"
+          echo "Released v$VERSION at $commit: ${tags[*]}" >> "$GITHUB_STEP_SUMMARY"
