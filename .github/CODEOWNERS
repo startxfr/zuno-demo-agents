@@ -1,0 +1,9 @@
+# Who reviews what (zuno-demo ADR-0576 clause 5). Corp policies and an
+# agent's access and allowed_* declarations widen or narrow what agents may
+# do: they always need an owner's review.
+*                              @startxfr
+/policies/                     @startxfr
+/agents/*/agent.okf.md         @startxfr
+/agents/*/tasks/               @startxfr
+/.github/                      @startxfr
+/platform/release/             @startxfr
