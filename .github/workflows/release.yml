@@ -32,10 +32,12 @@ jobs:
     runs-on: ubuntu-latest
     environment: release
     steps:
-      - uses: actions/create-github-app-token@v1
+      # The App ID is not secret: a `release` environment variable or secret
+      # of that name works; the private key must be a secret.
+      - uses: actions/create-github-app-token@v2
         id: app
         with:
-          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          app-id: ${{ secrets.RELEASE_BOT_APP_ID || vars.RELEASE_BOT_APP_ID }}
           private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
       - uses: actions/checkout@v4
         with:
