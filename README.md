@@ -36,6 +36,11 @@ used to be platform-side only. Schemas: `platform/okf/schema/*-v0.3.schema.json`
 | `zuno.guardrails: {mode, categories}` | agent | at least the minimum mode of `policies/guardrails/guardrails-policy.yaml` for the classification |
 | `zuno.limits: {max_tokens, max_concurrent_requests, quota_class, memory}` | agent, task | ceilings of `policies/limits/limits-policy.yaml`, classes of `policies/quotas/quota-policy.yaml` |
 
+A corp skill a task references is embedded in that agent's artifact as
+`skills/corp/<name>.md`: an agent artifact is self-contained, and changing a
+corp skill changes the digest of every agent using it (so their versions
+must be bumped, which `check-versions` enforces).
+
 A bundle may only narrow the corp policies: `platform/okf/check_narrowing.py`
 refuses any widening, naming the corp clause it exceeds. v0.2 stays valid.
 
