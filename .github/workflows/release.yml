@@ -84,7 +84,7 @@ jobs:
             commit="$(git rev-parse stable)"
           fi
           git tag -a "v$VERSION" "$commit" -m "Release v$VERSION"
-          tags=("v$VERSION")
+          tags=()
           for dir in agents/*/; do
             agent="$(basename "$dir")"
             version="$(cat "$dir/VERSION")"
@@ -93,5 +93,9 @@ jobs:
               tags+=("$agent-v$version")
             fi
           done
-          git push origin "${tags[@]}"
-          echo "Released v$VERSION at $commit: ${tags[*]}" >> "$GITHUB_STEP_SUMMARY"
+          # GitHub creates no push event at all when more than three tags
+          # are pushed at once, so the release tag that starts publish.yml
+          # goes alone, after the agent version tags.
+          if [ "${#tags[@]}" -gt 0 ]; then git push origin "${tags[@]}"; fi
+          git push origin "v$VERSION"
+          echo "Released v$VERSION at $commit: v$VERSION ${tags[*]}" >> "$GITHUB_STEP_SUMMARY"
