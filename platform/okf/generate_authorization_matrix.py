@@ -8,8 +8,8 @@ who x what x for-what x policy intersection for that agent - one row per
 bundle frontmatter plus policies/tools/tool-policy.yaml and
 policies/knowledge/knowledge-policy.yaml, plus a `### Model routing`
 subsection - one row per task - resolving each task's effective model
-chain (reference model + fallback) from platform/ai-gateway/
-provider-routing.yaml and policies/model-routing/model-routing-policy.yaml.
+chain (reference model + fallback) from policies/models/
+model-catalog.yaml and policies/model-routing/model-routing-policy.yaml.
 The matrix is documentation of the intersection, never an input to it
 (ADR-0503 clause 2): MCP Gateway, Agent Runtime, AI Gateway and the
 portal keep reading the YAML sources; nothing at runtime reads this
@@ -48,7 +48,7 @@ AGENTS_DIR = REPO_ROOT / "agents"
 TOOL_POLICY_PATH = REPO_ROOT / "policies" / "tools" / "tool-policy.yaml"
 KNOWLEDGE_POLICY_PATH = REPO_ROOT / "policies" / "knowledge" / "knowledge-policy.yaml"
 QUOTA_POLICY_PATH = REPO_ROOT / "policies" / "quotas" / "quota-policy.yaml"
-PROVIDER_ROUTING_PATH = REPO_ROOT / "platform" / "ai-gateway" / "provider-routing.yaml"
+MODEL_CATALOG_PATH = REPO_ROOT / "policies" / "models" / "model-catalog.yaml"
 MODEL_ROUTING_POLICY_PATH = REPO_ROOT / "policies" / "model-routing" / "model-routing-policy.yaml"
 
 BEGIN_MARKER = ("<!-- BEGIN GENERATED AUTHORIZATION MATRIX (ADR-0503) - do not edit; "
@@ -87,8 +87,8 @@ def _load_quota_classes() -> Dict[str, Dict]:
 
 
 def _load_providers() -> List[Dict]:
-    doc = yaml.safe_load(PROVIDER_ROUTING_PATH.read_text(encoding="utf-8")) or {}
-    return list(doc.get("providers") or [])
+    doc = yaml.safe_load(MODEL_CATALOG_PATH.read_text(encoding="utf-8")) or {}
+    return list(doc.get("models") or [])
 
 
 def _preference_names(entry: Dict) -> List[str]:
@@ -141,7 +141,7 @@ def _effective_model_chain(
 ) -> List[str]:
     """Mirrors components/ai-gateway/app/routing.py's
     RoutingTable.candidates_for() + _apply_preference(): filter providers
-    eligible for `classification`, keep provider-routing.yaml's order,
+    eligible for `classification`, keep model-catalog.yaml's order,
     then move any `prefer` names that survived to the front in that order
     - a pure reorder, never able to resurrect a provider eligibility
     filtered out. Duplicated here rather than imported (this file already
@@ -185,7 +185,7 @@ def _provider_meta(providers: List[Dict]) -> Dict[str, Tuple[str, str]]:
     which say nothing about which model actually answers - reading
     "`local`" gave no way to tell it is the 27B. That opacity is where
     the ADR-0518/ADR-0531 role contradiction became invisible in the
-    generated docs, so the model id and its `role` (provider-routing.yaml
+    generated docs, so the model id and its `role` (model-catalog.yaml
     is the authority for both) are surfaced here.
     """
     return {
@@ -239,7 +239,7 @@ def _render_section(agent_dir: pathlib.Path, tool_policy: Dict[str, Dict],
         f"Generated per ADR-0503 from this bundle's frontmatter, "
         f"`policies/tools/tool-policy.yaml`, "
         f"`policies/knowledge/knowledge-policy.yaml`, "
-        f"`platform/ai-gateway/provider-routing.yaml` and "
+        f"`policies/models/model-catalog.yaml` and "
         f"`policies/model-routing/model-routing-policy.yaml` — the enforced "
         f"intersection (ADR-0011/ADR-0203) restated for review, never read "
         f"at runtime. Entitlement (ADR-0040): `{', '.join(access_groups) or '(none)'}`; "
@@ -320,14 +320,14 @@ def _render_section(agent_dir: pathlib.Path, tool_policy: Dict[str, Dict],
         lines.append("")
         lines.append(
             "Effective per-task model chain (ADR-0021/ADR-0303/ADR-0412), resolved "
-            "from `platform/ai-gateway/provider-routing.yaml`'s classification "
+            "from `policies/models/model-catalog.yaml`'s classification "
             "eligibility reordered by this `(agent, task)`'s `policies/model-routing/"
             "model-routing-policy.yaml` preference — the first entry is the "
             "reference model, the rest are fallback alternatives, in try order. "
             "The reference model is annotated with the model id it actually "
             "serves and that model's architectural role (`default`, `quality`, "
             "`reasoning`, `specialized`, `reasoning-external`, `code`, "
-            "`general-external`); `provider-routing.yaml`'s `role` key is the "
+            "`general-external`); `model-catalog.yaml`'s `role` key is the "
             "authority for both, and every model reachable through the fallback "
             "chain is named in the **Available models** rollup below the table."
         )
@@ -393,7 +393,7 @@ def _render_section(agent_dir: pathlib.Path, tool_policy: Dict[str, Dict],
                 # forced-local tier(s) as two separate rows instead of the
                 # single row below. Tiers producing an identical chain are
                 # merged into a single label (e.g. `C2/C3`) rather than
-                # repeated - every local provider in provider-routing.yaml
+                # repeated - every local provider in model-catalog.yaml
                 # today is eligible for C1/C2/C3 alike, so C2 and C3 forced
                 # local resolve to the exact same chain.
                 baseline_tiers = [t for t in ("C1", "C2", "C3") if t not in local_only_for]

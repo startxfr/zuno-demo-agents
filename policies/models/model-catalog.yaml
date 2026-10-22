@@ -1,0 +1,92 @@
+# Model catalog: the model vocabulary agent bundles may name.
+#
+# Corp policy, owned by this repository (ADR-0576, as amended on
+# 2026-10-22: the agents repository defines its own vocabulary). Each entry
+# is a logical model name that policies/model-routing/model-routing-policy.yaml
+# may prefer, with the facts routing decisions depend on:
+#   kind          local (served in-cluster) or saas (leaves the cluster)
+#   model         the model that answers, for humans reading the matrices
+#   role          architectural role (default, quality, reasoning, ...)
+#   eligible_for  data classifications allowed to reach it (C1 < C2 < C3)
+#
+# Order matters: it is the default fallback order within a classification,
+# local models first.
+#
+# This file says nothing about HOW a model is reached (endpoints, MaaS refs,
+# credentials). A consuming platform binds each name to a real backend and
+# must refuse, at admission, a release naming a model it cannot serve.
+#
+# Seeded on 2026-10-22 from zuno-demo platform/ai-gateway/provider-routing.yaml
+# (commit 9b5507c6), keeping only the logical fields.
+
+models:
+- name: local-maas
+  kind: local
+  model: qwen3.6-27b-instruct
+  role: quality
+  eligible_for: [C1, C2, C3]
+- name: local
+  kind: local
+  model: qwen3.6-27b-instruct
+  role: quality
+  eligible_for: [C1, C2, C3]
+- name: local-gpt-oss-maas
+  kind: local
+  model: gpt-oss-20b
+  role: reasoning
+  eligible_for: [C1, C2, C3]
+- name: local-gpt-oss
+  kind: local
+  model: gpt-oss-20b
+  role: reasoning
+  eligible_for: [C1, C2, C3]
+- name: local-wesh-maas
+  kind: local
+  model: qwen3.5-9b-wesh
+  role: specialized
+  eligible_for: [C1, C2, C3]
+- name: local-wesh
+  kind: local
+  model: qwen3.5-9b-wesh
+  role: specialized
+  eligible_for: [C1, C2, C3]
+- name: local-qwen35-maas
+  kind: local
+  model: qwen3.5-9b
+  role: default
+  eligible_for: [C1, C2, C3]
+- name: local-qwen35
+  kind: local
+  model: qwen3.5-9b
+  role: default
+  eligible_for: [C1, C2, C3]
+- name: openai
+  kind: saas
+  model: gpt-4o-mini
+  role: general-external
+  eligible_for: [C1, C2]
+- name: gemini
+  kind: saas
+  model: gemini-1.5-pro
+  role: general-external
+  eligible_for: [C1]
+- name: anthropic
+  kind: saas
+  model: claude-3-5-sonnet-latest
+  role: general-external
+  eligible_for: [C1, C2]
+- name: mistral
+  kind: saas
+  model: mistral-large-latest
+  role: general-external
+  eligible_for: [C1]
+- name: mistral-codestral
+  kind: saas
+  model: codestral-latest
+  role: code
+  eligible_for: [C1, C2]
+- name: ovhcloud-gpt-oss-120b
+  kind: saas
+  model: gpt-oss-120b
+  role: reasoning-external
+  eligible_for: [C1, C2]

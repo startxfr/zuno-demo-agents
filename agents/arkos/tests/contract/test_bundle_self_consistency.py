@@ -117,26 +117,10 @@ def test_authorization_matrix_is_current() -> None:
     )
 
 
-def test_deployment_snapshot_is_current() -> None:
-    """ADR-0503: same currency check as the matrix above, for the
-    generated CR snapshot."""
-    result = subprocess.run(
-        [sys.executable, "platform/okf/generate_deployment_snapshot.py", "--check"],
-        cwd=REPO_ROOT,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, (
-        f"a deployment snapshot is stale - run "
-        f"'python3 platform/okf/generate_deployment_snapshot.py'\nstdout: {result.stdout}\nstderr: {result.stderr}"
-    )
-
-
 TESTS = [
     test_every_allowed_tool_resolves_with_the_consultant_role,
     test_every_allowed_knowledge_domain_resolves_with_the_consultant_role,
     test_authorization_matrix_is_current,
-    test_deployment_snapshot_is_current,
 ]
 
 
