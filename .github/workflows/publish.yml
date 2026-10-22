@@ -10,6 +10,10 @@ name: Publish release
 on:
   push:
     tags: ["v*"]
+  # Recovery only: run it with a release tag as the ref ("Use workflow
+  # from: Tags > vX.Y.Z"). From a branch the tag check below fails, and the
+  # signature identity (refs/heads/...) would not be a release one anyway.
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -29,7 +33,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: The tag is the VERSION of its tree
-        run: test "v$(cat VERSION)" = "$GITHUB_REF_NAME"
+        run: test "$GITHUB_REF_TYPE" = tag && test "v$(cat VERSION)" = "$GITHUB_REF_NAME"
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
