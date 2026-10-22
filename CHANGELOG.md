@@ -2,6 +2,23 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v0.1.1 - 2026-10-22
+
+Agents:
+
+- `advantage` 0.1.0
+- `arkos` 0.1.0
+- `cognos` 0.1.0
+- `comage` 0.1.0
+- `finage` 0.1.0
+- `naveo` 0.1.0
+- `soursage` 0.1.0
+- `tekos` 0.1.0
+
+Changes:
+
+- fix(release): push the release tag alone, v0.1.1 (cf02ea6)
+
 ## v0.1.0 - 2026-10-22
 
 Agents:
