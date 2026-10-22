@@ -41,7 +41,19 @@ SCHEMAS: Dict[str, Dict[str, str]] = {
         "rag": "zuno-okf-rag-v0.2.schema.json",
         "policy": "zuno-okf-policy-v0.2.schema.json",
     },
+    # zuno-demo ADR-0579: skills, model roles, guardrails, limits. Accepted
+    # here before any bundle uses it (consumers first, bundles last).
+    "v0.3": {
+        "agent": "zuno-okf-v0.3.schema.json",
+        "task": "zuno-okf-task-v0.3.schema.json",
+        "prompt": "zuno-okf-prompt-v0.3.schema.json",
+        "tool": "zuno-okf-tool-v0.3.schema.json",
+        "rag": "zuno-okf-rag-v0.3.schema.json",
+        "policy": "zuno-okf-policy-v0.3.schema.json",
+        "skill": "zuno-okf-skill-v0.3.schema.json",
+    },
 }
+CORP_SKILLS_DIR = REPO_ROOT / "policies" / "skills"
 SKIPPED_DIRS = {"tests", "__pycache__"}
 
 
@@ -99,6 +111,8 @@ def main(argv: List[str]) -> int:
     problems: List[str] = []
     for bundle in bundles:
         problems += check_bundle(bundle, schemas)
+    if not argv and CORP_SKILLS_DIR.is_dir():
+        problems += check_bundle(CORP_SKILLS_DIR, schemas)
     if problems:
         print(f"{len(problems)} schema issue(s):")
         for p in problems:

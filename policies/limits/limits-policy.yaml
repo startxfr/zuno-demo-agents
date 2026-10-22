@@ -1,0 +1,14 @@
+# Corp policy: limits - ceilings for the per-agent and per-task bounds an
+# OKF v0.3 bundle may declare under `zuno.limits` (zuno-demo ADR-0579
+# clause 4). A bundle may only ask for less.
+#
+# Quota amounts are not here: they live in policies/quotas/quota-policy.yaml,
+# and `zuno.limits.quota_class` only selects one of its classes.
+
+# Generation ceiling per model call (ADR-0544). Same bound as the OKF task
+# schema's zuno.max_tokens maximum.
+max_tokens: 8192
+
+# Concurrent requests one user may keep open on one agent. Seed value: no
+# platform enforces it yet; it is the bound a bundle is checked against.
+max_concurrent_requests: 10

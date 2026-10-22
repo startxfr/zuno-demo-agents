@@ -24,6 +24,25 @@ An agent may only narrow the corp policies, never widen them. The model
 catalog names logical models; a consuming platform binds each name to a real
 backend and refuses a release that names one it cannot serve.
 
+## OKF v0.3
+
+v0.3 (zuno-demo ADR-0579) lets an agent declare, in its own bundle, what
+used to be platform-side only. Schemas: `platform/okf/schema/*-v0.3.schema.json`.
+
+| Field | Where | Bounded by |
+|---|---|---|
+| `zuno.skills: [name, corp/name]` | task | the skill (`skills/<name>.md` in the agent, or `policies/skills/<name>.md` for `corp/`) may only need tools and knowledge the task allows |
+| `zuno.models: {preferred, forbidden}` | agent, task | roles of `policies/models/model-catalog.yaml`, eligible for the agent's classification |
+| `zuno.guardrails: {mode, categories}` | agent | at least the minimum mode of `policies/guardrails/guardrails-policy.yaml` for the classification |
+| `zuno.limits: {max_tokens, max_concurrent_requests, quota_class, memory}` | agent, task | ceilings of `policies/limits/limits-policy.yaml`, classes of `policies/quotas/quota-policy.yaml` |
+
+A bundle may only narrow the corp policies: `platform/okf/check_narrowing.py`
+refuses any widening, naming the corp clause it exceeds. v0.2 stays valid.
+
+**Do not move a bundle to `okf_version: v0.3` yet.** Every consumer must
+read v0.3 first; unifai-operator embeds the v0.2 schemas only and would
+refuse the bundle. Consumers first, bundles last.
+
 ## What a release is
 
 Each release publishes, to `quay.io/zuno` by default:
