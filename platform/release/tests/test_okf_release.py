@@ -105,6 +105,43 @@ class LayerTest(RepoTestCase):
                                             "reference": "r/okf-demo@sha256:1"}])
 
 
+class CorpSkillTest(RepoTestCase):
+    """OKF v0.3 corp skills travel inside the agent artifact (skills/corp/<name>.md)."""
+
+    def use_corp_skill(self) -> None:
+        (self.root / "policies" / "skills").mkdir(parents=True)
+        (self.root / "policies" / "skills" / "house-style.md").write_text("---\ntype: skill\n---\nBe brief.\n")
+        (self.root / "agents" / "demo" / "tasks" / "do.md").write_text(
+            "---\ntype: task\nzuno:\n  skills: [corp/house-style]\n---\n")
+        self.commit("use a corp skill")
+
+    def names(self, layer: bytes) -> list:
+        with tarfile.open(fileobj=io.BytesIO(gzip.decompress(layer))) as tar:
+            return tar.getnames()
+
+    def test_corp_skill_is_embedded(self) -> None:
+        self.use_corp_skill()
+        layer = okf_release.build_agent(self.root / "agents" / "demo").layer
+        self.assertEqual(self.names(layer), ["agent.okf.md", "skills/corp/house-style.md", "tasks/do.md"])
+
+    def test_changed_corp_skill_needs_an_agent_bump(self) -> None:
+        self.use_corp_skill()
+        self.tag("v0.1.0")
+        self.tag("demo-v1.0.0")
+        (self.root / "VERSION").write_text("0.2.0\n")
+        (self.root / "policies" / "skills" / "house-style.md").write_text("---\ntype: skill\n---\nBe briefer.\n")
+        self.commit("change the corp skill")
+        problems = okf_release.check_versions()
+        self.assertEqual(len(problems), 1)
+        self.assertIn("agents/demo changed since demo-v1.0.0", problems[0])
+
+    def test_missing_corp_skill_stops_the_build(self) -> None:
+        (self.root / "agents" / "demo" / "tasks" / "do.md").write_text(
+            "---\ntype: task\nzuno:\n  skills: [corp/nope]\n---\n")
+        with self.assertRaises(okf_release.ReleaseError):
+            okf_release.build_agent(self.root / "agents" / "demo")
+
+
 class VersionGateTest(RepoTestCase):
     def test_first_release_passes(self) -> None:
         self.assertEqual(okf_release.check_versions(), [])

@@ -43,6 +43,8 @@ jobs:
           python3 platform/okf/validate_okf_schema.py
           python3 platform/supply-chain/validate_okf_bundle.py
           python3 platform/okf/validate_quota_policy.py
+          python3 platform/okf/check_narrowing.py
+          python3 platform/okf/tests/test_okf_v03.py
           python3 platform/okf/generate_authorization_matrix.py --check --all
           python3 platform/okf/run_agent_contract_tests.py
           python3 -m unittest discover -s platform/release/tests
@@ -74,7 +76,7 @@ jobs:
         run: |
           jq -n --arg commit "$GITHUB_SHA" --arg release "$GITHUB_REF_NAME" --arg run "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
             '{commit: $commit, release: $release, run: $run,
-              checks: ["validate_okf_schema", "validate_okf_bundle", "validate_quota_policy",
+              checks: ["validate_okf_schema", "validate_okf_bundle", "validate_quota_policy", "check_narrowing",
                        "generate_authorization_matrix --check", "run_agent_contract_tests", "release tooling tests"]}' \
             > predicate.json
           jq -r '.corp, .agents[]' refs.json \
