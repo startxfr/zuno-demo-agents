@@ -87,8 +87,8 @@ Branches, versions and releases: [RELEASING.md](RELEASING.md).
 
 ## History
 
-Extracted on 2026-10-22 from `startxfr/zuno-demo` (branch `demo222`, commit
-`9b5507c6`) with its history, per zuno-demo ADR-0576. Commit messages before
+Extracted on 2026-10-22 from `startxfr/zuno-demo` (branch `demo222`, since
+retired and kept as the tag `archive/demo222`; commit `9b5507c6`, also in `devel`) with its history, per zuno-demo ADR-0576. Commit messages before
 that date refer to zuno-demo ADRs and work packages.
 
 ## License
