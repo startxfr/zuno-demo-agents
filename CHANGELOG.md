@@ -2,6 +2,24 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v0.2.0 - 2026-10-23
+
+Agents:
+
+- `advantage` 0.1.0
+- `arkos` 0.1.0
+- `cognos` 0.1.0
+- `comage` 0.1.0
+- `finage` 0.1.0
+- `naveo` 0.1.0
+- `soursage` 0.1.0
+- `tekos` 0.1.0
+
+Changes:
+
+- feat(release): embed referenced corp skills in the agent artifact (8a26fc2)
+- feat(okf): OKF v0.3 schemas, corp ceilings and the narrowing rule (5d51969)
+
 ## v0.1.1 - 2026-10-22
 
 Agents:
