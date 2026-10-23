@@ -124,6 +124,30 @@ def runtime_files(agent_dir: pathlib.Path) -> List[pathlib.Path]:
     return sorted(files, key=lambda p: p.relative_to(agent_dir).as_posix())
 
 
+def corp_skills(agent_dir: pathlib.Path) -> Dict[str, pathlib.Path]:
+    """Corp skills the agent's tasks reference (OKF v0.3 `corp/<name>`).
+
+    They are embedded in the agent artifact as skills/corp/<name>.md, so an
+    agent artifact is self-contained: a consumer never needs the corp
+    artifact to build an agent's prompts, and the agent's digest changes
+    when a skill it uses changes."""
+    out: Dict[str, pathlib.Path] = {}
+    tasks_dir = agent_dir / "tasks"
+    for task in sorted(tasks_dir.glob("*.md")) if tasks_dir.is_dir() else []:
+        text = task.read_text(encoding="utf-8")
+        end = text.find("\n---", 4)
+        front = (yaml.safe_load(text[4:end]) or {}) if text.startswith("---\n") and end > 0 else {}
+        for ref in ((front.get("zuno") or {}).get("skills") or []):
+            if isinstance(ref, str) and ref.startswith("corp/"):
+                name = ref[len("corp/"):]
+                path = POLICIES_DIR / "skills" / f"{name}.md"
+                if not path.is_file():
+                    raise ReleaseError(f"{task.relative_to(REPO_ROOT)}: corp skill {ref!r} not found "
+                                       f"({path.relative_to(REPO_ROOT)})")
+                out[f"skills/corp/{name}.md"] = path
+    return out
+
+
 def policy_files() -> List[pathlib.Path]:
     return sorted((p for p in POLICIES_DIR.rglob("*") if p.is_file() and p.name not in EXCLUDED_NAMES),
                   key=lambda p: p.relative_to(POLICIES_DIR).as_posix())
@@ -136,6 +160,11 @@ def runtime_changed_since(tag: str, agent_dir: pathlib.Path) -> bool:
                    if _is_runtime(pathlib.PurePosixPath(line).relative_to(agent_dir.relative_to(REPO_ROOT).as_posix()))}
     if old_runtime != set(paths):
         return True
+    # Embedded corp skills count as the agent's own files.
+    paths += [p.relative_to(REPO_ROOT).as_posix() for p in corp_skills(agent_dir).values()]
+    for path in paths:
+        if not git("ls-tree", "--name-only", tag, "--", path):
+            return True
     result = subprocess.run(["git", "diff", "--quiet", tag, "--", *paths], cwd=REPO_ROOT)
     return result.returncode != 0
 
@@ -179,14 +208,22 @@ def check_versions() -> List[str]:
 
 # --- layers -------------------------------------------------------------------
 
-def build_layer(root: pathlib.Path, files: Sequence[pathlib.Path]) -> bytes:
-    """Deterministic gzipped tar of `files`, named relative to `root`."""
+def build_layer(root: pathlib.Path, files: Sequence[pathlib.Path],
+                extra: Optional[Dict[str, pathlib.Path]] = None) -> bytes:
+    """Deterministic gzipped tar of `files`, named relative to `root`, plus
+    `extra` entries under the archive names given."""
+    entries = {p.relative_to(root).as_posix(): p for p in files}
+    for arcname, path in (extra or {}).items():
+        if arcname in entries:
+            raise ReleaseError(f"{arcname} would be written twice in one layer")
+        entries[arcname] = path
     buf = io.BytesIO()
     with gzip.GzipFile(fileobj=buf, mode="wb", mtime=0) as gz:
         with tarfile.open(fileobj=gz, mode="w", format=tarfile.PAX_FORMAT) as tar:
-            for path in sorted(files, key=lambda p: p.relative_to(root).as_posix()):
+            for arcname in sorted(entries):
+                path = entries[arcname]
                 data = path.read_bytes()
-                info = tarfile.TarInfo(path.relative_to(root).as_posix())
+                info = tarfile.TarInfo(arcname)
                 info.size, info.mode, info.mtime = len(data), 0o644, 0
                 info.uid = info.gid = 0
                 info.uname = info.gname = ""
@@ -223,8 +260,10 @@ class AgentBuild:
 
 def build_agent(agent_dir: pathlib.Path) -> AgentBuild:
     rel = agent_dir.relative_to(REPO_ROOT).as_posix()
-    revision = git("log", "-1", "--format=%H", "--", rel)
-    created = git("log", "-1", "--format=%cI", "--", rel)
+    skills = corp_skills(agent_dir)
+    history = [rel] + [p.relative_to(REPO_ROOT).as_posix() for p in skills.values()]
+    revision = git("log", "-1", "--format=%H", "--", *history)
+    created = git("log", "-1", "--format=%cI", "--", *history)
     if not revision:
         raise ReleaseError(f"{rel} has no commit: commit it before building")
     return AgentBuild(
@@ -233,7 +272,7 @@ def build_agent(agent_dir: pathlib.Path) -> AgentBuild:
         okf_version=okf_version(agent_dir),
         revision=revision,
         created=created,
-        layer=build_layer(agent_dir, runtime_files(agent_dir)),
+        layer=build_layer(agent_dir, runtime_files(agent_dir), skills),
     )
 
 

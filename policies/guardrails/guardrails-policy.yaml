@@ -1,0 +1,23 @@
+# Corp policy: guardrails - the floor every agent's guardrail mode must meet
+# (zuno-demo ADR-0579 clause 3, ADR-0567). Machine-readable companion of
+# README.md in this directory.
+#
+# An agent may declare `zuno.guardrails.mode` (OKF v0.3) to be STRICTER than
+# this floor for its classification, never weaker. Detection patterns are
+# platform configuration and stay with the platform; this file only names
+# the modes, their order and the categories agents may refer to.
+
+# Weakest first. An agent never declares `off`: a platform may switch a
+# hook off, an agent definition may not.
+modes: [off, observe, block]
+
+# The minimum mode per data classification. Seeded on 2026-10-22 from the
+# zuno-demo ai-gateway's modeByClassification, which ships observe for every
+# class (switching one to block is decided on evidence, ADR-0534).
+minimum_mode_by_classification:
+  C1: observe
+  C2: observe
+  C3: observe
+
+# Detection categories (README.md, "What is covered").
+categories: [pii, injection]
