@@ -204,8 +204,11 @@ def validate_bundle(bundle_dir: pathlib.Path, known_tools: Set[str], known_domai
     except ValueError as exc:
         return [Finding(label, str(exc))]
 
-    if frontmatter.get("okf_version") != "v0.2":
-        findings.append(Finding(label, f"okf_version must be v0.2, got {frontmatter.get('okf_version')!r}"))
+    # v0.3 (zuno-demo ADR-0579) adds skills, model roles, guardrails and
+    # limits; platform/okf/check_narrowing.py checks them against the corp
+    # policies. v0.2 stays valid for the v0.12 band.
+    if frontmatter.get("okf_version") not in ("v0.2", "v0.3"):
+        findings.append(Finding(label, f"okf_version must be v0.2 or v0.3, got {frontmatter.get('okf_version')!r}"))
     if frontmatter.get("type") != "agent":
         findings.append(Finding(label, f"type must be 'agent', got {frontmatter.get('type')!r}"))
 
