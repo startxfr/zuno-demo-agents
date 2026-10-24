@@ -2,6 +2,25 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v0.3.1 - 2026-10-24
+
+Agents:
+
+- `advantage` 0.1.0
+- `arkos` 0.1.0
+- `cognos` 0.1.0
+- `comage` 0.1.0
+- `finage` 0.1.0
+- `naveo` 0.1.0
+- `soursage` 0.1.0
+- `tekos` 0.2.0
+
+Changes:
+
+- release: bump VERSION to 0.3.1 (conformance cases in the corp artifact) (a9d9472)
+- feat(release): carry the OKF conformance cases in the corp artifact (33fcdcf)
+- feat(conformance): OKF conformance fixtures for the platform readers (1bad85a)
+
 ## v0.3.0 - 2026-10-23
 
 Agents:
