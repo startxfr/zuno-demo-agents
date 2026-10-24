@@ -1,0 +1,11 @@
+{
+  "description": "okf_version v0.9 is not supported: refused with a named error.",
+  "mcp_gateway": {
+    "load_error": "unsupported okf_version 'v0.9'",
+    "agents": {}
+  },
+  "admission": {
+    "error": "unsupported okf_version 'v0.9'",
+    "agents": null
+  }
+}
