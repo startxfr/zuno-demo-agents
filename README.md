@@ -44,9 +44,12 @@ must be bumped, which `check-versions` enforces).
 A bundle may only narrow the corp policies: `platform/okf/check_narrowing.py`
 refuses any widening, naming the corp clause it exceeds. v0.2 stays valid.
 
-**Do not move a bundle to `okf_version: v0.3` yet.** Every consumer must
-read v0.3 first; unifai-operator embeds the v0.2 schemas only and would
-refuse the bundle. Consumers first, bundles last.
+Bundles may move to `okf_version: v0.3`, one agent at a time (`tekos`
+first). The consumers read v0.3: unifai-operator since 0.1.27 and the
+zuno-demo readers (zuno-demo WP-163). The operator does not map
+`zuno.models`, `zuno.guardrails` or `zuno.limits` yet, so they have no
+runtime effect there: the corp routing and guardrail policies remain the
+authority, and a bundle's v0.3 fields must restate them, never change them.
 
 ## What a release is
 
