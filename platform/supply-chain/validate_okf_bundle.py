@@ -93,6 +93,20 @@ def _known_tool_names() -> Set[str]:
     return names
 
 
+def tool_policy_findings(path: pathlib.Path = TOOL_POLICY_PATH) -> List["Finding"]:
+    """Structural checks on the tool policy itself. `access` (zuno-demo ADR-0406
+    and ADR-0409) is optional and must be `read` or `write`; absent means `write`."""
+    if not path.is_file():
+        return []
+    label = "policies/tools/tool-policy.yaml"
+    findings: List[Finding] = []
+    for entry in (yaml.safe_load(path.read_text()) or {}).get("tools", []):
+        access = entry.get("access")
+        if access is not None and access not in ("read", "write"):
+            findings.append(Finding(label, f"tool '{entry.get('tool')}': access must be 'read' or 'write', got {access!r}"))
+    return findings
+
+
 def _known_knowledge_domains() -> Set[str]:
     """ADR-0202/0203 knowledge policy - feature-detected. Returns an empty
     set (meaning "no knowledge references validated yet") until WP-20
@@ -261,7 +275,7 @@ def main() -> int:
     known_tools = _known_tool_names()
     known_domains = _known_knowledge_domains()
 
-    all_findings: List[Finding] = []
+    all_findings: List[Finding] = list(tool_policy_findings())
     for bundle_dir in bundle_dirs:
         all_findings.extend(validate_bundle(bundle_dir, known_tools, known_domains))
 
