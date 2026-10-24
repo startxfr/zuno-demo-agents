@@ -1,0 +1,11 @@
+{
+  "description": "An agent without okf_version is refused, not assumed to be the newest.",
+  "mcp_gateway": {
+    "load_error": "missing okf_version",
+    "agents": {}
+  },
+  "admission": {
+    "error": "missing okf_version",
+    "agents": null
+  }
+}
