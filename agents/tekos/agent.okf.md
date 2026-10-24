@@ -1,5 +1,5 @@
 ---
-okf_version: v0.2
+okf_version: v0.3
 type: agent
 title: Tekos
 description: >-
@@ -42,6 +42,12 @@ zuno:
       ([local-gpt-oss, local]) lives in
       policies/model-routing/model-routing-policy.yaml — the resolved
       effective chain is generated below in "Model routing".
+  # OKF v0.3 (ADR-0579 clause 3): the corp floor for C1
+  # (policies/guardrails/guardrails-policy.yaml) and what the ai-gateway's
+  # modeByClassification serves today. No `categories`: Tekos cares about
+  # every corp category, which is what the absence means.
+  guardrails:
+    mode: observe
   access:
     # ADR-0040: agent entitlement group, orthogonal to the `consultant`
     # business role that governs tool/data permissions inside Tekos
@@ -63,7 +69,7 @@ first vertical slice and validates frontend, BFF, Keycloak, runtime, AI
 gateway, RAG, MCP Confluence, model routing, streaming and citations end
 to end.
 
-Conforms to `platform/okf/schema/zuno-okf-v0.2.schema.json` (ADR-0005,
+Conforms to `platform/okf/schema/zuno-okf-v0.3.schema.json` (ADR-0005,
 ADR-0006, ADR-0038). Task detail lives in `tasks/*.md`, linked by name from
 `zuno.tasks` above; the system prompt for the primary task lives in
 `prompts/answer-technical-question.md`.

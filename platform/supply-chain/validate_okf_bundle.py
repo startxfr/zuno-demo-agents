@@ -61,6 +61,11 @@ TOOL_POLICY_PATH = REPO_ROOT / "policies" / "tools" / "tool-policy.yaml"
 KNOWLEDGE_POLICY_PATH = REPO_ROOT / "policies" / "knowledge" / "knowledge-policy.yaml"
 
 
+# zuno-demo ADR-0579 clause 6: v0.2 and v0.3 documents may sit side by side in one bundle (the
+# schemas and the operator accept the mix), so a v0.3 agent can keep or move its content notes.
+NOTE_OKF_VERSIONS = ("v0.2", "v0.3")
+
+
 @dataclass
 class Finding:
     bundle: str
@@ -91,6 +96,20 @@ def _known_tool_names() -> Set[str]:
         if "capability" in entry:
             names.add(entry["capability"])
     return names
+
+
+def tool_policy_findings(path: pathlib.Path = TOOL_POLICY_PATH) -> List["Finding"]:
+    """Structural checks on the tool policy itself. `access` (zuno-demo ADR-0406
+    and ADR-0409) is optional and must be `read` or `write`; absent means `write`."""
+    if not path.is_file():
+        return []
+    label = "policies/tools/tool-policy.yaml"
+    findings: List[Finding] = []
+    for entry in (yaml.safe_load(path.read_text()) or {}).get("tools", []):
+        access = entry.get("access")
+        if access is not None and access not in ("read", "write"):
+            findings.append(Finding(label, f"tool '{entry.get('tool')}': access must be 'read' or 'write', got {access!r}"))
+    return findings
 
 
 def _known_knowledge_domains() -> Set[str]:
@@ -133,8 +152,8 @@ def _validate_content_notes(bundle_dir: pathlib.Path, label: str, declared_tasks
         except ValueError as exc:
             findings.append(Finding(label, str(exc)))
             continue
-        if fm.get("okf_version") != "v0.2" or fm.get("type") != "rag":
-            findings.append(Finding(label, f"{rel}: expected okf_version v0.2 and type rag"))
+        if fm.get("okf_version") not in NOTE_OKF_VERSIONS or fm.get("type") != "rag":
+            findings.append(Finding(label, f"{rel}: expected okf_version v0.2 or v0.3 and type rag"))
             continue
         zuno = fm.get("zuno") or {}
         domain = zuno.get("domain")
@@ -151,8 +170,8 @@ def _validate_content_notes(bundle_dir: pathlib.Path, label: str, declared_tasks
         except ValueError as exc:
             findings.append(Finding(label, str(exc)))
             continue
-        if fm.get("okf_version") != "v0.2" or fm.get("type") != "tool":
-            findings.append(Finding(label, f"{rel}: expected okf_version v0.2 and type tool"))
+        if fm.get("okf_version") not in NOTE_OKF_VERSIONS or fm.get("type") != "tool":
+            findings.append(Finding(label, f"{rel}: expected okf_version v0.2 or v0.3 and type tool"))
             continue
         zuno = fm.get("zuno") or {}
         capability = zuno.get("capability")
@@ -169,8 +188,8 @@ def _validate_content_notes(bundle_dir: pathlib.Path, label: str, declared_tasks
         except ValueError as exc:
             findings.append(Finding(label, str(exc)))
             continue
-        if fm.get("okf_version") != "v0.2" or fm.get("type") != "policy":
-            findings.append(Finding(label, f"{rel}: expected okf_version v0.2 and type policy"))
+        if fm.get("okf_version") not in NOTE_OKF_VERSIONS or fm.get("type") != "policy":
+            findings.append(Finding(label, f"{rel}: expected okf_version v0.2 or v0.3 and type policy"))
             continue
         zuno = fm.get("zuno") or {}
         applies_to = zuno.get("applies_to") or {}
@@ -261,7 +280,7 @@ def main() -> int:
     known_tools = _known_tool_names()
     known_domains = _known_knowledge_domains()
 
-    all_findings: List[Finding] = []
+    all_findings: List[Finding] = list(tool_policy_findings())
     for bundle_dir in bundle_dirs:
         all_findings.extend(validate_bundle(bundle_dir, known_tools, known_domains))
 
