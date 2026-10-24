@@ -39,6 +39,12 @@
 # `groups` claim cannot be validated against the realm's JWKS
 # (see platform/identity/README.md).
 #
+# `access` (zuno-demo ADR-0406, ADR-0409): `read` when the tool changes nothing in
+# an external system (reads, searches, lists, and local generation of content);
+# `write` when it creates, updates, sends, deletes or runs automation. Absent
+# means `write` (fail closed). Gateway use: on a delegated call, a `write` tool is
+# refused while policies/limits/limits-policy.yaml `delegation.allow_write` is false.
+#
 # Schema per entry:
 #   tool:              MCP tool name, unique key (legacy pre-ADR-0116 name,
 #                       kept as an explicit migration alias).
@@ -88,6 +94,7 @@
 
 tools:
   - tool: search_confluence
+    access: read
     capability: confluence.page.search
     mcp_server: confluence
     description: >-
@@ -125,6 +132,7 @@ tools:
   # (already used internally by Tekos's retrieve_node) via a thin proxy to
   # components/rag-service - no new backend deployed.
   - tool: search_technical_docs
+    access: read
     capability: knowledge.tech.search
     mcp_server: rag-service
     description: >-
@@ -155,6 +163,7 @@ tools:
   # confluence.page.create/update, satisfying ADR-0117's "read access never
   # implies write access".
   - tool: confluence.page.read
+    access: read
     capability: confluence.page.read
     mcp_server: confluence
     description: >-
@@ -174,6 +183,7 @@ tools:
       allow_context: false
 
   - tool: confluence.page.create
+    access: write
     capability: confluence.page.create
     mcp_server: confluence
     min_classification: C2
@@ -185,6 +195,7 @@ tools:
       allow_context: false
 
   - tool: confluence.page.update
+    access: write
     capability: confluence.page.update
     mcp_server: confluence
     min_classification: C2
@@ -200,6 +211,7 @@ tools:
   # same delegated Google Workspace pattern Arkos proved for Drive
   # writes, exercised here for reads under their own business role.
   - tool: list_drive_files
+    access: read
     capability: drive.document.search
     mcp_server: google-workspace
     min_classification: C1
@@ -217,6 +229,7 @@ tools:
   # self/any-scoped capability pattern is introduced for a different
   # domain, Workday, not retrofitted here).
   - tool: drive.document.create
+    access: write
     capability: drive.document.create
     mcp_server: google-workspace
     min_classification: C1
@@ -226,6 +239,7 @@ tools:
       - cdp
 
   - tool: drive.document.update
+    access: write
     capability: drive.document.update
     mcp_server: google-workspace
     min_classification: C1
@@ -235,6 +249,7 @@ tools:
       - cdp
 
   - tool: read_gmail
+    access: read
     capability: gmail.message.read
     mcp_server: google-workspace
     min_classification: C1
@@ -262,6 +277,7 @@ tools:
   # C2 rule - Salesforce content stays governed by C2's ordinary
   # restricted-SaaS routing.
   - tool: salesforce.opportunity.read
+    access: read
     capability: salesforce.opportunity.read
     mcp_server: salesforce
     min_classification: C2
@@ -270,6 +286,7 @@ tools:
       - board
 
   - tool: salesforce.opportunity.create
+    access: write
     capability: salesforce.opportunity.create
     mcp_server: salesforce
     min_classification: C2
@@ -278,6 +295,7 @@ tools:
       - board
 
   - tool: salesforce.opportunity.update
+    access: write
     capability: salesforce.opportunity.update
     mcp_server: salesforce
     min_classification: C2
@@ -286,6 +304,7 @@ tools:
       - board
 
   - tool: web_search
+    access: read
     capability: web.page.search
     mcp_server: web-search
     min_classification: C1
@@ -297,6 +316,7 @@ tools:
       - board
 
   - tool: send_technical_report_email
+    access: write
     capability: email.report.send
     mcp_server: smtp-technical
     min_classification: C2
@@ -321,6 +341,7 @@ tools:
   # because policy-evaluation tests must prove the intersection is
   # correctly *shaped*, independent of whether a backend exists.
   - tool: workday.profile.self.read
+    access: read
     capability: workday.profile.self.read
     mcp_server: workday
     min_classification: C3
@@ -340,6 +361,7 @@ tools:
     subject_field: employee_id
 
   - tool: workday.profile.self.update
+    access: write
     capability: workday.profile.self.update
     mcp_server: workday
     min_classification: C3
@@ -348,6 +370,7 @@ tools:
     subject_field: employee_id
 
   - tool: workday.profile.any.read
+    access: read
     capability: workday.profile.any.read
     mcp_server: workday
     min_classification: C3
@@ -367,6 +390,7 @@ tools:
   # on the ADR-0011 agent_declaration factor until one does, same initial
   # state Confluence's write capabilities had at WP-02.
   - tool: git.repository.read
+    access: read
     capability: git.repository.read
     mcp_server: git-forge
     min_classification: C2
@@ -376,6 +400,7 @@ tools:
       - cdp
 
   - tool: git.repository.list
+    access: read
     capability: git.repository.list
     mcp_server: git-forge
     min_classification: C2
@@ -390,6 +415,7 @@ tools:
   # already do the real work - see git-forge/server.py and each agent's
   # own agents/<name>/tasks/*.md `allowed_tools`).
   - tool: git.repository.private.read
+    access: read
     capability: git.repository.private.read
     mcp_server: git-forge
     min_classification: C2
@@ -399,6 +425,7 @@ tools:
       - cdp
 
   - tool: git.repository.private.list
+    access: read
     capability: git.repository.private.list
     mcp_server: git-forge
     min_classification: C2
@@ -408,6 +435,7 @@ tools:
       - cdp
 
   - tool: git.file.write
+    access: write
     capability: git.file.write
     mcp_server: git-forge
     min_classification: C2
@@ -417,6 +445,7 @@ tools:
       - cdp
 
   - tool: git.repository.create
+    access: write
     capability: git.repository.create
     mcp_server: git-forge
     min_classification: C2
@@ -426,6 +455,7 @@ tools:
       - cdp
 
   - tool: git.repository.fork
+    access: write
     capability: git.repository.fork
     mcp_server: git-forge
     min_classification: C2
@@ -440,6 +470,7 @@ tools:
   # by the ordinary intersection, and an authorized one gets the
   # server's explanatory refusal rather than "unknown tool".
   - tool: git.repository.delete
+    access: write
     capability: git.repository.delete
     mcp_server: git-forge
     min_classification: C2
@@ -487,6 +518,7 @@ tools:
   # new Keycloak group: real humans already trusted with cluster-admin-tier
   # access to the AI platform, not a broader "any console user" grant.
   - tool: aap.platform.audit
+    access: read
     capability: aap.platform.audit
     mcp_server: aap
     description: >-
@@ -505,6 +537,7 @@ tools:
       - ocp-ai-ops
 
   - tool: aap.cluster.audit
+    access: write
     capability: aap.cluster.audit
     mcp_server: aap
     description: >-
@@ -537,6 +570,7 @@ tools:
   # handlers/image_gen.py always declares C2 to ai-gateway, never the
   # caller's real classification).
   - tool: generate_image
+    access: read
     capability: image.generation.create
     mcp_server: image-gen
     min_classification: C2
@@ -568,6 +602,7 @@ tools:
   # this tool - it still never declares generate_image/
   # image.generation.create.
   - tool: generate_diagram
+    access: read
     capability: diagram.generation.create
     mcp_server: diagram-gen
     min_classification: C1
