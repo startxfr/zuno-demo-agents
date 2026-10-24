@@ -2,6 +2,24 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v0.5.0 - 2026-10-24
+
+Agents:
+
+- `advantage` 0.1.0
+- `arkos` 0.1.0
+- `cognos` 0.1.0
+- `comage` 0.1.0
+- `finage` 0.1.0
+- `naveo` 0.1.0
+- `soursage` 0.1.0
+- `tekos` 0.3.0
+
+Changes:
+
+- release: bump VERSION to 0.5.0 (standard token ceilings raised, evaluation quota class) (69f7f96)
+- feat(policy): raise the standard token ceilings; add an evaluation quota class (a3690d7)
+
 ## v0.4.1 - 2026-10-24
 
 Agents:
