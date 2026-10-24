@@ -85,5 +85,19 @@
       }
     },
     "narrowing_error": null
+  },
+  "ui": {
+    "alpha": {
+      "displayName": "Alpha",
+      "tileDescription": "Fixture agent.",
+      "color": "#0066CC",
+      "icon": "code"
+    },
+    "beta": {
+      "displayName": "Beta",
+      "tileDescription": "Fixture agent.",
+      "color": "#0066CC",
+      "icon": "code"
+    }
   }
 }
