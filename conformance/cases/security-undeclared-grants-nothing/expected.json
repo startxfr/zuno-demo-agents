@@ -1,0 +1,32 @@
+{
+  "description": "A task without allowed_tools grants no tool and an agent without access.groups has no group: absence never widens.",
+  "mcp_gateway": {
+    "load_error": null,
+    "agents": {
+      "alpha": {
+        "status": "active",
+        "access_groups": [],
+        "tasks": {
+          "ask": []
+        }
+      }
+    }
+  },
+  "admission": {
+    "error": null,
+    "agents": {
+      "alpha": {
+        "status": "active",
+        "groups": [],
+        "classification": "C1",
+        "tasks": {
+          "ask": {
+            "tools": [],
+            "knowledge": [],
+            "quota_class": "standard"
+          }
+        }
+      }
+    }
+  }
+}

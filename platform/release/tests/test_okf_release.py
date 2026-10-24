@@ -105,6 +105,47 @@ class LayerTest(RepoTestCase):
                                             "reference": "r/okf-demo@sha256:1"}])
 
 
+class ConformanceLayerTest(RepoTestCase):
+    """The conformance cases ride in the corp artifact as an optional last layer."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.saved_conformance = okf_release.CONFORMANCE_DIR
+        okf_release.CONFORMANCE_DIR = self.root / "conformance"
+
+    def tearDown(self) -> None:
+        okf_release.CONFORMANCE_DIR = self.saved_conformance
+        super().tearDown()
+
+    def names(self, layer: bytes) -> list:
+        with tarfile.open(fileobj=io.BytesIO(gzip.decompress(layer))) as tar:
+            return tar.getnames()
+
+    def test_without_cases_the_corp_artifact_has_two_layers(self) -> None:
+        layers = okf_release.corp_layers("0.1.0", "release", {})
+        self.assertEqual([l[2] for l in layers], [okf_release.POLICIES_LAYER_TYPE, okf_release.INDEX_LAYER_TYPE])
+
+    def test_cases_become_a_third_layer_rooted_at_conformance(self) -> None:
+        case = self.root / "conformance" / "cases" / "valid-x"
+        (case / "agents" / "a").mkdir(parents=True)
+        (case / "expected.json").write_text("{}\n")
+        (case / "agents" / "a" / "agent.okf.md").write_text(AGENT_MD)
+        (self.root / "conformance" / "README.md").write_text("notes\n")
+        (self.root / "conformance" / "test_fixtures.py").write_text("pass\n")
+        layers = okf_release.corp_layers("0.1.0", "release", {})
+        self.assertEqual(layers[-1][2], okf_release.CONFORMANCE_LAYER_TYPE)
+        self.assertEqual(self.names(layers[-1][1]),
+                         ["cases/valid-x/agents/a/agent.okf.md", "cases/valid-x/expected.json"])
+
+    def test_the_conformance_layer_is_deterministic(self) -> None:
+        case = self.root / "conformance" / "cases" / "valid-x"
+        case.mkdir(parents=True)
+        (case / "expected.json").write_text("{}\n")
+        first = okf_release.corp_layers("0.1.0", "release", {})[-1][1]
+        (case / "expected.json").touch()
+        self.assertEqual(first, okf_release.corp_layers("0.1.0", "release", {})[-1][1])
+
+
 class CorpSkillTest(RepoTestCase):
     """OKF v0.3 corp skills travel inside the agent artifact (skills/corp/<name>.md)."""
 

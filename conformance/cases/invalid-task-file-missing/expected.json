@@ -1,0 +1,11 @@
+{
+  "description": "The agent lists a task whose file is absent: refused, no partial load.",
+  "mcp_gateway": {
+    "load_error": "ghost.md",
+    "agents": {}
+  },
+  "admission": {
+    "error": "ghost.md",
+    "agents": null
+  }
+}

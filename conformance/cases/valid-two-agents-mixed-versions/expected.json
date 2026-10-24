@@ -1,0 +1,69 @@
+{
+  "description": "A v0.2 and a v0.3 agent side by side: both load, order does not matter.",
+  "mcp_gateway": {
+    "load_error": null,
+    "agents": {
+      "alpha": {
+        "status": "active",
+        "access_groups": [
+          "agent_demo"
+        ],
+        "tasks": {
+          "ask": [
+            "search_docs"
+          ]
+        }
+      },
+      "beta": {
+        "status": "placeholder",
+        "access_groups": [
+          "agent_beta"
+        ],
+        "tasks": {
+          "ask": [
+            "web_search"
+          ]
+        }
+      }
+    }
+  },
+  "admission": {
+    "error": null,
+    "agents": {
+      "alpha": {
+        "status": "active",
+        "groups": [
+          "agent_demo"
+        ],
+        "classification": "C1",
+        "tasks": {
+          "ask": {
+            "tools": [
+              "search_docs"
+            ],
+            "knowledge": [
+              "knowledge.tech"
+            ],
+            "quota_class": "standard"
+          }
+        }
+      },
+      "beta": {
+        "status": "placeholder",
+        "groups": [
+          "agent_beta"
+        ],
+        "classification": "C1",
+        "tasks": {
+          "ask": {
+            "tools": [
+              "web_search"
+            ],
+            "knowledge": [],
+            "quota_class": "standard"
+          }
+        }
+      }
+    }
+  }
+}
