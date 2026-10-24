@@ -12,3 +12,15 @@ max_tokens: 8192
 # Concurrent requests one user may keep open on one agent. Seed value: no
 # platform enforces it yet; it is the bound a bundle is checked against.
 max_concurrent_requests: 10
+
+# Agent-to-agent delegation (zuno-demo ADR-0406). Ceiling on the hops a chain
+# may have: a bundle's `zuno.limits.delegation.max_depth` may not exceed it.
+# The default for an agent that declares nothing is 1 (it may call a target; the
+# target may not call anyone).
+max_delegation_depth: 2
+
+delegation:
+  # Whether the gateway lets a delegated call use write or destructive tools.
+  # false until human approval works across a delegation end to end (ADR-0409).
+  allow_write: false
+

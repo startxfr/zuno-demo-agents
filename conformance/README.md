@@ -12,13 +12,17 @@ Each case is a directory:
     cases/<name>/agents/<agent>/tasks/*.md
     cases/<name>/expected.json                 the expected result per reader
 
-`expected.json` carries `mcp_gateway` and `admission` sections. Both describe a
+`expected.json` carries `mcp_gateway` and `admission` sections, and an optional
+`delegation` section (zuno-demo ADR-0401, ADR-0406: each agent's declared targets
+and `max_depth`, plus the `narrowing_error` a `narrowing-` case must raise). Readers
+that predate delegation ignore that section, so adding it never breaks them. Both describe a
 successful load (`agents`, and a `null` error) or a refusal (an error substring
 that must appear in the reader's message, and no agents).
 
-Case prefixes: `valid-` (loads, schema-valid), `security-` (loads, and the
-result must stay deny-by-default; schema-invalid on purpose), `invalid-`
-(refused with a named error).
+Case prefixes: `valid-` (loads, schema-valid, narrows the corp policies), `security-`
+(loads, and the result must stay deny-by-default; schema-invalid on purpose),
+`invalid-` (refused with a named error), `narrowing-` (loads and is schema-valid,
+but `platform/okf/check_narrowing.py` refuses it with the expected message).
 
 Supported `okf_version`: `v0.2` and `v0.3` (zuno-demo ADR-0579 clause 6).
 
