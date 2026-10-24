@@ -2,6 +2,30 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v0.4.0 - 2026-10-24
+
+Agents:
+
+- `advantage` 0.1.0
+- `arkos` 0.1.0
+- `cognos` 0.1.0
+- `comage` 0.1.0
+- `finage` 0.1.0
+- `naveo` 0.1.0
+- `soursage` 0.1.0
+- `tekos` 0.3.0
+
+Changes:
+
+- release: bump VERSION to 0.4.0 (delegation fields, tool access, Tekos on OKF v0.3) (2b99ae5)
+- docs: bundles may move to OKF v0.3; the consumers read it (2ab460d)
+- feat(tekos): move the rag, tool and policy notes to OKF v0.3 (a5bbaea)
+- feat(tekos): move the bundle to OKF v0.3 (tekos 0.3.0) (04423d7)
+- test: complete the v0.3 content notes of the note-version test (f15dd27)
+- fix(validate): accept v0.2 and v0.3 content notes in a bundle (1875ca7)
+- feat(policy): declare read or write on every tool of the corp tool policy (3d69956)
+- feat(okf): optional delegation fields in OKF v0.3 and their conformance cases (51b9e92)
+
 ## v0.3.1 - 2026-10-24
 
 Agents:
