@@ -2,6 +2,25 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v0.4.1 - 2026-10-24
+
+Agents:
+
+- `advantage` 0.1.0
+- `arkos` 0.1.0
+- `cognos` 0.1.0
+- `comage` 0.1.0
+- `finage` 0.1.0
+- `naveo` 0.1.0
+- `soursage` 0.1.0
+- `tekos` 0.3.0
+
+Changes:
+
+- release: bump VERSION to 0.4.1 (display shapes for icon and color in OKF v0.3) (96eb240)
+- test(conformance): the v0.3 delegation case states its ui block (5052524)
+- feat(conformance): display block shapes (icon, color) match what unifai-operator accepts (0743db7)
+
 ## v0.4.0 - 2026-10-24
 
 Agents:

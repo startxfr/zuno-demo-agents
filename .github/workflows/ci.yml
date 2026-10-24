@@ -54,6 +54,8 @@ jobs:
         run: python3 platform/okf/tests/test_tool_policy_access.py
       - name: OKF conformance fixtures are well formed
         run: python3 conformance/test_fixtures.py
+      - name: Display block shapes match what unifai-operator accepts
+        run: python3 conformance/test_ui_display.py
       - name: Release tooling
         run: python3 -m unittest discover -s platform/release/tests
       - name: Builds are reproducible
