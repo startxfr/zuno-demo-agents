@@ -28,4 +28,8 @@ Supported `okf_version`: `v0.2` and `v0.3` (zuno-demo ADR-0579 clause 6).
 
 `python3 conformance/test_fixtures.py` checks the fixtures themselves: every
 `valid-` case matches the OKF schemas, every `expected.json` is well formed, and
-no case is orphaned. The per-reader tests live with the readers.
+no case is orphaned, and every `valid-` case states the `ui` display block of its
+agents (`ui` section of `expected.json`: displayName, tileDescription, color, icon).
+`python3 conformance/test_ui_display.py` checks the shapes unifai-operator accepts for `icon`
+(`^[a-z0-9][a-z0-9-]{0,39}$`) and `color` (`#rrggbb` or 3 to 30 letters), that the v0.3
+schema refuses the others, and that every real agent of `agents/` complies (WP-167). The per-reader tests live with the readers.
