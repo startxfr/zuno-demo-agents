@@ -17,6 +17,9 @@ sys.path.insert(0, str(REPO / "platform" / "okf"))
 import check_narrowing as narrow  # noqa: E402
 import validate_okf_schema as schema  # noqa: E402
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import test_ui_display as ui_display  # noqa: E402
+
 PREFIXES = ("valid-", "security-", "invalid-", "narrowing-")
 
 
@@ -35,6 +38,20 @@ class FixtureTests(unittest.TestCase):
             refused = case.name.startswith("invalid-")
             self.assertEqual(expected["mcp_gateway"]["load_error"] is not None, refused, case.name)
             self.assertEqual(expected["admission"]["error"] is not None, refused, case.name)
+
+    def test_valid_cases_state_the_display_block_of_every_agent(self):
+        """`ui` is the display block unifai-operator copies into the sheet (WP-167)."""
+        for case in self.cases():
+            if not case.name.startswith("valid-"):
+                continue
+            expected = json.loads((case / "expected.json").read_text())
+            agents = sorted(p for p in (case / "agents").iterdir() if p.is_dir())
+            self.assertEqual(sorted(expected["ui"]), [p.name for p in agents], case.name)
+            for bundle in agents:
+                ui = ui_display.frontmatter(bundle / "agent.okf.md")["zuno"]["ui"]
+                self.assertEqual(expected["ui"][bundle.name], {k: ui[k] for k in ui_display.UI_FIELDS}, f"{case.name}/{bundle.name}")
+                self.assertRegex(ui["icon"], ui_display.ICON, f"{case.name}/{bundle.name}")
+                self.assertRegex(ui["color"], ui_display.COLOR, f"{case.name}/{bundle.name}")
 
     def test_valid_cases_match_the_schemas(self):
         validators = schema.validators()

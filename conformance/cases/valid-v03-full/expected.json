@@ -38,5 +38,13 @@
         }
       }
     }
+  },
+  "ui": {
+    "gamma": {
+      "displayName": "Gamma",
+      "tileDescription": "Fixture agent.",
+      "color": "#0066CC",
+      "icon": "code"
+    }
   }
 }

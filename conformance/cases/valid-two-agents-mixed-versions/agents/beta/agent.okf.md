@@ -15,8 +15,8 @@ zuno:
   ui:
     displayName: Beta
     tileDescription: Fixture agent.
-    color: '#0066CC'
-    icon: code
+    color: teal
+    icon: drafting-compass
   access:
     groups:
     - agent_beta
