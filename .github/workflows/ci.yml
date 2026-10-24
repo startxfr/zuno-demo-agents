@@ -48,6 +48,8 @@ jobs:
         run: python3 platform/okf/run_agent_contract_tests.py
       - name: OKF v0.3 schemas and narrowing rule
         run: python3 platform/okf/tests/test_okf_v03.py
+      - name: Content notes may be v0.2 or v0.3
+        run: python3 platform/okf/tests/test_content_note_versions.py
       - name: tool-policy access field
         run: python3 platform/okf/tests/test_tool_policy_access.py
       - name: OKF conformance fixtures are well formed

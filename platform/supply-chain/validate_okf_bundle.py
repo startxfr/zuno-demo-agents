@@ -61,6 +61,11 @@ TOOL_POLICY_PATH = REPO_ROOT / "policies" / "tools" / "tool-policy.yaml"
 KNOWLEDGE_POLICY_PATH = REPO_ROOT / "policies" / "knowledge" / "knowledge-policy.yaml"
 
 
+# zuno-demo ADR-0579 clause 6: v0.2 and v0.3 documents may sit side by side in one bundle (the
+# schemas and the operator accept the mix), so a v0.3 agent can keep or move its content notes.
+NOTE_OKF_VERSIONS = ("v0.2", "v0.3")
+
+
 @dataclass
 class Finding:
     bundle: str
@@ -147,8 +152,8 @@ def _validate_content_notes(bundle_dir: pathlib.Path, label: str, declared_tasks
         except ValueError as exc:
             findings.append(Finding(label, str(exc)))
             continue
-        if fm.get("okf_version") != "v0.2" or fm.get("type") != "rag":
-            findings.append(Finding(label, f"{rel}: expected okf_version v0.2 and type rag"))
+        if fm.get("okf_version") not in NOTE_OKF_VERSIONS or fm.get("type") != "rag":
+            findings.append(Finding(label, f"{rel}: expected okf_version v0.2 or v0.3 and type rag"))
             continue
         zuno = fm.get("zuno") or {}
         domain = zuno.get("domain")
@@ -165,8 +170,8 @@ def _validate_content_notes(bundle_dir: pathlib.Path, label: str, declared_tasks
         except ValueError as exc:
             findings.append(Finding(label, str(exc)))
             continue
-        if fm.get("okf_version") != "v0.2" or fm.get("type") != "tool":
-            findings.append(Finding(label, f"{rel}: expected okf_version v0.2 and type tool"))
+        if fm.get("okf_version") not in NOTE_OKF_VERSIONS or fm.get("type") != "tool":
+            findings.append(Finding(label, f"{rel}: expected okf_version v0.2 or v0.3 and type tool"))
             continue
         zuno = fm.get("zuno") or {}
         capability = zuno.get("capability")
@@ -183,8 +188,8 @@ def _validate_content_notes(bundle_dir: pathlib.Path, label: str, declared_tasks
         except ValueError as exc:
             findings.append(Finding(label, str(exc)))
             continue
-        if fm.get("okf_version") != "v0.2" or fm.get("type") != "policy":
-            findings.append(Finding(label, f"{rel}: expected okf_version v0.2 and type policy"))
+        if fm.get("okf_version") not in NOTE_OKF_VERSIONS or fm.get("type") != "policy":
+            findings.append(Finding(label, f"{rel}: expected okf_version v0.2 or v0.3 and type policy"))
             continue
         zuno = fm.get("zuno") or {}
         applies_to = zuno.get("applies_to") or {}
