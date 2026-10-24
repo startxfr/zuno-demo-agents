@@ -1,0 +1,89 @@
+{
+  "description": "alpha declares beta/ask as its one delegation target and a depth of 2 (ADR-0401, ADR-0406); readers that predate delegation load it unchanged.",
+  "mcp_gateway": {
+    "load_error": null,
+    "agents": {
+      "alpha": {
+        "status": "active",
+        "access_groups": [
+          "agent_demo"
+        ],
+        "tasks": {
+          "ask": [
+            "search_docs"
+          ]
+        }
+      },
+      "beta": {
+        "status": "active",
+        "access_groups": [
+          "agent_beta"
+        ],
+        "tasks": {
+          "ask": [
+            "search_docs"
+          ]
+        }
+      }
+    }
+  },
+  "admission": {
+    "error": null,
+    "agents": {
+      "alpha": {
+        "status": "active",
+        "groups": [
+          "agent_demo"
+        ],
+        "classification": "C1",
+        "tasks": {
+          "ask": {
+            "tools": [
+              "search_docs"
+            ],
+            "knowledge": [
+              "knowledge.tech"
+            ],
+            "quota_class": "standard"
+          }
+        }
+      },
+      "beta": {
+        "status": "active",
+        "groups": [
+          "agent_beta"
+        ],
+        "classification": "C1",
+        "tasks": {
+          "ask": {
+            "tools": [
+              "search_docs"
+            ],
+            "knowledge": [
+              "knowledge.tech"
+            ],
+            "quota_class": "standard"
+          }
+        }
+      }
+    }
+  },
+  "delegation": {
+    "agents": {
+      "alpha": {
+        "targets": [
+          {
+            "agent": "beta",
+            "task": "ask"
+          }
+        ],
+        "max_depth": 2
+      },
+      "beta": {
+        "targets": [],
+        "max_depth": null
+      }
+    },
+    "narrowing_error": null
+  }
+}

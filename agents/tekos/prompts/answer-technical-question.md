@@ -1,5 +1,5 @@
 ---
-okf_version: v0.2
+okf_version: v0.3
 type: prompt
 title: Tekos system prompt - answer-technical-question
 ---

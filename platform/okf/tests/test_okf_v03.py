@@ -67,7 +67,8 @@ class V03TestCase(unittest.TestCase):
         self.write("policies/guardrails/guardrails-policy.yaml", yaml.safe_dump({
             "modes": ["off", "observe", "block"], "categories": ["pii", "injection"],
             "minimum_mode_by_classification": {"C1": "observe", "C2": "observe", "C3": "block"}}))
-        self.write("policies/limits/limits-policy.yaml", "max_tokens: 8192\nmax_concurrent_requests: 10\n")
+        self.write("policies/limits/limits-policy.yaml",
+                   "max_tokens: 8192\nmax_concurrent_requests: 10\nmax_delegation_depth: 2\n")
         self.write("policies/quotas/quota-policy.yaml", yaml.safe_dump({"classes": {"standard": {}, "intensive": {}}}))
         self.saved = (narrow.REPO_ROOT, narrow.POLICIES, narrow.CORP_SKILLS_DIR)
         narrow.REPO_ROOT, narrow.POLICIES = self.root, self.root / "policies"
@@ -160,6 +161,61 @@ class NarrowingTest(V03TestCase):
     def test_missing_skill(self) -> None:
         self.set_task(skills=["corp/nope"])
         self.assertIn("skill 'corp/nope' not found", self.findings()[0])
+
+
+class DelegationTest(V03TestCase):
+    """zuno-demo ADR-0401 / ADR-0406: the optional delegation fields."""
+
+    def add_peer(self) -> None:
+        peer = yaml.safe_load(yaml.safe_dump(AGENT))
+        peer["zuno"]["name"] = "peer"
+        self.write("agents/peer/agent.okf.md", md(peer))
+        self.write("agents/peer/tasks/ask.md", md(TASK))
+
+    def target(self, agent: str = "peer", task: str = "ask") -> dict:
+        return {"targets": [{"agent": agent, "task": task}]}
+
+    def test_a_declared_target_matches_the_schema_and_narrows(self) -> None:
+        self.add_peer()
+        self.set_agent(delegation=self.target(), limits={**AGENT["zuno"]["limits"], "delegation": {"max_depth": 2}})
+        front = schema.frontmatter(self.bundle / "agent.okf.md")
+        self.assertEqual(list(schema.validators()["v0.3"]["agent"].iter_errors(front)), [])
+        self.assertEqual(self.findings(), [])
+
+    def test_the_schema_refuses_empty_targets_unknown_keys_and_depth_zero(self) -> None:
+        validator = schema.validators()["v0.3"]["agent"]
+        for zuno in ({"delegation": {"targets": []}},
+                     {"delegation": {"targets": [{"agent": "peer", "task": "ask", "extra": 1}]}},
+                     {"delegation": {"targets": [{"agent": "peer"}]}},
+                     {"limits": {"delegation": {"max_depth": 0}}}):
+            agent = yaml.safe_load(yaml.safe_dump(AGENT))
+            agent["zuno"].update(zuno)
+            self.assertTrue(list(validator.iter_errors(agent)), zuno)
+
+    def test_an_agent_cannot_target_itself(self) -> None:
+        self.set_agent(delegation=self.target("demo", "ask"))
+        self.assertIn("is the agent itself", self.findings()[0])
+
+    def test_a_target_agent_must_be_in_the_release(self) -> None:
+        self.set_agent(delegation=self.target("ghost", "ask"))
+        self.assertIn("target agent 'ghost' is not in the release", self.findings()[0])
+
+    def test_a_target_task_must_exist(self) -> None:
+        self.add_peer()
+        self.set_agent(delegation=self.target("peer", "missing"))
+        self.assertIn("target task peer/missing does not exist", self.findings()[0])
+
+    def test_depth_above_the_corp_ceiling_is_refused(self) -> None:
+        self.set_agent(limits={**AGENT["zuno"]["limits"], "delegation": {"max_depth": 3}})
+        self.assertIn("delegation max_depth 3 exceeds the corp ceiling 2", self.findings()[0])
+
+    def test_delegation_is_a_v03_field(self) -> None:
+        self.add_peer()
+        agent = yaml.safe_load(yaml.safe_dump(AGENT))
+        agent["okf_version"] = "v0.2"
+        agent["zuno"]["delegation"] = self.target()
+        self.write("agents/demo/agent.okf.md", md(agent))
+        self.assertIn("delegation is an OKF v0.3 field", self.findings()[0])
 
 
 if __name__ == "__main__":

@@ -27,7 +27,11 @@ is the one agent whose deployment interface is not an `AIAgent` CR).
 manifests remains a deliberate non-goal while the coexistence proof
 stands.
 
-## Declarative structure (ADR-0038: OKF v0.2 Markdown bundles)
+## Declarative structure (ADR-0038: OKF Markdown bundles)
+
+The whole bundle is OKF v0.3 (ADR-0579): the agent declares its guardrail
+mode and each task its model roles; the `rag/`, `tools/` and `policies/`
+notes only change their version.
 
 ```text
 tekos/
