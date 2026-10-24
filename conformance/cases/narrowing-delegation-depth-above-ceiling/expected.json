@@ -1,0 +1,89 @@
+{
+  "description": "alpha asks for a delegation depth of 5, above the corp ceiling: readers still load it, the narrowing check refuses it.",
+  "mcp_gateway": {
+    "load_error": null,
+    "agents": {
+      "alpha": {
+        "status": "active",
+        "access_groups": [
+          "agent_demo"
+        ],
+        "tasks": {
+          "ask": [
+            "search_docs"
+          ]
+        }
+      },
+      "beta": {
+        "status": "active",
+        "access_groups": [
+          "agent_beta"
+        ],
+        "tasks": {
+          "ask": [
+            "search_docs"
+          ]
+        }
+      }
+    }
+  },
+  "admission": {
+    "error": null,
+    "agents": {
+      "alpha": {
+        "status": "active",
+        "groups": [
+          "agent_demo"
+        ],
+        "classification": "C1",
+        "tasks": {
+          "ask": {
+            "tools": [
+              "search_docs"
+            ],
+            "knowledge": [
+              "knowledge.tech"
+            ],
+            "quota_class": "standard"
+          }
+        }
+      },
+      "beta": {
+        "status": "active",
+        "groups": [
+          "agent_beta"
+        ],
+        "classification": "C1",
+        "tasks": {
+          "ask": {
+            "tools": [
+              "search_docs"
+            ],
+            "knowledge": [
+              "knowledge.tech"
+            ],
+            "quota_class": "standard"
+          }
+        }
+      }
+    }
+  },
+  "delegation": {
+    "agents": {
+      "alpha": {
+        "targets": [
+          {
+            "agent": "beta",
+            "task": "ask"
+          }
+        ],
+        "max_depth": 5
+      },
+      "beta": {
+        "targets": [],
+        "max_depth": null
+      }
+    },
+    "narrowing_error": "delegation max_depth 5 exceeds the corp ceiling"
+  }
+}
