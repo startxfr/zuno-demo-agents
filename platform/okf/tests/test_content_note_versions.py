@@ -39,13 +39,16 @@ def bundle(versions: dict) -> pathlib.Path:
                  "access": {"groups": ["agent_demo"]},
                  "ui": {"displayName": "Demo", "tileDescription": "d", "color": "#0066CC", "icon": "code"}}}))
     (b / "tasks" / "ask.md").write_text(md({"okf_version": "v0.3", "type": "task", "title": "Ask",
-        "zuno": {"allowed_tools": ["search_docs"], "allowed_knowledge": ["knowledge.tech"]}}))
+        "zuno": {"allowed_tools": ["web_search"], "allowed_knowledge": ["knowledge.tech"]}}))
     (b / "rag" / "tech.md").write_text(md({"okf_version": versions["rag"], "type": "rag", "title": "Tech",
         "zuno": {"domain": "knowledge.tech", "used_by_tasks": ["ask"]}}))
     (b / "tools" / "search.md").write_text(md({"okf_version": versions["tool"], "type": "tool", "title": "Search",
-        "zuno": {"capability": "search_docs", "used_by_tasks": ["ask"]}}))
+        "zuno": {"capability": "web_search", "used_by_tasks": ["ask"]}}))
     (b / "policies" / "scope.md").write_text(md({"okf_version": versions["policy"], "type": "policy", "title": "Scope",
-        "zuno": {"applies_to": {"tasks": ["ask"], "tools": ["search_docs"]}}}))
+        "zuno": {"narrows_platform_policy": True, "constraint_type": "data_handling_addendum",
+                 "applies_to": {"tasks": ["ask"], "tools": ["web_search"]},
+                 "rationale": "A scope narrower than the platform policy.",
+                 "enforcement": {"mechanism": "none-yet", "notes": "Prompt-level only."}}}))
     return b
 
 
@@ -55,7 +58,7 @@ class NoteVersions(unittest.TestCase):
         saved = validator.REPO_ROOT
         validator.REPO_ROOT = b.parents[1]
         try:
-            return validator.validate_bundle(b, {"search_docs"}, {"knowledge.tech"})
+            return validator.validate_bundle(b, {"web_search"}, {"knowledge.tech"})
         finally:
             validator.REPO_ROOT = saved
 
