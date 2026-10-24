@@ -73,6 +73,9 @@ classes:
       must not take interactive chat down with it - the trade is recorded
       in ADR-0511's Security considerations and revisited if abuse is ever
       observed.
+      Token ceilings raised 2026-10-24 (3M/30M/15M to 10M/100M/50M): since
+      the Red Hat documentation joined the Tekos retriever a model call
+      carries 13k-18k prompt tokens, and a day of normal use exceeded 3M.
     fail_mode: open
     requests:
       user:    { limit: 60,   window: 5m }
@@ -90,9 +93,9 @@ classes:
       # is a genuine per-user daily ceiling, not just a stresstest knob.
       # New values keep the prior 1 : 10 : 5 (user : group : project) ratio,
       # sized with ~2.5x headroom over the observed run.
-      user:    { budget: 3000000,   window: 24h }
-      group:   { budget: 30000000,  window: 24h }
-      project: { budget: 15000000,  window: 24h }
+      user:    { budget: 10000000,  window: 24h }
+      group:   { budget: 100000000, window: 24h }
+      project: { budget: 50000000,  window: 24h }
 
   intensive:
     description: >-
@@ -110,6 +113,25 @@ classes:
       group:   { budget: 5000000,  window: 24h }
       project: { budget: 2500000,  window: 24h }
 
+  evaluation:
+    description: >-
+      Automated evaluation and stresstest traffic (the eval-* and stress-*
+      personas of the evaluation harnesses, the RAGAS job). Its own budget,
+      so a test campaign never starves a demo persona and is not starved by
+      one. Selectable only by the platform's trusted evaluation client: the
+      ai-gateway honours X-Zuno-Quota-Class only from Keycloak clients listed
+      in trustedPlatformClients (zuno-evaluations), so an end user cannot
+      give it to themselves. Twice the standard ceilings; fail_mode open
+      like standard, since tests reproduce interactive use.
+    fail_mode: open
+    requests:
+      user:    { limit: 120,  window: 5m }
+      group:   { limit: 1200, window: 5m }
+      project: { limit: 600,  window: 5m }
+    tokens:
+      user:    { budget: 20000000,  window: 24h }
+      group:   { budget: 200000000, window: 24h }
+      project: { budget: 100000000, window: 24h }
   stresstest:
     description: >-
       Dedicated, deliberately tiny class used only by the Day 3 stresstest's
