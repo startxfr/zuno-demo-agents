@@ -29,10 +29,9 @@ stands.
 
 ## Declarative structure (ADR-0038: OKF Markdown bundles)
 
-`agent.okf.md`, `tasks/` and `prompts/` are OKF v0.3 (ADR-0579): the agent
-declares its guardrail mode and each task its model roles. The `rag/`,
-`tools/` and `policies/` notes stay v0.2, the version
-`platform/supply-chain/validate_okf_bundle.py` accepts for them today.
+The whole bundle is OKF v0.3 (ADR-0579): the agent declares its guardrail
+mode and each task its model roles; the `rag/`, `tools/` and `policies/`
+notes only change their version.
 
 ```text
 tekos/

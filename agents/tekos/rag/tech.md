@@ -1,5 +1,5 @@
 ---
-okf_version: v0.2
+okf_version: v0.3
 type: rag
 title: Technical documentation retrieval
 zuno:
