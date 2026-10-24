@@ -15,6 +15,9 @@ agents through it.
         type        application/vnd.zuno.okf.corp.v1
         layers      application/vnd.zuno.okf.policies.v1.tar+gzip (policies/)
                     application/vnd.zuno.okf.index.v1+json (agent digests)
+                    application/vnd.zuno.okf.conformance.v1.tar+gzip
+                        (conformance/cases/, the OKF reader conformance cases,
+                        ADR-0508; present when the repository has them)
 
 Layers are deterministic (sorted entries, mtime 0, uid/gid 0, mode 0644) and
 an agent manifest's annotations depend only on that agent's own history, so
@@ -55,6 +58,7 @@ import yaml
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 AGENTS_DIR = REPO_ROOT / "agents"
 POLICIES_DIR = REPO_ROOT / "policies"
+CONFORMANCE_DIR = REPO_ROOT / "conformance"
 SOURCE_URL = "https://github.com/startxfr/zuno-demo-agents"
 
 AGENT_ARTIFACT_TYPE = "application/vnd.zuno.okf.bundle.v2"
@@ -62,6 +66,7 @@ AGENT_LAYER_TYPE = "application/vnd.zuno.okf.bundle.v2.tar+gzip"
 CORP_ARTIFACT_TYPE = "application/vnd.zuno.okf.corp.v1"
 POLICIES_LAYER_TYPE = "application/vnd.zuno.okf.policies.v1.tar+gzip"
 INDEX_LAYER_TYPE = "application/vnd.zuno.okf.index.v1+json"
+CONFORMANCE_LAYER_TYPE = "application/vnd.zuno.okf.conformance.v1.tar+gzip"
 
 RUNTIME_FILES = ("agent.okf.md",)
 RUNTIME_DIRS = ("tasks", "prompts", "skills", "tools", "rag", "policies")
@@ -151,6 +156,29 @@ def corp_skills(agent_dir: pathlib.Path) -> Dict[str, pathlib.Path]:
 def policy_files() -> List[pathlib.Path]:
     return sorted((p for p in POLICIES_DIR.rglob("*") if p.is_file() and p.name not in EXCLUDED_NAMES),
                   key=lambda p: p.relative_to(POLICIES_DIR).as_posix())
+
+
+def conformance_files() -> List[pathlib.Path]:
+    """The conformance cases (conformance/cases/**), never the README or the
+    self-check test that sit beside them."""
+    cases = CONFORMANCE_DIR / "cases"
+    if not cases.is_dir():
+        return []
+    return sorted((p for p in cases.rglob("*") if p.is_file() and p.name not in EXCLUDED_NAMES),
+                  key=lambda p: p.relative_to(CONFORMANCE_DIR).as_posix())
+
+
+def corp_layers(release: str, channel: str,
+                pushed: Dict[str, Tuple["AgentBuild", str]]) -> List[Tuple[str, bytes, str]]:
+    """The layers of the corp artifact. The conformance layer is optional and
+    comes last, so an older consumer that reads only the policies and index
+    layers by media type is unaffected."""
+    layers = [("okf-policies.tar.gz", build_layer(POLICIES_DIR, policy_files()), POLICIES_LAYER_TYPE),
+              ("okf-index.json", corp_index(release, channel, pushed), INDEX_LAYER_TYPE)]
+    cases = conformance_files()
+    if cases:
+        layers.append(("okf-conformance.tar.gz", build_layer(CONFORMANCE_DIR, cases), CONFORMANCE_LAYER_TYPE))
+    return layers
 
 
 def runtime_changed_since(tag: str, agent_dir: pathlib.Path) -> bool:
@@ -370,8 +398,7 @@ def publish(registry: Registry, channel: str, sha: str) -> Dict[str, object]:
             "zuno.okf.release": release,
             "zuno.okf.channel": channel,
         },
-        [("okf-policies.tar.gz", build_layer(POLICIES_DIR, policy_files()), POLICIES_LAYER_TYPE),
-         ("okf-index.json", corp_index(release, channel, pushed), INDEX_LAYER_TYPE)],
+        corp_layers(release, channel, pushed),
     )
     return {
         "release": release,
@@ -449,6 +476,8 @@ def main(argv: Optional[List[str]] = None) -> int:
                 (args.out / f"okf-{b.name}.tar.gz").write_bytes(b.layer)
                 meta[b.name] = b.annotations()
             (args.out / "okf-policies.tar.gz").write_bytes(build_layer(POLICIES_DIR, policy_files()))
+            if conformance_files():
+                (args.out / "okf-conformance.tar.gz").write_bytes(build_layer(CONFORMANCE_DIR, conformance_files()))
             (args.out / "metadata.json").write_text(json.dumps(meta, indent=2, sort_keys=True) + "\n")
             print(args.out)
         elif args.command == "publish":
