@@ -1,0 +1,11 @@
+{
+  "description": "An index with no YAML frontmatter is refused, not read as an empty active agent.",
+  "mcp_gateway": {
+    "load_error": "frontmatter",
+    "agents": {}
+  },
+  "admission": {
+    "error": "frontmatter",
+    "agents": null
+  }
+}

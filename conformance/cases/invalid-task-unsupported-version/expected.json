@@ -1,0 +1,11 @@
+{
+  "description": "A task document is version-checked too, not only the agent index.",
+  "mcp_gateway": {
+    "load_error": "unsupported okf_version 'v0.1'",
+    "agents": {}
+  },
+  "admission": {
+    "error": "unsupported okf_version 'v0.1'",
+    "agents": null
+  }
+}
