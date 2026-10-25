@@ -2,6 +2,23 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v0.7.0 - 2026-10-25
+
+Agents:
+
+- `advantage` 0.1.0
+- `arkos` 0.1.0
+- `cognos` 0.1.0
+- `comage` 0.1.0
+- `finage` 0.1.0
+- `naveo` 0.1.0
+- `soursage` 0.1.0
+- `tekos` 0.4.2
+
+Changes:
+
+- feat(okf): zuno.limits.max_steps bounds the rounds of one agent turn (v0.3, optional); corp ceiling 30 (2e4c62e)
+
 ## v0.6.3 - 2026-10-25
 
 Agents:
