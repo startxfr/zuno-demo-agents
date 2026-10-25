@@ -54,6 +54,9 @@ zuno:
     # (policies/tools/tool-policy.yaml).
     groups:
       - agent_tekos
+      # Early access to Tekos for users outside agent_tekos (e.g. a pilot
+      # cohort); the gateways grant access on any one of these groups.
+      - agent_tekos_preview
   ui:
     displayName: Tekos
     tileDescription: Technical Q&A with citations, for consultants.
@@ -94,7 +97,7 @@ and `tasks/find-relevant-docs.md`.
 
 ## Authorization matrix
 
-Generated per ADR-0503 from this bundle's frontmatter, `policies/tools/tool-policy.yaml`, `policies/knowledge/knowledge-policy.yaml`, `policies/models/model-catalog.yaml` and `policies/model-routing/model-routing-policy.yaml` — the enforced intersection (ADR-0011/ADR-0203) restated for review, never read at runtime. Entitlement (ADR-0040): `agent_tekos`; model classification ceiling (ADR-0021): `C1`; status: `active`.
+Generated per ADR-0503 from this bundle's frontmatter, `policies/tools/tool-policy.yaml`, `policies/knowledge/knowledge-policy.yaml`, `policies/models/model-catalog.yaml` and `policies/model-routing/model-routing-policy.yaml` — the enforced intersection (ADR-0011/ADR-0203) restated for review, never read at runtime. Entitlement (ADR-0040): `agent_tekos, agent_tekos_preview`; model classification ceiling (ADR-0021): `C1`; status: `active`.
 
 | Task (FOR WHAT) | Resource (WHAT) | Kind | Capability / server | Min class | Business roles (WHO) | Ext-model context | Quota | Policy source |
 |---|---|---|---|---|---|---|---|---|
@@ -108,6 +111,7 @@ Generated per ADR-0503 from this bundle's frontmatter, `policies/tools/tool-poli
 | `answer-technical-question` (primary; prompt: `prompts/answer-technical-question.md`) | `knowledge.tech` | knowledge | — | — | consultant, board, cdp | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.tech` |
 | `answer-technical-question` (primary; prompt: `prompts/answer-technical-question.md`) | `knowledge.project` | knowledge | — | — | consultant, board, sales, adv, finance, cdp | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.project` |
 | `find-relevant-docs` | `search_confluence` | tool | `confluence.page.search` @ confluence | C2 | consultant, board, cdp, lightspeed_readonly, ocp-ai-ops | blocked | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `search_confluence` |
+| `find-relevant-docs` | `list_drive_files` | tool | `drive.document.search` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `list_drive_files` |
 | `find-relevant-docs` | `knowledge.tech` | knowledge | — | — | consultant, board, cdp | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.tech` |
 | `check-my-drive-docs` | `list_drive_files` | tool | `drive.document.search` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `list_drive_files` |
 
