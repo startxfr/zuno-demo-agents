@@ -13,6 +13,13 @@ max_tokens: 8192
 # platform enforces it yet; it is the bound a bundle is checked against.
 max_concurrent_requests: 10
 
+# Reasoning/tool rounds of one agent turn (zuno.limits.max_steps, agent or
+# task level). unifai-operator bounds an agent that declares nothing to 15
+# rounds and executes an identical tool call at most twice per run; 30 leaves
+# room for complex tasks while bounding loops (a tekos turn once looped about
+# 50 rounds, zuno-demo scenario #11, 2026-10-25).
+max_steps: 30
+
 # Agent-to-agent delegation (zuno-demo ADR-0406). Ceiling on the hops a chain
 # may have: a bundle's `zuno.limits.delegation.max_depth` may not exceed it.
 # The default for an agent that declares nothing is 1 (it may call a target; the
