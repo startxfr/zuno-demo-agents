@@ -68,7 +68,7 @@ class V03TestCase(unittest.TestCase):
             "modes": ["off", "observe", "block"], "categories": ["pii", "injection"],
             "minimum_mode_by_classification": {"C1": "observe", "C2": "observe", "C3": "block"}}))
         self.write("policies/limits/limits-policy.yaml",
-                   "max_tokens: 8192\nmax_concurrent_requests: 10\nmax_delegation_depth: 2\n")
+                   "max_tokens: 8192\nmax_concurrent_requests: 10\nmax_steps: 30\nmax_delegation_depth: 2\n")
         self.write("policies/quotas/quota-policy.yaml", yaml.safe_dump({"classes": {"standard": {}, "intensive": {}}}))
         self.saved = (narrow.REPO_ROOT, narrow.POLICIES, narrow.CORP_SKILLS_DIR)
         narrow.REPO_ROOT, narrow.POLICIES = self.root, self.root / "policies"
@@ -123,6 +123,23 @@ class NarrowingTest(V03TestCase):
     def test_v02_bundle_is_not_checked(self) -> None:
         self.write("agents/demo/agent.okf.md", md({**AGENT, "okf_version": "v0.2"}))
         self.assertEqual(self.findings(), [])
+
+    def test_max_steps_within_the_corp_ceiling(self) -> None:
+        self.set_agent(limits={**AGENT["zuno"]["limits"], "max_steps": 20})
+        self.set_task(limits={"max_steps": 30})
+        self.assertEqual(self.findings(), [])
+
+    def test_max_steps_above_the_corp_ceiling(self) -> None:
+        self.set_task(limits={"max_steps": 31})
+        self.assertIn("max_steps 31 exceeds the corp ceiling 30", " ".join(self.findings()))
+
+    def test_max_steps_schema_refuses_zero(self) -> None:
+        validators = schema.validators()["v0.3"]
+        agent = yaml.safe_load(yaml.safe_dump(AGENT))
+        agent["zuno"]["limits"] = {**agent["zuno"].get("limits", {}), "max_steps": 0}
+        self.assertTrue(list(validators["agent"].iter_errors(agent)))
+        agent["zuno"]["limits"]["max_steps"] = 15
+        self.assertEqual(list(validators["agent"].iter_errors(agent)), [])
 
     def test_unknown_model_role(self) -> None:
         self.set_agent(models={"preferred": ["quantum"]})
