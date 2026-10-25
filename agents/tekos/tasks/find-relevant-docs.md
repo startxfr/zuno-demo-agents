@@ -5,6 +5,10 @@ title: Find relevant documentation
 zuno:
   allowed_tools:
     - search_confluence
+    # The consultant's own Drive files are part of the material to scan
+    # before a customer call (read only; already allowed to Tekos through
+    # check-my-drive-docs, so the agent's tool union is unchanged).
+    - list_drive_files
   allowed_knowledge:
     - knowledge.tech
   # OKF v0.3 (ADR-0579 clause 2): the roles, in order, of this task's entry in
@@ -28,6 +32,7 @@ zuno:
     - "Find the Confluence pages describing the satellite build architecture."
     - "Which documentation covers OpenShift AI model serving?"
     - "List the reference material we have on Keycloak realm configuration."
+    - "Which of my Drive files cover the customer's OpenShift upgrade?"
 ---
 
 # Find relevant documentation
