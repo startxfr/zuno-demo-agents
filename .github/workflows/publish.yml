@@ -70,8 +70,15 @@ jobs:
           corp="$(jq -r .corp refs.json)"
           echo "corp_name=${corp%@*}" >> "$GITHUB_OUTPUT"
           echo "corp_digest=${corp#*@}" >> "$GITHUB_OUTPUT"
+      # Once per digest: an unchanged agent keeps its digest, and every
+      # `cosign sign` appends to the same .sig manifest, which consumers read
+      # only up to a bound (32 layers for unifai-operator). A manifest above
+      # 16 layers is emptied and re-signed here; the release signature is the
+      # one deployed platforms verify, so only this workflow may empty it.
       - name: Sign keyless
-        run: jq -r '.corp, .agents[]' refs.json | xargs -n1 cosign sign --yes
+        run: |
+          jq -r '.corp, .agents[]' refs.json | python3 platform/release/sign_once.py sign \
+            --identity '^https://github\.com/startxfr/zuno-demo-agents/\.github/workflows/publish\.yml@refs/tags/v' --clean-above 16
       - name: Attest the checks that passed
         run: |
           jq -n --arg commit "$GITHUB_SHA" --arg release "$GITHUB_REF_NAME" --arg run "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
@@ -79,8 +86,9 @@ jobs:
               checks: ["validate_okf_schema", "validate_okf_bundle", "validate_quota_policy", "check_narrowing",
                        "generate_authorization_matrix --check", "run_agent_contract_tests", "release tooling tests"]}' \
             > predicate.json
-          jq -r '.corp, .agents[]' refs.json \
-            | xargs -I{} cosign attest --yes --type https://zuno.startx.fr/okf/contract-tests/v1 --predicate predicate.json {}
+          jq -r '.corp, .agents[]' refs.json | python3 platform/release/sign_once.py attest \
+            --identity '^https://github\.com/startxfr/zuno-demo-agents/\.github/workflows/publish\.yml@refs/tags/v' --clean-above 16 \
+            --type https://zuno.startx.fr/okf/contract-tests/v1 --predicate predicate.json
       - name: Attest build provenance of the release
         uses: actions/attest-build-provenance@v2
         with:
