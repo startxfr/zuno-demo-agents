@@ -32,6 +32,7 @@ zuno:
     - "Find the Confluence pages describing the satellite build architecture."
     - "Which documentation covers OpenShift AI model serving?"
     - "List the reference material we have on Keycloak realm configuration."
+    - "Which of my Drive files cover the customer's OpenShift upgrade?"
 ---
 
 # Find relevant documentation
