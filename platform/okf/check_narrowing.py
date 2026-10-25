@@ -16,7 +16,7 @@ policies allow is a finding, naming the corp clause it exceeds:
 - guardrails   the mode is at least the corp minimum for the agent's
                classification (policies/guardrails/guardrails-policy.yaml);
                categories are corp categories
-- limits       max_tokens and max_concurrent_requests are at most the corp
+- limits       max_tokens, max_concurrent_requests and max_steps are at most the corp
                ceilings (policies/limits/limits-policy.yaml); quota_class is a
                class of policies/quotas/quota-policy.yaml (agent and task
                level, and the v0.2 task `quota_class`/`max_tokens` aliases);
@@ -72,6 +72,7 @@ class Corp:
         limits = load("limits/limits-policy.yaml")
         self.max_tokens: Optional[int] = limits.get("max_tokens")
         self.max_concurrent: Optional[int] = limits.get("max_concurrent_requests")
+        self.max_steps: Optional[int] = limits.get("max_steps")
         self.max_delegation_depth: Optional[int] = limits.get("max_delegation_depth")
         self.quota_classes: Set[str] = set((load("quotas/quota-policy.yaml").get("classes") or {}).keys())
 
@@ -100,6 +101,9 @@ def _limits(where: str, limits: dict, corp: Corp) -> List[str]:
     if corp.max_concurrent is not None and (limits.get("max_concurrent_requests") or 0) > corp.max_concurrent:
         out.append(f"{where}: max_concurrent_requests {limits['max_concurrent_requests']} exceeds the corp "
                    f"ceiling {corp.max_concurrent} (policies/limits/limits-policy.yaml)")
+    if corp.max_steps is not None and (limits.get("max_steps") or 0) > corp.max_steps:
+        out.append(f"{where}: max_steps {limits['max_steps']} exceeds the corp ceiling {corp.max_steps} "
+                   f"(policies/limits/limits-policy.yaml)")
     depth = (limits.get("delegation") or {}).get("max_depth")
     if corp.max_delegation_depth is not None and depth is not None and depth > corp.max_delegation_depth:
         out.append(f"{where}: delegation max_depth {depth} exceeds the corp ceiling {corp.max_delegation_depth} "
