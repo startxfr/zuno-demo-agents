@@ -52,8 +52,12 @@ jobs:
           python3 platform/release/okf_release.py publish
           --registry "$OKF_REGISTRY" --channel "${{ github.ref_name }}"
           --sha "$GITHUB_SHA" --output refs.json
+      # Once per digest (see publish.yml). Never --clean-above here: emptying
+      # a .sig manifest would also remove the release signature.
       - name: Sign keyless
-        run: jq -r '.corp, .agents[]' refs.json | xargs -n1 cosign sign --yes
+        run: |
+          jq -r '.corp, .agents[]' refs.json | python3 platform/release/sign_once.py sign \
+            --identity '^https://github\.com/startxfr/zuno-demo-agents/\.github/workflows/publish-dev\.yml@refs/heads/'
       - name: Summary
         run: |
           {
