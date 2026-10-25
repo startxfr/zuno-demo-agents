@@ -34,7 +34,7 @@ used to be platform-side only. Schemas: `platform/okf/schema/*-v0.3.schema.json`
 | `zuno.skills: [name, corp/name]` | task | the skill (`skills/<name>.md` in the agent, or `policies/skills/<name>.md` for `corp/`) may only need tools and knowledge the task allows |
 | `zuno.models: {preferred, forbidden}` | agent, task | roles of `policies/models/model-catalog.yaml`, eligible for the agent's classification |
 | `zuno.guardrails: {mode, categories}` | agent | at least the minimum mode of `policies/guardrails/guardrails-policy.yaml` for the classification |
-| `zuno.limits: {max_tokens, max_concurrent_requests, quota_class, memory}` | agent, task | ceilings of `policies/limits/limits-policy.yaml`, classes of `policies/quotas/quota-policy.yaml` |
+| `zuno.limits: {max_tokens, max_concurrent_requests, max_steps, quota_class, memory}` | agent, task | ceilings of `policies/limits/limits-policy.yaml`, classes of `policies/quotas/quota-policy.yaml` |
 
 A corp skill a task references is embedded in that agent's artifact as
 `skills/corp/<name>.md`: an agent artifact is self-contained, and changing a
