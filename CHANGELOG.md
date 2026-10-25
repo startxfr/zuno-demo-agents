@@ -2,6 +2,23 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v0.6.2 - 2026-10-25
+
+Agents:
+
+- `advantage` 0.1.0
+- `arkos` 0.1.0
+- `cognos` 0.1.0
+- `comage` 0.1.0
+- `finage` 0.1.0
+- `naveo` 0.1.0
+- `soursage` 0.1.0
+- `tekos` 0.4.1
+
+Changes:
+
+- fix(release): sign each artifact once per identity; empty oversized signature manifests (33c19bc)
+
 ## v0.6.1 - 2026-10-25
 
 Agents:
