@@ -48,6 +48,17 @@ zuno:
   # every corp category, which is what the absence means.
   guardrails:
     mode: observe
+  # OKF v0.3 (ADR-0579 clause 4): the conversation history Tekos carries, the
+  # same window as Arkos. UnifAI bounds both the conversation messages and the
+  # accumulated agent results to token_budget (operator 0.1.47); proven on
+  # demo333 with a 9-turn conversation before this was added. Every model
+  # Tekos reaches serves at least 32768 tokens.
+  limits:
+    memory:
+      history:
+        enabled: true
+        max_turns: 6
+        token_budget: 6000
   access:
     # ADR-0040: agent entitlement group, orthogonal to the `consultant`
     # business role that governs tool/data permissions inside Tekos
