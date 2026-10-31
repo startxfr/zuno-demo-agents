@@ -2,6 +2,29 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v0.8.0 - 2026-10-31
+
+Agents:
+
+- `advantage` 0.1.0
+- `arkos` 0.2.1
+- `cognos` 0.1.0
+- `comage` 0.1.0
+- `finage` 0.1.0
+- `naveo` 0.1.0
+- `soursage` 0.1.0
+- `tekos` 0.4.4
+
+Changes:
+
+- feat(arkos): cap the replies of its three uncapped tasks at 8192 tokens (arkos 0.2.1) (1dcfb89)
+- feat(tekos): carry a 6-turn, 6000-token conversation history (tekos 0.4.4) (b11156f)
+- release: 0.8.0 (Arkos 0.2.0 delegates to Tekos; Tekos 0.4.3 reasons locally first) (ebaaa96)
+- feat(tekos): answer-technical-question prefers the local reasoning model (tekos 0.4.3) (a4f5a9e)
+- feat(arkos): declare Tekos / answer-technical-question as its only delegation target (v0.3, max depth 1) (10f1bd9)
+- Revert "feat(tekos): declare Arkos / draft-architecture-testimonial as its only delegation target (max depth 1)" (1292abe)
+- feat(tekos): declare Arkos / draft-architecture-testimonial as its only delegation target (max depth 1) (aa0e3d8)
+
 ## v0.7.0 - 2026-10-25
 
 Agents:
