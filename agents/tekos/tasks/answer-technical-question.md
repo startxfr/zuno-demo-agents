@@ -39,11 +39,15 @@ zuno:
   # [ovhcloud-gpt-oss-120b, local-gpt-oss-maas, local-gpt-oss,
   # local-qwen35-maas, local-qwen35, local-wesh-maas, local-wesh, local-maas,
   # local]).
-  # Same order as served today; the routing policy stays the authority.
+  # Since tekos 0.4.3 the local reasoning model comes FIRST: the external
+  # ovhcloud-gpt-oss-120b took 8.6 s to its first token on a quiet stack
+  # (zuno-demo stresstest 2026-10-31, objective 6 s), the local gpt-oss-20b
+  # about 0.1 s. The generated routing (zuno-demo ADR-0581, WP-164 lot 2)
+  # reorders the corp candidates by these roles; it never adds or removes one.
   models:
     preferred:
-      - reasoning-external
       - reasoning
+      - reasoning-external
       - default
       - specialized
       - quality

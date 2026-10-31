@@ -1,5 +1,5 @@
 ---
-okf_version: v0.2
+okf_version: v0.3
 type: agent
 title: Arkos
 description: >-
@@ -79,6 +79,16 @@ zuno:
     notes: >-
       Placeholder pending v1 build; C3 anticipated because sovereign-marked
       DAT workflows are local-model-only per MEMORY.md section 5.
+  # OKF v0.3 (ADR-0401, ADR-0406): Arkos may ask Tekos for a technical answer while it
+  # drafts. Read-only delegation through the zuno a2a-gateway, one hop. Arkos is already
+  # C3/local-only (ADR-0215), so the static C3 raise of a delegating task changes nothing.
+  delegation:
+    targets:
+      - agent: tekos
+        task: answer-technical-question
+  limits:
+    delegation:
+      max_depth: 1
   access:
     # ADR-0040: agent entitlement group, orthogonal to the `consultant`
     # business role that governs tool/data permissions inside Arkos
