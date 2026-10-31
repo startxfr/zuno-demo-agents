@@ -57,15 +57,6 @@ zuno:
       # Early access to Tekos for users outside agent_tekos (e.g. a pilot
       # cohort); the gateways grant access on any one of these groups.
       - agent_tekos_preview
-  # OKF v0.3 (ADR-0401, ADR-0406): Tekos may hand an architecture-testimonial draft to
-  # Arkos. Read-only delegation through the zuno a2a-gateway; the chain is capped at one hop.
-  delegation:
-    targets:
-      - agent: arkos
-        task: draft-architecture-testimonial
-  limits:
-    delegation:
-      max_depth: 1
   ui:
     displayName: Tekos
     tileDescription: Technical Q&A with citations, for consultants.
