@@ -7,7 +7,6 @@ zuno:
     - web_search
   allowed_knowledge:
     - knowledge.project
-    - knowledge.sxa-legacy
   # ADR-0515: editable starters. Shown in the chat empty state, and in the
   # composer's slash menu (agent-frontend web/src/chat/TaskPromptMenu.tsx).
   # UX only - never parsed or enforced server-side, and picking one does NOT
@@ -34,13 +33,10 @@ other tasks declare no live-read capability either since ADR-0219 removed
 the deterministic `sxa.*` surface. `tool_call_node` cleanly no-ops rather
 than attempting a live call.
 
-**Documented gap (WP-36's own brief anticipates this), now closed on the
-retrieval side**: `finance` is in `knowledge.sxa-legacy`'s
-`allowed_groups` (ADR-0219 widened it to the union of what that domain and
-the duplicate ADR-0217 domain granted), so `allowed_knowledge` above is
-`knowledge.project` and `knowledge.sxa-legacy` - still never
-`knowledge.sales` or `knowledge.adv`. What remains genuinely open is the
-deterministic side: Finage has no exact-figure capability at all, because
-SXA is a closed pre-2021 record with no live billing system behind it. This
-task still declares no Salesforce capability - Finage proves finance-scoped
-access without inheriting broader Sales/ADV access (ADR-0326).
+**Documented gap (WP-36's own brief anticipates this)**: no finance-specific RAG knowledge domain exists in
+this repository. `allowed_knowledge` above is `knowledge.project` only - still never `knowledge.sales` or
+`knowledge.adv`. It also held `knowledge.sxa-legacy` (the pre-2021 commercial record, whose `allowed_groups`
+ADR-0219 widened to `finance`) until 2026-11-02 (WP-185), when that domain stopped being served. What remains
+genuinely open is the deterministic side: Finage has no exact-figure capability at all, because SXA is a closed
+pre-2021 record with no live billing system behind it. This task still declares no Salesforce capability -
+Finage proves finance-scoped access without inheriting broader Sales/ADV access (ADR-0326).

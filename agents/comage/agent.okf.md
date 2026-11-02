@@ -4,9 +4,8 @@ type: agent
 title: Comage
 description: >-
   Sales assistant. Answers deal-status questions grounded in indexed and
-  live Salesforce data, updates opportunities, compares against historical
-  legacy SXA figures, and checks the user's own Drive/Gmail for
-  account-relevant material.
+  live Salesforce data, updates opportunities, and checks the user's own
+  Drive/Gmail for account-relevant material.
 provenance:
   maintainer: Zuno Demo architecture team
   repository: zuno-demo
@@ -16,7 +15,6 @@ freshness:
   last_reviewed: "2026-08-05"
 sources:
   - "knowledge.sales (asynchronously ingested from Salesforce, WP-22)"
-  - "knowledge.sxa-legacy (imported legacy SXA snapshot)"
   - salesforce
 zuno:
   name: comage
@@ -26,7 +24,6 @@ zuno:
   tasks:
     - check-deal-status
     - update-opportunity-status
-    - compare-historical-deals
     - check-my-drive-and-mail
   model:
     preferred_classification: C2
@@ -34,10 +31,7 @@ zuno:
       Placeholder pending the live acceptance gate; C2 matches
       `knowledge.sales`/`salesforce.*`'s own classification
       (policies/data-classification/classification.yaml's `sales-data`
-      domain). `knowledge.sxa-legacy` no longer escalates a turn beyond C2:
-      reclassified from C3 to C2 (ADR-0206 Status update, 2026-08-30) - an
-      immutable historical snapshot with no live write path, same tier as
-      `sales-data`.
+      domain).
   access:
     # ADR-0040: agent entitlement group, orthogonal to the `sales` business
     # role that governs tool/data permissions inside Comage.
@@ -81,8 +75,8 @@ indexed-read/live-action pattern"). `check-deal-status`
 (`tasks/check-deal-status.md`) is the one live-routed task: it prefers
 `knowledge.sales` for ordinary reads and triggers a live
 `salesforce.opportunity.read` call (`zuno.live_read_tool`) whenever the
-question needs a mutable field's current value. Comage's other three
-declared tasks (`update-opportunity-status`, `compare-historical-deals`,
+question needs a mutable field's current value. Comage's other two
+declared tasks (`update-opportunity-status`,
 `check-my-drive-and-mail`) are v1-scope catalog entries with no dedicated
 route yet, matching Tekos's own `find-relevant-docs`/`check-my-drive-docs`
 pattern - declared so their `allowed_tools`/`allowed_knowledge` already
@@ -91,7 +85,11 @@ narrow Comage's overall ceiling correctly.
 Comage has no agent-level `zuno.allowed_knowledge` field either
 (ADR-0203), for the same reason Tekos/Arkos don't: its knowledge ceiling
 is the union of every task's own `zuno.allowed_knowledge` - today
-`[knowledge.sales, knowledge.project, knowledge.sxa-legacy]`.
+`[knowledge.sales, knowledge.project]`.
+
+`compare-historical-deals` was removed on 2026-11-02 (WP-185): its only knowledge
+source, `knowledge.sxa-legacy` (the pre-2021 SXA record), is no longer served by the
+platform since the RAG moved to UnifAI (WP-168). It returns if that record is restored.
 
 Access group is `agent_comage` (ADR-0040 entitlement dimension, orthogonal
 to the `sales` business role that governs tool/data permissions inside
@@ -113,7 +111,6 @@ Generated per ADR-0503 from this bundle's frontmatter, `policies/tools/tool-poli
 | `check-deal-status` (primary; prompt: `prompts/check-deal-status.md`) | `knowledge.sales` | knowledge | — | C2 | sales, adv, board, cdp, finance | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.sales` |
 | `check-deal-status` (primary; prompt: `prompts/check-deal-status.md`) | `knowledge.project` | knowledge | — | — | consultant, board, sales, adv, finance, cdp | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.project` |
 | `update-opportunity-status` | `salesforce.opportunity.update` | tool | `salesforce.opportunity.update` @ salesforce | C2 | sales, board | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `salesforce.opportunity.update` |
-| `compare-historical-deals` | `knowledge.sxa-legacy` | knowledge | — | C2 | sales, board, adv, finance | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.sxa-legacy` |
 | `check-my-drive-and-mail` | `list_drive_files` | tool | `drive.document.search` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `list_drive_files` |
 | `check-my-drive-and-mail` | `read_gmail` | tool | `gmail.message.read` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `read_gmail` |
 
@@ -125,7 +122,6 @@ Effective per-task model chain (ADR-0021/ADR-0303/ADR-0412), resolved from `poli
 |---|---|---|---|---|---|
 | `check-deal-status` (primary; prompt: `prompts/check-deal-status.md`) | `C2` | `local-wesh-maas` → `qwen3.5-9b-wesh` (specialized) | `local-wesh`, `local-qwen35-maas`, `local-qwen35`, `local-maas`, `local`, `local-gpt-oss-maas`, `local-gpt-oss`, `openai`, `anthropic`, `mistral-codestral`, `ovhcloud-gpt-oss-120b` | — | `policies/model-routing/model-routing-policy.yaml` |
 | `update-opportunity-status` | `C2` | `local-wesh-maas` → `qwen3.5-9b-wesh` (specialized) | `local-wesh`, `local-qwen35-maas`, `local-qwen35`, `local-maas`, `local`, `local-gpt-oss-maas`, `local-gpt-oss`, `openai`, `anthropic`, `mistral-codestral`, `ovhcloud-gpt-oss-120b` | — | `policies/model-routing/model-routing-policy.yaml` |
-| `compare-historical-deals` | `C2` | `ovhcloud-gpt-oss-120b` → `gpt-oss-120b` (reasoning-external) | `local-gpt-oss-maas`, `local-gpt-oss`, `local-wesh-maas`, `local-wesh`, `local-qwen35-maas`, `local-qwen35`, `local-maas`, `local`, `openai`, `anthropic`, `mistral-codestral` | — | `policies/model-routing/model-routing-policy.yaml` |
 | `check-my-drive-and-mail` | `C2` | `local-wesh-maas` → `qwen3.5-9b-wesh` (specialized) | `local-wesh`, `local-qwen35-maas`, `local-qwen35`, `local-maas`, `local`, `local-gpt-oss-maas`, `local-gpt-oss`, `openai`, `anthropic`, `mistral-codestral`, `ovhcloud-gpt-oss-120b` | — | `policies/model-routing/model-routing-policy.yaml` |
 
 **Available models** (ADR-0419, generated): the union of every model reachable by any task or prompt slot above, at any classification, each with the model id it serves and that model's role - `local-maas` → `qwen3.6-27b-instruct` (quality), `local` → `qwen3.6-27b-instruct` (quality), `local-gpt-oss-maas` → `gpt-oss-20b` (reasoning), `local-gpt-oss` → `gpt-oss-20b` (reasoning), `local-wesh-maas` → `qwen3.5-9b-wesh` (specialized), `local-wesh` → `qwen3.5-9b-wesh` (specialized), `local-qwen35-maas` → `qwen3.5-9b` (default), `local-qwen35` → `qwen3.5-9b` (default), `openai` → `gpt-4o-mini` (general-external), `anthropic` → `claude-3-5-sonnet-latest` (general-external), `mistral-codestral` → `codestral-latest` (code), `ovhcloud-gpt-oss-120b` → `gpt-oss-120b` (reasoning-external).

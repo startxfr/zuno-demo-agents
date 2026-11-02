@@ -19,15 +19,11 @@ someone chooses to build Cognos, per WP-43's own scope). Statuses:
    `cognos-entitlement-only-user-01` fixture exists yet - add it with
    the first real task (it only matters once there is a tool boundary
    to prove).
-3. **Add policy entries** - PARTIALLY DONE (2026-08-21; domain repointed
-   2026-08-26 by ADR-0219): `tasks/review-historical-commercial-data.md`
-   declares `allowed_knowledge: [knowledge.sxa-legacy]`; `board` is present
-   in that domain's `allowed_groups` (`policies/knowledge/
-   knowledge-policy.yaml`), so no policy edit was needed for this grant
-   before or after the repoint. `tasks/coming-soon.md` still declares `allowed_tools: []` and
-   no knowledge domains - still nothing to grant there. Remaining tools/
-   domains from the intended build (ADR-0349 §6) still need this same
-   step when their real tasks are authored.
+3. **Add policy entries** - OPEN: `tasks/coming-soon.md` declares `allowed_tools: []` and no
+   knowledge domains, so there is nothing to grant. Its only real task,
+   `review-historical-commercial-data`, was removed on 2026-11-02 (WP-185) because
+   `knowledge.sxa-legacy` is no longer served. Tools and domains from the intended build
+   (ADR-0349 §6) need this step when their real tasks are authored.
 4. **Register the GitOps Application** - OPEN: no
    `gitops/charts/cognos/` or `gitops/apps/cognos/` exists (WP-43
    scope: charts arrive when someone chooses to deploy Cognos). Run

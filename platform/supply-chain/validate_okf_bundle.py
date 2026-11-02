@@ -57,6 +57,7 @@ import yaml
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 AGENTS_DIR = REPO_ROOT / "agents"
+CLIENTS_DIR = REPO_ROOT / "experience-clients"
 TOOL_POLICY_PATH = REPO_ROOT / "policies" / "tools" / "tool-policy.yaml"
 KNOWLEDGE_POLICY_PATH = REPO_ROOT / "policies" / "knowledge" / "knowledge-policy.yaml"
 
@@ -270,6 +271,74 @@ def validate_bundle(bundle_dir: pathlib.Path, known_tools: Set[str], known_domai
     return findings
 
 
+CLASSIFICATION_RANK = {"C1": 1, "C2": 2, "C3": 3}
+
+
+def _tool_min_classification() -> Dict[str, str]:
+    """tool or capability name -> min_classification in tool-policy.yaml."""
+    if not TOOL_POLICY_PATH.is_file():
+        return {}
+    doc = yaml.safe_load(TOOL_POLICY_PATH.read_text()) or {}
+    out: Dict[str, str] = {}
+    for entry in doc.get("tools", []):
+        for key in ("tool", "capability"):
+            if key in entry:
+                out[entry[key]] = entry.get("min_classification", "C1")
+    return out
+
+
+def validate_client(client_dir: pathlib.Path, known_tools: Set[str], agent_names: Set[str]) -> List[Finding]:
+    """zuno-demo ADR-0592: an experience client (experience-clients/<name>).
+
+    Same task rules as an agent (each task exists, is a task, and allows only
+    tools of tool-policy.yaml), plus what keeps it from being mistaken for an
+    agent: its name is no agent's name, and it allows no tool its declared
+    classification cannot reach (a C1 client cannot use a C2 tool)."""
+    label = str(client_dir.relative_to(REPO_ROOT))
+    findings: List[Finding] = []
+    try:
+        frontmatter = _split_frontmatter(client_dir / "client.okf.md")
+    except ValueError as exc:
+        return [Finding(label, str(exc))]
+
+    if frontmatter.get("okf_version") != "v0.3":
+        findings.append(Finding(label, f"okf_version must be v0.3, got {frontmatter.get('okf_version')!r}"))
+    if frontmatter.get("type") != "experience-client":
+        findings.append(Finding(label, f"type must be 'experience-client', got {frontmatter.get('type')!r}"))
+
+    zuno = frontmatter.get("zuno") or {}
+    name = zuno.get("name")
+    if name != client_dir.name:
+        findings.append(Finding(label, f"zuno.name {name!r} does not match directory name {client_dir.name!r}"))
+    if name in agent_names:
+        findings.append(Finding(label, f"zuno.name {name!r} is also an agent: a logical name is either an agent or a client"))
+
+    ceiling = zuno.get("classification")
+    min_class = _tool_min_classification()
+    for task_name in zuno.get("tasks", []):
+        task_path = client_dir / "tasks" / f"{task_name}.md"
+        try:
+            task_frontmatter = _split_frontmatter(task_path)
+        except ValueError as exc:
+            findings.append(Finding(label, str(exc)))
+            continue
+        if task_frontmatter.get("type") != "task":
+            findings.append(Finding(label, f"{task_path.name}: expected type task"))
+        task_zuno = task_frontmatter.get("zuno") or {}
+        if task_zuno.get("allowed_knowledge"):
+            findings.append(Finding(label, f"{task_path.name}: an experience client has no RAG, allowed_knowledge must be empty"))
+        for tool_name in task_zuno.get("allowed_tools", []):
+            if known_tools and tool_name not in known_tools:
+                findings.append(Finding(label, f"{task_path.name}: unknown tool '{tool_name}' (not in tool-policy.yaml)"))
+                continue
+            needed = min_class.get(tool_name, "C1")
+            if ceiling and CLASSIFICATION_RANK[needed] > CLASSIFICATION_RANK[ceiling]:
+                findings.append(
+                    Finding(label, f"{task_path.name}: tool '{tool_name}' needs {needed}, above the client's classification {ceiling}")
+                )
+    return findings
+
+
 def main() -> int:
     args = sys.argv[1:]
     if args:
@@ -284,7 +353,12 @@ def main() -> int:
     for bundle_dir in bundle_dirs:
         all_findings.extend(validate_bundle(bundle_dir, known_tools, known_domains))
 
-    print(f"Validated {len(bundle_dirs)} OKF bundle(s) under agents/.")
+    client_dirs = [] if args else sorted(p for p in CLIENTS_DIR.iterdir() if p.is_dir()) if CLIENTS_DIR.is_dir() else []
+    agent_names = {p.name for p in AGENTS_DIR.iterdir() if p.is_dir()}
+    for client_dir in client_dirs:
+        all_findings.extend(validate_client(client_dir, known_tools, agent_names))
+
+    print(f"Validated {len(bundle_dirs)} OKF bundle(s) under agents/ and {len(client_dirs)} under experience-clients/.")
     if not all_findings:
         print("\nRESULT: PASS - every bundle is structurally valid and every policy reference resolves.")
         return 0

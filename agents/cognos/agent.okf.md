@@ -19,7 +19,6 @@ zuno:
   status: placeholder
   tasks:
     - coming-soon
-    - review-historical-commercial-data
   model:
     preferred_classification: C3
     notes: >-
@@ -57,13 +56,9 @@ onboarding Cognos later is primarily a `status: active` flip plus real
 task implementation through the ADR-0307 template workflow
 (`platform/templates/agent/`), not a redesign.
 
-`tasks/review-historical-commercial-data.md` is this bundle's first real
-(non-`coming-soon`) task - its `allowed_knowledge: [knowledge.sxa-legacy]`
-grant is declared and policy-backed but inert while `status` stays
-`placeholder` (see that task file's own note and `NEXT_STEPS.md`). It
-originally named ADR-0217's second SXA domain; ADR-0219 retired it and the
-grant moved to the surviving `knowledge.sxa-legacy`, which also lists
-`board`, so it remained valid without a policy edit.
+Its first real task, `review-historical-commercial-data`, was removed on 2026-11-02 (WP-185): its only
+knowledge source, `knowledge.sxa-legacy`, is no longer served since the RAG moved to UnifAI (WP-168).
+Cognos is back to the `coming-soon` placeholder until a real task is authored (`NEXT_STEPS.md`).
 
 <!-- BEGIN GENERATED AUTHORIZATION MATRIX (ADR-0503) - do not edit; regenerate with: python3 platform/okf/generate_authorization_matrix.py -->
 
@@ -71,9 +66,7 @@ grant moved to the surviving `knowledge.sxa-legacy`, which also lists
 
 Generated per ADR-0503 from this bundle's frontmatter, `policies/tools/tool-policy.yaml`, `policies/knowledge/knowledge-policy.yaml`, `policies/models/model-catalog.yaml` and `policies/model-routing/model-routing-policy.yaml` — the enforced intersection (ADR-0011/ADR-0203) restated for review, never read at runtime. Entitlement (ADR-0040): `agent_cognos`; model classification ceiling (ADR-0021): `C3`; status: `placeholder`.
 
-| Task (FOR WHAT) | Resource (WHAT) | Kind | Capability / server | Min class | Business roles (WHO) | Ext-model context | Quota | Policy source |
-|---|---|---|---|---|---|---|---|---|
-| `review-historical-commercial-data` | `knowledge.sxa-legacy` | knowledge | — | C2 | sales, board, adv, finance | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.sxa-legacy` |
+No capabilities declared: every task's `allowed_tools`/`allowed_knowledge` is empty, so this agent can invoke no tool and retrieve from no knowledge domain regardless of caller groups (the honest Stage-1 zero-capability state, ADR-0502).
 
 ### Model routing
 
@@ -82,7 +75,6 @@ Effective per-task model chain (ADR-0021/ADR-0303/ADR-0412), resolved from `poli
 | Task | Classification ceiling | Reference model | Fallback chain | Adapter | Policy source |
 |---|---|---|---|---|---|
 | `coming-soon` | `C3` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh` | — | `policies/model-routing/model-routing-policy.yaml` |
-| `review-historical-commercial-data` | `C3` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh` | — | `policies/model-routing/model-routing-policy.yaml` |
 
 **Available models** (ADR-0419, generated): the union of every model reachable by any task or prompt slot above, at any classification, each with the model id it serves and that model's role - `local-maas` → `qwen3.6-27b-instruct` (quality), `local` → `qwen3.6-27b-instruct` (quality), `local-gpt-oss-maas` → `gpt-oss-20b` (reasoning), `local-gpt-oss` → `gpt-oss-20b` (reasoning), `local-wesh-maas` → `qwen3.5-9b-wesh` (specialized), `local-wesh` → `qwen3.5-9b-wesh` (specialized), `local-qwen35-maas` → `qwen3.5-9b` (default), `local-qwen35` → `qwen3.5-9b` (default).
 

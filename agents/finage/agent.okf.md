@@ -4,9 +4,8 @@ type: agent
 title: Finage
 description: >-
   Finance assistant. Identifies business ready to invoice and produces
-  monthly invoice reporting, drawing on legacy SXA revenue/billing
-  history via retrieval (knowledge.sxa-legacy, ADR-0219 - no deterministic
-  query capabilities remain) and durable project memory - never live
+  monthly invoice reporting, drawing on durable project memory (the
+  pre-2021 SXA billing history is no longer served, WP-185) - never live
   Salesforce or ADV/project-delivery data (ADR-0326: strictly
   finance-scoped, no implicit inheritance from Comage/Advantage).
 provenance:
@@ -18,7 +17,6 @@ freshness:
   last_reviewed: "2026-08-05"
 sources:
   - "knowledge.project"
-  - "knowledge.sxa-legacy (pre-2021 commercial record, retrieval only, ADR-0219)"
 zuno:
   name: finage
   status: placeholder
@@ -34,10 +32,7 @@ zuno:
     local_only: true
     notes: >-
       Placeholder pending the live acceptance gate; C2 default.
-      `knowledge.sxa-legacy` (retrieval only, no deterministic
-      aggregation/lookup capabilities since ADR-0219 retired them) was
-      reclassified from C3 to C2 (ADR-0206 Status update, 2026-08-30), so a
-      turn touching it no longer escalates above C2 either. ADR-0416:
+      ADR-0416:
       `local_only: true` makes Finage local-model-only
       unconditionally, at every classification including C1 - finance
       material never leaves the cluster, full stop, rather than riding
@@ -83,9 +78,8 @@ integration.
 **Documented gap (WP-36's own brief anticipates this)**: no
 finance-specific RAG knowledge domain exists in this repository. Rather
 than inventing one, Finage's tasks declare `knowledge.project` (cross-agent
-project memory) and `knowledge.sxa-legacy` (the pre-2021 commercial record)
-for retrieval. ADR-0219 widened that domain's `allowed_groups` to include
-`finance`, so the boundary WP-36 originally had to honor no longer applies.
+project memory) for retrieval. They also declared `knowledge.sxa-legacy` (the pre-2021 commercial record) until
+2026-11-02 (WP-185), when that domain stopped being served.
 
 What remains open, and is now the sharper gap, is the *deterministic* side:
 Finage has no exact-figure capability at all. It was built on the `sxa.*`
@@ -121,13 +115,10 @@ Generated per ADR-0503 from this bundle's frontmatter, `policies/tools/tool-poli
 |---|---|---|---|---|---|---|---|---|
 | `answer-finance-question` (primary; prompt: `prompts/answer-finance-question.md`) | `web_search` | tool | `web.page.search` @ web-search | C1 | sales, consultant, adv, finance, board | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `web_search` |
 | `answer-finance-question` (primary; prompt: `prompts/answer-finance-question.md`) | `knowledge.project` | knowledge | — | — | consultant, board, sales, adv, finance, cdp | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.project` |
-| `answer-finance-question` (primary; prompt: `prompts/answer-finance-question.md`) | `knowledge.sxa-legacy` | knowledge | — | C2 | sales, board, adv, finance | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.sxa-legacy` |
 | `identify-business-ready-to-invoice` (project-required; prompt: `prompts/identify-business-ready-to-invoice.md`) | `salesforce.opportunity.read` | tool | `salesforce.opportunity.read` @ salesforce | C2 | sales, board | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `salesforce.opportunity.read` |
 | `identify-business-ready-to-invoice` (project-required; prompt: `prompts/identify-business-ready-to-invoice.md`) | `knowledge.project` | knowledge | — | — | consultant, board, sales, adv, finance, cdp | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.project` |
-| `identify-business-ready-to-invoice` (project-required; prompt: `prompts/identify-business-ready-to-invoice.md`) | `knowledge.sxa-legacy` | knowledge | — | C2 | sales, board, adv, finance | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.sxa-legacy` |
 | `monthly-invoice-report` (project-required; prompt: `prompts/monthly-invoice-report.md`) | `salesforce.opportunity.read` | tool | `salesforce.opportunity.read` @ salesforce | C2 | sales, board | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `salesforce.opportunity.read` |
 | `monthly-invoice-report` (project-required; prompt: `prompts/monthly-invoice-report.md`) | `knowledge.project` | knowledge | — | — | consultant, board, sales, adv, finance, cdp | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.project` |
-| `monthly-invoice-report` (project-required; prompt: `prompts/monthly-invoice-report.md`) | `knowledge.sxa-legacy` | knowledge | — | C2 | sales, board, adv, finance | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.sxa-legacy` |
 | `check-my-drive-and-mail` | `list_drive_files` | tool | `drive.document.search` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `list_drive_files` |
 | `check-my-drive-and-mail` | `read_gmail` | tool | `gmail.message.read` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `read_gmail` |
 
