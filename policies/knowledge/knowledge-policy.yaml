@@ -89,32 +89,6 @@ domains:
       - finance
     min_classification: C2
 
-  knowledge.sxa-legacy:
-    # The company's pre-2021 commercial record, served through retrieval
-    # only (ADR-0219). "Direction" (ADR-0206's stated business role) maps to
-    # the existing `board` Keycloak group - no separate `direction` group
-    # exists in the realm.
-    #
-    # ADR-0219 widened this from sales/board to all four of
-    # Comage/Cognos/Advantage/Finage's business roles. That is not a
-    # loosening: it is the union of what this domain and the duplicate
-    # ADR-0217 domain granted, adopted so that retiring that duplicate
-    # costs no agent the reach ADR-0217 had already given it. ADR-0340's
-    # table marked cdp/finance "-" on this row; ADR-0219 amends it for
-    # `finance` and `adv`. `cdp` stays excluded - no stated need, unlike the
-    # "policy-defined" cells ADR-0340 calls out for knowledge.sales/adv.
-    allowed_groups:
-      - sales
-      - board
-      - adv
-      - finance
-    # Reclassified C3 -> C2 (ADR-0206 Status update, 2026-08-30): an
-    # immutable historical snapshot with no live write path, treated as one
-    # undifferentiated corpus rather than field-by-field - closes WP-23's
-    # deferred field-level review action. Same tier as sales-data in
-    # policies/data-classification/classification.yaml.
-    min_classification: C2
-
   knowledge.adv:
     allowed_groups:
       - adv
