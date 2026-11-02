@@ -88,7 +88,7 @@ is the union of every task's own `zuno.allowed_knowledge` - today
 `[knowledge.sales, knowledge.project]`.
 
 `compare-historical-deals` was removed on 2026-11-02 (WP-185): its only knowledge
-source, `knowledge.sxa-legacy` (the pre-2021 SXA record), is no longer served by the
+source, the pre-2021 SXA record, is no longer served by the
 platform since the RAG moved to UnifAI (WP-168). It returns if that record is restored.
 
 Access group is `agent_comage` (ADR-0040 entitlement dimension, orthogonal

@@ -57,7 +57,7 @@ task implementation through the ADR-0307 template workflow
 (`platform/templates/agent/`), not a redesign.
 
 Its first real task, `review-historical-commercial-data`, was removed on 2026-11-02 (WP-185): its only
-knowledge source, `knowledge.sxa-legacy`, is no longer served since the RAG moved to UnifAI (WP-168).
+knowledge source, the pre-2021 SXA record, is no longer served since the RAG moved to UnifAI (WP-168).
 Cognos is back to the `coming-soon` placeholder until a real task is authored (`NEXT_STEPS.md`).
 
 <!-- BEGIN GENERATED AUTHORIZATION MATRIX (ADR-0503) - do not edit; regenerate with: python3 platform/okf/generate_authorization_matrix.py -->
