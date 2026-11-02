@@ -2,6 +2,27 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v0.9.2 - 2026-11-02
+
+Agents:
+
+- `advantage` 0.2.1
+- `arkos` 0.2.2
+- `cognos` 0.2.1
+- `comage` 0.2.1
+- `finage` 0.2.2
+- `naveo` 0.1.1
+- `soursage` 0.1.0
+- `tekos` 0.4.5
+
+Changes:
+
+- release: bump VERSION to 0.9.2 (no reference to knowledge.sxa-legacy is left) (425ff03)
+- docs(finage): name the retired SXA record in words, not by its domain id (finage 0.2.2) (5e5865e)
+- docs(comage): name the retired SXA record in words, not by its domain id (comage 0.2.1) (c73de60)
+- docs(cognos): name the retired SXA record in words, not by its domain id (cognos 0.2.1) (7b49546)
+- docs(advantage): name the retired SXA record in words, not by its domain id (advantage 0.2.1) (2539a65)
+
 ## v0.9.1 - 2026-11-02
 
 Agents:
