@@ -35,7 +35,7 @@ than attempting a live call.
 
 **Documented gap (WP-36's own brief anticipates this)**: no finance-specific RAG knowledge domain exists in
 this repository. `allowed_knowledge` above is `knowledge.project` only - still never `knowledge.sales` or
-`knowledge.adv`. It also held `knowledge.sxa-legacy` (the pre-2021 commercial record, whose `allowed_groups`
+`knowledge.adv`. It also held the pre-2021 commercial record (whose reader groups
 ADR-0219 widened to `finance`) until 2026-11-02 (WP-185), when that domain stopped being served. What remains
 genuinely open is the deterministic side: Finage has no exact-figure capability at all, because SXA is a closed
 pre-2021 record with no live billing system behind it. This task still declares no Salesforce capability -
