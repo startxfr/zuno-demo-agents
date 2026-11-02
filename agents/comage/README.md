@@ -1,8 +1,8 @@
 # Comage Agent
 
 - **Purpose:** Sales assistant
-- **Primary integrations:** Sales data (Salesforce + legacy SXA), Gmail, Drive
-- **Initial tasks:** Deal status; opportunity updates; historical deal comparison
+- **Primary integrations:** Sales data (Salesforce), Gmail, Drive
+- **Initial tasks:** Deal status; opportunity updates
 
 ## Stage (ADR-0502)
 
@@ -21,8 +21,8 @@ directories are retained, not deleted, and still await real content —
   future promotion-time step, out of scope for this flip).
 - Real bundle (ADR-0326 slice 2/4, WP-33 repo work merged):
   `retrieve_reason_respond` shape, primary task `check-deal-status`
-  plus `update-opportunity-status`, `compare-historical-deals` and
-  `check-my-drive-and-mail` — four declared tasks.
+  plus `update-opportunity-status` and
+  `check-my-drive-and-mail` — three declared tasks.
 - Evaluations: `evaluations/comage/` authored. PROMOTION.md steps 1 and 3
   (human scenario review, live 75% gate run) completed retroactively
   2026-08-30 — see WP-33's own "State" field for the full result (18/22
@@ -51,7 +51,6 @@ comage/
 ├── tasks/
 │   ├── check-deal-status.md           (primary task)
 │   ├── update-opportunity-status.md
-│   ├── compare-historical-deals.md
 │   └── check-my-drive-and-mail.md
 ├── prompts/
 │   └── check-deal-status.md

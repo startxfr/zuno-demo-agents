@@ -7,7 +7,6 @@ zuno:
     - salesforce.opportunity.read
   allowed_knowledge:
     - knowledge.project
-    - knowledge.sxa-legacy
   project_required: true
   # ADR-0515: editable starters. Shown in the chat empty state, and in the
   # composer's slash menu (agent-frontend web/src/chat/TaskPromptMenu.tsx).
@@ -21,19 +20,14 @@ zuno:
 # Identify business ready to invoice
 
 Identify business that has reached the `A facturer`/billable state and
-later (MEMORY.md section 9), by retrieving the relevant customer and quote
-records from the `knowledge.sxa-legacy` historical corpus.
+later (MEMORY.md section 9), from the engagement's own durable project memory (`knowledge.project`).
 
-**Retrieval only, and billing state is historical, not current
-(ADR-0219).** This task was built on the deterministic `sxa.customer.read`/
-`sxa.quote.read` lookups, on the reasoning that exact billing state must
-never be something a chunk approximates (ADR-0017). Those capabilities are
-gone, and the reasoning no longer applies the way it did: SXA is the
-company's closed pre-2021 record, so there is no live billing system for a
-deterministic tool to be exact *about*. What this task now reports is the
-billing state as it stood in that historical record, attributed to the
-records it came from - never presented as the current state of an
-outstanding invoice.
+**No billing history is available (WP-185, 2026-11-02).** This task was built on the deterministic
+`sxa.customer.read`/`sxa.quote.read` lookups (ADR-0017), then on retrieval over `knowledge.sxa-legacy`, the company's
+closed pre-2021 record (ADR-0219). That domain is no longer served: the platform's RAG moved to UnifAI (WP-168)
+without a source for it. The task therefore reports only what the project memory of the verified engagement holds,
+attributes it to the records it came from, and says plainly that no billing history stands behind it. It never
+presents a retrieved state as the current state of an outstanding invoice.
 
 `zuno.project_required: true` (ADR-0512/WP-55): this task only makes
 sense inside one client engagement, so Agent Runtime refuses to execute

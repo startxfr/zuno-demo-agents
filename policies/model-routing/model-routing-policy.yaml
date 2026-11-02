@@ -54,7 +54,7 @@ adapters: []
 # WP-092) is now the fleet-wide default candidate - every (agent, task)
 # below is explicit, no more implicit provider-routing.yaml file-order
 # default. Reasoning-heavy/reflexional entries (Tekos's
-# answer-technical-question, Comage's compare-historical-deals, both of
+# answer-technical-question and both of
 # Arkos's document-workflow tasks) keep gpt-oss-20b's existing rank ahead
 # of qwen3.5-9b - this decision does not touch that doctrine, only extends
 # who gets ovhcloud-gpt-oss-120b ahead of it (see those entries' own
@@ -172,32 +172,11 @@ preferences:
     preferred: [local-maas, local]
     fallback: [local-gpt-oss-maas, local-gpt-oss, local-wesh-maas, local-wesh, local-qwen35-maas, local-qwen35]
   # ADR-0526 (WP-087) decision 7: Comage is the candidate agent, so the
-  # qwen3.5-9b-wesh pair leads the chain on ALL FOUR of its declared
+  # qwen3.5-9b-wesh pair leads the chain on ALL THREE of its declared
   # tasks. A preference is keyed by the (agent, task) tuple and an entry
   # without `task` is rejected outright (app/model_routing_policy.py's
   # own validation), so "the default for Comage" is expressible only as
   # one entry per task - there is no agent-level default to write.
-  #
-  # Multi-year comparison/analysis over C2 sxa-legacy data (reclassified
-  # C3 -> C2 by ADR-0206's 2026-08-30 Status update) - reflexional, same
-  # doctrine as Tekos's answer-technical-question. This is the task
-  # ADR-0526's Security considerations single out: it escalates to C2
-  # whenever knowledge.sxa-legacy contributes (ADR-0034), so the variant
-  # answers C2 turns by default. That is legitimate for a local provider,
-  # and it is exactly why the substance half of the promotion gate stays
-  # mandatory (decision 8) - a style model that degrades reasoning on
-  # financial and legacy data is a security-relevant regression, not a
-  # cosmetic one. This preference list deliberately stays local/OVH-only -
-  # C2 makes restricted SaaS technically eligible but no SaaS entry is
-  # added here. ADR-0531: ovhcloud-gpt-oss-120b now leads here too (same
-  # eligibility-filtering mechanism as Arkos's reflect_node - survives at
-  # C1/C2, excluded at C3, where wesh/qwen3.5-9b naturally take over),
-  # gpt-oss-20b keeps its existing rank right behind it; qwen3.5-9b is
-  # inserted after wesh (Comage's own fine-tune stays this task's local
-  # default, unchanged from ADR-0526).
-  - agent: comage
-    task: compare-historical-deals
-    preferred: [ovhcloud-gpt-oss-120b, local-gpt-oss-maas, local-gpt-oss, local-wesh-maas, local-wesh, local-qwen35-maas, local-qwen35, local-maas, local]
   # Opportunity lookup by name/stage - a simple transactional read, and a
   # tool-calling turn: the variant's serving runtime must therefore keep
   # a tool-call parser configured (gitops/charts/models), or tool use
@@ -268,11 +247,6 @@ preferences:
   - agent: cognos
     task: coming-soon
     preferred: [ovhcloud-gpt-oss-120b, local-qwen35-maas, local-qwen35, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
-  # ADR-0531: no prior entry - now explicit. Still inert (no runtime
-  # route), forward-declared like coming-soon above.
-  - agent: cognos
-    task: review-historical-commercial-data
-    preferred: [local-qwen35-maas, local-qwen35, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
   # ADR-0531: Naveo/Soursage are pre-live agents (see their own
   # NEXT_STEPS.md) - these entries are pure forward-declaration, identical
   # in spirit to cognos/coming-soon above, zero live-routing effect until
@@ -341,9 +315,6 @@ preferences:
 # alone is sourced from evaluations/comage/gate_config.yaml's own
 # scenario_threshold, so it is comparable rather than arbitrary.
 objectives:
-  - agent: comage
-    task: compare-historical-deals
-    quality_floor: 0.75
   - agent: comage
     task: check-deal-status
     quality_floor: 0.75
