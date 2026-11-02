@@ -2,6 +2,27 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v0.9.1 - 2026-11-02
+
+Agents:
+
+- `advantage` 0.2.0
+- `arkos` 0.2.2
+- `cognos` 0.2.0
+- `comage` 0.2.0
+- `finage` 0.2.1
+- `naveo` 0.1.1
+- `soursage` 0.1.0
+- `tekos` 0.4.5
+
+Changes:
+
+- release: bump VERSION to 0.9.1 (rehearsal quota class, WP-185 policy cleanups) (4a419b3)
+- feat(policy): add a fail-open rehearsal quota class for the shared-quota proof (2e9f18a)
+- docs(finage): the invoice report note names the retired record without the domain id (finage 0.2.1) (eb55330)
+- docs(policies): the salesforce tool entry no longer points at the legacy SXA domain (WP-185) (b15e145)
+- fix(policies): drop the knowledge.sxa-legacy domain entry, nothing serves it (WP-185) (d9b2614)
+
 ## v0.9.0 - 2026-11-02
 
 Agents:
