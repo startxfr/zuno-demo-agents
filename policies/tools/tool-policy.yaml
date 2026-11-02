@@ -264,12 +264,11 @@ tools:
   # ADR-0326/ADR-0206 (WP-33): live Salesforce (components/mcp-servers/
   # salesforce). ADR-0219 retired the deterministic sxa.* capabilities this
   # row was once contrasted against, so this is now the only structured
-  # commercial-data path; legacy SXA is reachable through
-  # `knowledge.sxa-legacy` retrieval only. `sales`/`board` only, no `adv`:
-  # ADR-0326's Advantage bullet requires any cross-domain commercial access
-  # to be "explicitly declared... rather than inherited from Comage", and
-  # Advantage's legacy access is granted on the knowledge domain, never
-  # implicitly on current Salesforce through this entry. C2 matches `sales-data` in
+  # commercial-data path; the legacy SXA record is no longer served (ADR-0219,
+  # WP-185). `sales`/`board` only, no `adv`: ADR-0326's Advantage bullet
+  # requires any cross-domain commercial access to be "explicitly declared...
+  # rather than inherited from Comage", so Advantage never inherits current
+  # Salesforce access through this entry. C2 matches `sales-data` in
   # policies/data-classification/classification.yaml (knowledge.sales's
   # own default_by_source_type). No `external_model_policy.allow_context:
   # false` here (unlike Confluence's ADR-0035 entry): that restriction is
