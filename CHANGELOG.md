@@ -2,6 +2,25 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v0.8.1 - 2026-11-02
+
+Agents:
+
+- `advantage` 0.1.0
+- `arkos` 0.2.2
+- `cognos` 0.1.0
+- `comage` 0.1.0
+- `finage` 0.1.0
+- `naveo` 0.1.1
+- `soursage` 0.1.0
+- `tekos` 0.4.5
+
+Changes:
+
+- upgrade version (ef8787c)
+- chore: release 0.8.1 (Confluence-reading tasks are local only) (6ad5f11)
+- fix(routing): tasks that read Confluence or the technical docs are local only at every level (tekos 0.4.5, arkos 0.2.2, naveo 0.1.1) (fa01142)
+
 ## v0.8.0 - 2026-10-31
 
 Agents:
