@@ -95,6 +95,9 @@ preferences:
     task: answer-technical-question
     preferred: [ovhcloud-gpt-oss-120b, local-gpt-oss-maas, local-gpt-oss, local-qwen35-maas, local-qwen35, local-wesh-maas, local-wesh, local-maas, local]
     fallback: [openai, gemini, anthropic, mistral]
+    # WP-187: reads Confluence or the technical docs and the turn's level is only what the task declares,
+    # so no external provider at any level; a local failure fails the task instead of sending the context out.
+    local_only_for: [C1, C2, C3]
   # Simple lookup/listing tasks - no reflexional override, so ADR-0531's
   # fleet default applies directly: qwen3.5-9b primary, qwen3.5-9b-wesh
   # fallback (Tekos's own pairing, ADR-0526 decision 7's insertion kept
@@ -103,6 +106,9 @@ preferences:
     task: find-relevant-docs
     preferred: [local-qwen35-maas, local-qwen35, local-wesh-maas, local-wesh, local-maas, local, local-gpt-oss-maas, local-gpt-oss, ovhcloud-gpt-oss-120b]
     fallback: [openai, gemini, anthropic, mistral]
+    # WP-187: reads Confluence or the technical docs and the turn's level is only what the task declares,
+    # so no external provider at any level; a local failure fails the task instead of sending the context out.
+    local_only_for: [C1, C2, C3]
   - agent: tekos
     task: check-my-drive-docs
     preferred: [local-qwen35-maas, local-qwen35, local-wesh-maas, local-wesh, local-maas, local, local-gpt-oss-maas, local-gpt-oss, ovhcloud-gpt-oss-120b]
@@ -121,7 +127,9 @@ preferences:
   - agent: arkos
     task: draft-architecture-testimonial
     prefer: [ovhcloud-gpt-oss-120b, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
-    local_only_for: [C2, C3]
+    # WP-187 (supersedes the C1 external reach described above): reads Confluence or the technical docs and the turn's level is only what the task declares,
+    # so no external provider at any level; a local failure fails the task instead of sending the context out.
+    local_only_for: [C1, C2, C3]
   # ADR-0514: workshop-presentation is NOT in ADR-0550's scope and keeps
   # its original C3 agent seed and fixed reflect-slot C2 ceiling unchanged
   # (app/graph/arkos_nodes.py) - that's what actually makes
@@ -130,6 +138,9 @@ preferences:
   - agent: arkos
     task: workshop-presentation
     prefer: [ovhcloud-gpt-oss-120b, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
+    # WP-187: reads Confluence or the technical docs and the turn's level is only what the task declares,
+    # so no external provider at any level; a local failure fails the task instead of sending the context out.
+    local_only_for: [C1, C2, C3]
   # 2026-09-03 correction to ADR-0531. Decision 1 states that every
   # declared (agent, task) pair carries an explicit entry - "no more
   # implicit provider-routing.yaml file-order default for any task" - but
@@ -269,6 +280,9 @@ preferences:
   - agent: naveo
     task: answer-onboarding-question
     preferred: [local-qwen35-maas, local-qwen35, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
+    # WP-187: reads Confluence or the technical docs and the turn's level is only what the task declares,
+    # so no external provider at any level; a local failure fails the task instead of sending the context out.
+    local_only_for: [C1, C2, C3]
   - agent: soursage
     task: coming-soon
     preferred: [local-qwen35-maas, local-qwen35, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
