@@ -2,6 +2,26 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v0.9.0 - 2026-11-02
+
+Agents:
+
+- `advantage` 0.2.0
+- `arkos` 0.2.2
+- `cognos` 0.2.0
+- `comage` 0.2.0
+- `finage` 0.2.0
+- `naveo` 0.1.1
+- `soursage` 0.1.0
+- `tekos` 0.4.5
+
+Changes:
+
+- chore: release 0.9.0 (experience clients; sxa-legacy undeclared) (fa26aa2)
+- feat(advantage,finage): stop declaring knowledge.sxa-legacy (advantage 0.2.0, finage 0.2.0) (98a0cb9)
+- feat(comage,cognos): remove the two tasks built on knowledge.sxa-legacy (comage 0.2.0, cognos 0.2.0) (5b08ce9)
+- feat: experience clients, a declaration type the mcp-gateway reads (zuno-demo ADR-0592) (32fe851)
+
 ## v0.8.1 - 2026-11-02
 
 Agents:
