@@ -7,7 +7,6 @@ zuno:
     - salesforce.opportunity.read
   allowed_knowledge:
     - knowledge.project
-    - knowledge.sxa-legacy
   project_required: true
   # ADR-0515: editable starters. Shown in the chat empty state, and in the
   # composer's slash menu (agent-frontend web/src/chat/TaskPromptMenu.tsx).
@@ -21,18 +20,14 @@ zuno:
 # Produce the monthly invoicing report
 
 Produce the monthly invoicing report (MEMORY.md section 9: revenue,
-outstanding amounts, delay and forecast) over the `knowledge.sxa-legacy`
-historical corpus.
+outstanding amounts, delay and forecast) for one client engagement, from its durable project memory (`knowledge.project`).
 
-**Retrieval only; figures are historical and must be attributed
-(ADR-0219).** This task was built on `sxa.aggregate.revenue-by-year` and
-`sxa.record.lookup`, whose whole point was an exact number rather than a
-RAG-approximated one (ADR-0017). Those capabilities are gone: SXA is the
-company's closed pre-2021 record, and a frozen corpus has no store of
-record for an aggregation tool to compute against. Every figure this task
-reports is now read out of retrieved records and must be attributed to
-them. It must not present a summed or derived total as an authoritative
-aggregate, and it must not imply the numbers describe the current period.
+**No billing history is available (WP-185, 2026-11-02).** This task was built on `sxa.aggregate.revenue-by-year` and
+`sxa.record.lookup` (ADR-0017), then on retrieval over `knowledge.sxa-legacy`, the closed pre-2021 record (ADR-0219).
+That domain is no longer served since the RAG moved to UnifAI (WP-168). Every figure this task reports is read out of
+the engagement's project memory and must be attributed to it. It must not present a summed or derived total as an
+authoritative aggregate, it must not imply the numbers describe the current period, and it states when the project
+memory holds no figures.
 
 `zuno.project_required: true` (ADR-0512/WP-55): this report only makes
 sense for one client engagement, so Agent Runtime refuses to execute it

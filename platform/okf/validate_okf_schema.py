@@ -14,7 +14,7 @@ A bundle that fails here would be refused by the operator with
 cluster.
 
 Run from the repository root:
-    python3 platform/okf/validate_okf_schema.py            # every agent
+    python3 platform/okf/validate_okf_schema.py            # every agent and experience client
     python3 platform/okf/validate_okf_schema.py agents/tekos
 """
 from __future__ import annotations
@@ -29,6 +29,7 @@ from jsonschema import Draft202012Validator
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 AGENTS_DIR = REPO_ROOT / "agents"
+CLIENTS_DIR = REPO_ROOT / "experience-clients"
 SCHEMA_DIR = REPO_ROOT / "platform" / "okf" / "schema"
 
 # OKF document `type` -> schema file, per supported okf_version.
@@ -51,6 +52,8 @@ SCHEMAS: Dict[str, Dict[str, str]] = {
         "rag": "zuno-okf-rag-v0.3.schema.json",
         "policy": "zuno-okf-policy-v0.3.schema.json",
         "skill": "zuno-okf-skill-v0.3.schema.json",
+        # zuno-demo ADR-0592: experience clients (experience-clients/<name>).
+        "experience-client": "zuno-okf-experience-client-v0.3.schema.json",
     },
 }
 CORP_SKILLS_DIR = REPO_ROOT / "policies" / "skills"
@@ -106,7 +109,8 @@ def check_bundle(bundle_dir: pathlib.Path, schemas: Dict[str, Dict[str, Draft202
 
 def main(argv: List[str]) -> int:
     bundles = [REPO_ROOT / a for a in argv] if argv else sorted(
-        p.parent for p in AGENTS_DIR.glob("*/agent.okf.md"))
+        p.parent for p in AGENTS_DIR.glob("*/agent.okf.md")) + sorted(
+        p.parent for p in CLIENTS_DIR.glob("*/client.okf.md"))
     schemas = validators()
     problems: List[str] = []
     for bundle in bundles:
