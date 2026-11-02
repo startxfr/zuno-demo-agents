@@ -57,13 +57,16 @@ class RepoTestCase(unittest.TestCase):
         sh(self.root, "git", "config", "user.email", "t@example.com")
         sh(self.root, "git", "config", "user.name", "t")
         self.commit("initial")
-        self.saved = (okf_release.REPO_ROOT, okf_release.AGENTS_DIR, okf_release.POLICIES_DIR)
+        self.saved = (okf_release.REPO_ROOT, okf_release.AGENTS_DIR, okf_release.POLICIES_DIR,
+                      okf_release.CLIENTS_DIR)
         okf_release.REPO_ROOT = self.root
         okf_release.AGENTS_DIR = self.root / "agents"
         okf_release.POLICIES_DIR = self.root / "policies"
+        okf_release.CLIENTS_DIR = self.root / "experience-clients"
 
     def tearDown(self) -> None:
-        okf_release.REPO_ROOT, okf_release.AGENTS_DIR, okf_release.POLICIES_DIR = self.saved
+        (okf_release.REPO_ROOT, okf_release.AGENTS_DIR, okf_release.POLICIES_DIR,
+         okf_release.CLIENTS_DIR) = self.saved
         shutil.rmtree(self.tmp)
 
     def commit(self, message: str) -> None:
@@ -144,6 +147,43 @@ class ConformanceLayerTest(RepoTestCase):
         first = okf_release.corp_layers("0.1.0", "release", {})[-1][1]
         (case / "expected.json").touch()
         self.assertEqual(first, okf_release.corp_layers("0.1.0", "release", {})[-1][1])
+
+
+class ClientsLayerTest(RepoTestCase):
+    """zuno-demo ADR-0592: experience clients ride in the corp artifact, in
+    their own optional layer before the conformance layer; they are never an
+    agent artifact nor an index entry."""
+
+    def names(self, layer: bytes) -> list:
+        with tarfile.open(fileobj=io.BytesIO(gzip.decompress(layer))) as tar:
+            return tar.getnames()
+
+    def add_client(self) -> None:
+        client = self.root / "experience-clients" / "chat-ui"
+        (client / "tasks").mkdir(parents=True)
+        (client / "client.okf.md").write_text("---\ntype: experience-client\n---\n")
+        (client / "tasks" / "chat.md").write_text("---\ntype: task\n---\n")
+        (client / "README.md").write_text("notes\n")
+        (self.root / "experience-clients" / "README.md").write_text("notes\n")
+
+    def test_without_clients_there_is_no_clients_layer(self) -> None:
+        types = [l[2] for l in okf_release.corp_layers("0.1.0", "release", {})]
+        self.assertNotIn(okf_release.CLIENTS_LAYER_TYPE, types)
+
+    def test_clients_become_a_layer_rooted_at_experience_clients(self) -> None:
+        self.add_client()
+        layers = okf_release.corp_layers("0.1.0", "release", {})
+        # The conformance layer (if any) stays last, after the clients layer.
+        self.assertEqual([l[2] for l in layers][:3],
+                         [okf_release.POLICIES_LAYER_TYPE, okf_release.INDEX_LAYER_TYPE, okf_release.CLIENTS_LAYER_TYPE])
+        self.assertEqual(self.names(layers[2][1]), ["chat-ui/client.okf.md", "chat-ui/tasks/chat.md"])
+
+    def test_a_client_is_not_an_agent(self) -> None:
+        self.add_client()
+        self.assertEqual([p.name for p in okf_release.agent_dirs()], ["demo"])
+        build = okf_release.build_agent(self.root / "agents" / "demo")
+        index = json.loads(okf_release.corp_index("0.1.0", "release", {"demo": (build, "r/okf-demo@sha256:1")}))
+        self.assertEqual([a["name"] for a in index["agents"]], ["demo"])
 
 
 class CorpSkillTest(RepoTestCase):

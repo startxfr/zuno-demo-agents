@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/startxfr/zuno-demo-agents/platform/okf/schema/zuno-okf-experience-client-v0.3.schema.json",
+  "title": "Zuno Experience Client Declaration (OKF v0.3 frontmatter + Zuno extension)",
+  "description": "Schema for the YAML frontmatter of experience-clients/<name>/client.okf.md (zuno-demo ADR-0592). An experience client is a user interface over the governed chain (zuno-demo ADR-0587: Open WebUI, OpenClaw) that calls the mcp-gateway on behalf of a signed-in user under a logical agent name (X-Zuno-Agent). It is NOT an agent: it has no graph, prompt, RAG, UI tile or model preference, and it never becomes a UnifAI bundle, a Keycloak agent_* group, a MaaS subscription, an A2A endpoint or a delegation target. This declaration only says which callers may use the logical name (access.groups, business groups) and which tools each of its tasks allows (tasks/<task>.md, the ordinary task schema). The five-factor decision of the mcp-gateway still applies to every tool: the caller's groups and the request classification are checked against policies/tools/tool-policy.yaml.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "okf_version",
+    "type",
+    "title",
+    "description",
+    "zuno"
+  ],
+  "properties": {
+    "okf_version": {
+      "description": "[OKF CORE] OKF envelope version this document conforms to.",
+      "type": "string",
+      "const": "v0.3"
+    },
+    "type": {
+      "description": "[OKF CORE] Document kind. Always \"experience-client\" for client.okf.md files.",
+      "type": "string",
+      "const": "experience-client"
+    },
+    "title": {
+      "description": "[OKF CORE] Human-readable client name.",
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "description": "[OKF CORE] One or two sentence summary of the client and what its tools are for.",
+      "type": "string",
+      "minLength": 1
+    },
+    "provenance": {
+      "description": "[OKF CORE] Who authored/maintains this declaration.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "maintainer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "freshness": {
+      "description": "[OKF CORE] Last-reviewed marker.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "last_reviewed": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "zuno": {
+      "description": "[ZUNO EXT] What the mcp-gateway needs to entitle the logical agent name.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "tasks",
+        "access"
+      ],
+      "properties": {
+        "name": {
+          "description": "The logical agent name the client sends as X-Zuno-Agent. Matches the experience-clients/<name> directory and must not be the name of an agent.",
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "tasks": {
+          "description": "Task names the client sends as X-Zuno-Task; each is experience-clients/<name>/tasks/<task>.md (zuno-okf-task-v0.3.schema.json). Only allowed_tools is read.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "uniqueItems": true
+        },
+        "classification": {
+          "description": "The data classification the client declares on its requests (descriptive; the client's deployment sets the X-Zuno-Data-Classification header). Its tasks should only allow tools whose min_classification it reaches.",
+          "type": "string",
+          "enum": [
+            "C1",
+            "C2",
+            "C3"
+          ]
+        },
+        "access": {
+          "description": "Who may use the logical agent name.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "groups"
+          ],
+          "properties": {
+            "groups": {
+              "description": "Keycloak `zuno` realm groups (JWT `groups` claim, without the leading slash) whose members may call the mcp-gateway under this name. Unlike an agent, an experience client serves every employee, so these are business groups (sales, consultant, ...), not an agent_* entitlement group; the tool policy still narrows each tool to its own allowed_groups.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_-]*$"
+              },
+              "uniqueItems": true
+            }
+          }
+        }
+      }
+    }
+  }
+}

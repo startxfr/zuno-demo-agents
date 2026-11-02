@@ -58,6 +58,7 @@ import yaml
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 AGENTS_DIR = REPO_ROOT / "agents"
 POLICIES_DIR = REPO_ROOT / "policies"
+CLIENTS_DIR = REPO_ROOT / "experience-clients"
 CONFORMANCE_DIR = REPO_ROOT / "conformance"
 SOURCE_URL = "https://github.com/startxfr/zuno-demo-agents"
 
@@ -67,6 +68,8 @@ CORP_ARTIFACT_TYPE = "application/vnd.zuno.okf.corp.v1"
 POLICIES_LAYER_TYPE = "application/vnd.zuno.okf.policies.v1.tar+gzip"
 INDEX_LAYER_TYPE = "application/vnd.zuno.okf.index.v1+json"
 CONFORMANCE_LAYER_TYPE = "application/vnd.zuno.okf.conformance.v1.tar+gzip"
+# zuno-demo ADR-0592: experience clients (experience-clients/<name>), signed with the corp artifact.
+CLIENTS_LAYER_TYPE = "application/vnd.zuno.okf.clients.v1.tar+gzip"
 
 RUNTIME_FILES = ("agent.okf.md",)
 RUNTIME_DIRS = ("tasks", "prompts", "skills", "tools", "rag", "policies")
@@ -168,13 +171,31 @@ def conformance_files() -> List[pathlib.Path]:
                   key=lambda p: p.relative_to(CONFORMANCE_DIR).as_posix())
 
 
+def client_files() -> List[pathlib.Path]:
+    """The experience-client declarations (zuno-demo ADR-0592): each
+    experience-clients/<name>/client.okf.md and its tasks, never READMEs."""
+    if not CLIENTS_DIR.is_dir():
+        return []
+    files = []
+    for client in sorted(p.parent for p in CLIENTS_DIR.glob("*/client.okf.md")):
+        files.append(client / "client.okf.md")
+        tasks = client / "tasks"
+        if tasks.is_dir():
+            files += [p for p in tasks.rglob("*") if p.is_file() and p.name not in EXCLUDED_NAMES]
+    return sorted(files, key=lambda p: p.relative_to(CLIENTS_DIR).as_posix())
+
+
 def corp_layers(release: str, channel: str,
                 pushed: Dict[str, Tuple["AgentBuild", str]]) -> List[Tuple[str, bytes, str]]:
-    """The layers of the corp artifact. The conformance layer is optional and
-    comes last, so an older consumer that reads only the policies and index
-    layers by media type is unaffected."""
+    """The layers of the corp artifact. The clients and conformance layers are
+    optional and come after the policies and index layers, so an older
+    consumer that reads only those two by media type is unaffected; the
+    conformance layer stays last."""
     layers = [("okf-policies.tar.gz", build_layer(POLICIES_DIR, policy_files()), POLICIES_LAYER_TYPE),
               ("okf-index.json", corp_index(release, channel, pushed), INDEX_LAYER_TYPE)]
+    clients = client_files()
+    if clients:
+        layers.append(("okf-clients.tar.gz", build_layer(CLIENTS_DIR, clients), CLIENTS_LAYER_TYPE))
     cases = conformance_files()
     if cases:
         layers.append(("okf-conformance.tar.gz", build_layer(CONFORMANCE_DIR, cases), CONFORMANCE_LAYER_TYPE))
@@ -476,6 +497,8 @@ def main(argv: Optional[List[str]] = None) -> int:
                 (args.out / f"okf-{b.name}.tar.gz").write_bytes(b.layer)
                 meta[b.name] = b.annotations()
             (args.out / "okf-policies.tar.gz").write_bytes(build_layer(POLICIES_DIR, policy_files()))
+            if client_files():
+                (args.out / "okf-clients.tar.gz").write_bytes(build_layer(CLIENTS_DIR, client_files()))
             if conformance_files():
                 (args.out / "okf-conformance.tar.gz").write_bytes(build_layer(CONFORMANCE_DIR, conformance_files()))
             (args.out / "metadata.json").write_text(json.dumps(meta, indent=2, sort_keys=True) + "\n")
