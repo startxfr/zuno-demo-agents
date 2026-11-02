@@ -78,7 +78,7 @@ integration.
 **Documented gap (WP-36's own brief anticipates this)**: no
 finance-specific RAG knowledge domain exists in this repository. Rather
 than inventing one, Finage's tasks declare `knowledge.project` (cross-agent
-project memory) for retrieval. They also declared `knowledge.sxa-legacy` (the pre-2021 commercial record) until
+project memory) for retrieval. They also declared the pre-2021 commercial record until
 2026-11-02 (WP-185), when that domain stopped being served.
 
 What remains open, and is now the sharper gap, is the *deterministic* side:

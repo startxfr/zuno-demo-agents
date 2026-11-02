@@ -47,7 +47,7 @@ explicit omission, not by a runtime filter. Any further cross-domain
 commercial access this agent might need must be added here explicitly and
 policy-controlled, never inherited from Comage.
 
-`knowledge.sxa-legacy` was the one deliberate exception (ADR-0217, then ADR-0219, which widened its
-`allowed_groups` to include `adv`). It is no longer declared: the domain stopped being served when the RAG moved to
+The pre-2021 SXA record was the one deliberate exception (ADR-0217, then ADR-0219, which widened its
+reader groups to include `adv`). It is no longer declared: the domain stopped being served when the RAG moved to
 UnifAI (WP-185, 2026-11-02). The boundary that still holds - and that WP-35's negative test asserts - is
 `knowledge.sales`, which continues to exclude `adv`.

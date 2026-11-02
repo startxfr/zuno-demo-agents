@@ -23,8 +23,8 @@ Identify business that has reached the `A facturer`/billable state and
 later (MEMORY.md section 9), from the engagement's own durable project memory (`knowledge.project`).
 
 **No billing history is available (WP-185, 2026-11-02).** This task was built on the deterministic
-`sxa.customer.read`/`sxa.quote.read` lookups (ADR-0017), then on retrieval over `knowledge.sxa-legacy`, the company's
-closed pre-2021 record (ADR-0219). That domain is no longer served: the platform's RAG moved to UnifAI (WP-168)
+`sxa.customer.read`/`sxa.quote.read` lookups (ADR-0017), then on retrieval over the company's
+closed pre-2021 SXA record (ADR-0219). That domain is no longer served: the platform's RAG moved to UnifAI (WP-168)
 without a source for it. The task therefore reports only what the project memory of the verified engagement holds,
 attributes it to the records it came from, and says plainly that no billing history stands behind it. It never
 presents a retrieved state as the current state of an outstanding invoice.
