@@ -13,6 +13,7 @@ picks a release when it wants, verifies it, and configures itself from it.
 | Path | What it is |
 |---|---|
 | `agents/<name>/` | One agent: `agent.okf.md`, `tasks/`, `prompts/`, `tools/`, `rag/`, `policies/` (OKF v0.2, Markdown + YAML frontmatter), `tests/`, and its own `VERSION` |
+| `experience-clients/<name>/` | One experience client (zuno-demo ADR-0592: Open WebUI, OpenClaw): `client.okf.md` (who may use the logical agent name) and `tasks/` (the tools each task allows). Not an agent: no bundle, group, prompt or `VERSION`; it ships in the corp artifact's clients layer. See `experience-clients/README.md` |
 | `policies/` | Corp policies, the ceiling for every agent: `tools/`, `knowledge/`, `quotas/`, `model-routing/`, `models/model-catalog.yaml` (the model vocabulary), `guardrails/` |
 | `platform/okf/` | OKF schemas and checks: schema validation, authorization matrices, quota lint, contract-test runner |
 | `platform/supply-chain/validate_okf_bundle.py` | Bundle structure and corp policy references |
