@@ -2,6 +2,24 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v0.10.0 - 2026-11-03
+
+Agents:
+
+- `advantage` 0.2.1
+- `arkos` 0.2.2
+- `cognos` 0.2.1
+- `comage` 0.2.1
+- `finage` 0.2.2
+- `naveo` 0.1.1
+- `soursage` 0.1.0
+- `tekos` 0.4.5
+
+Changes:
+
+- release: bump VERSION to 0.10.0 (Open WebUI and OpenClaw chat get Confluence and the technical docs search) (885e90a)
+- feat(experience-clients): Open WebUI and OpenClaw chat get Confluence and the technical docs search (zuno-demo ADR-0594) (c43e683)
+
 ## v0.9.3 - 2026-11-03
 
 Agents:
