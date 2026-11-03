@@ -158,29 +158,6 @@ classes:
       group:   { budget: 8000,  window: 5m }
       project: { budget: 4000,  window: 5m }
 
-  rehearsal:
-    description: >-
-      Deliberately tiny, fail-open class for the shared-quota rehearsal of the
-      three-experiences demonstration (zuno-demo WP-184, ADR-0587): a persona
-      placed in the ai-gateway's QUOTA_REHEARSAL_GROUP runs under it in every
-      experience (Open WebUI, OpenClaw, UnifAI), so one user budget ends in a
-      429 in all three. Unlike `stresstest` it is fail_mode open, so the SaaS
-      providers stay eligible and the proof does not need the local GPU
-      models: a call is answered until the budget is spent, then refused with
-      an explicit quota error. No task opts into it, and the group is empty
-      outside a rehearsal, so ordinary usage never draws from it. The user
-      budget equals `stresstest`'s (a few short calls); group and project
-      budgets are loose enough never to bind first.
-    fail_mode: open
-    requests:
-      user:    { limit: 60,   window: 5m }
-      group:   { limit: 600,  window: 5m }
-      project: { limit: 300,  window: 5m }
-    tokens:
-      user:    { budget: 2000,   window: 5m }
-      group:   { budget: 100000, window: 5m }
-      project: { budget: 50000,  window: 5m }
-
 precedence:
   in_project_context: [project, user, group]
   default: [user, group]
