@@ -9,14 +9,20 @@ task allows.
 ```
 experience-clients/<name>/
   client.okf.md        # type: experience-client (zuno-okf-experience-client-v0.3.schema.json)
-  tasks/<task>.md      # type: task, only allowed_tools is read
+  tasks/<task>.md      # type: task: allowed_tools (mcp-gateway), zuno.models (ai-gateway routing, ADR-0596)
 ```
 
 What an experience client is not:
 
 - not a UnifAI bundle, not a Keycloak `agent_*` group, not a MaaS subscription;
 - not an A2A endpoint, not a delegation target;
-- no prompts, graph, RAG, model preference or UI tile.
+- no prompts, graph, RAG or UI tile.
+
+A task may declare `zuno.models` (zuno-demo ADR-0596). zuno-demo's generator turns it
+into the ai-gateway routing entry of (client, task), with the agents' rules: roles
+reorder, `forbidden` excludes, nothing is added. The task `code` puts the `code`
+role (Codestral) first; the ai-gateway routes the "Zuno Code" model (`zuno-code`)
+under it. Its MCP calls stay on `chat`.
 
 `access.groups` are business groups: a client serves every employee. Each tool is
 still narrowed by `policies/tools/tool-policy.yaml` (the caller's groups and the
