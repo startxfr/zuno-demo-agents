@@ -15,6 +15,8 @@ zuno:
   name: openclaw
   tasks:
     - chat
+    # zuno-demo ADR-0596: the model routing of "Zuno Code"; no tools.
+    - code
   # Same as open-webui (zuno-demo ADR-0594): MCP at C2, model calls at C1,
   # C2 tool turns kept on local models by the ai-gateway.
   classification: C2
