@@ -15,6 +15,8 @@ zuno:
   name: open-webui
   tasks:
     - chat
+    # zuno-demo ADR-0596: the model routing of "Zuno Code"; no tools.
+    - code
   # zuno-demo ADR-0594: the MCP connection calls at C2 so Confluence and the
   # technical knowledge base are listed; the model connection stays C1, and the
   # ai-gateway keeps a turn that used a C2 tool on local models (signed markers).
