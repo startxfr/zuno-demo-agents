@@ -1,6 +1,6 @@
 # Experience clients
 
-User interfaces over the governed chain (zuno-demo ADR-0587, ADR-0592): Open WebUI
+User interfaces over the governed chain (zuno-demo ADR-0587, ADR-0592): Open WebUI, Dify
 and OpenClaw. They are not agents. Each one calls the mcp-gateway on behalf of the
 signed-in user under a logical agent name (`X-Zuno-Agent`) and a task
 (`X-Zuno-Task`). This directory says who may use that name and which tools each
