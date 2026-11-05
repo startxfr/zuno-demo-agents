@@ -17,6 +17,25 @@ Agents:
 
 Changes:
 
+- release: v0.13.0 (eee8e31)
+- release: bump VERSION to 0.13.0 (k8s read capabilities and the kagent experience client: zuno-demo ADR-0600, WP-206, WP-207) (65f859b)
+- feat(wp-206,wp-207): k8s capabilities in the tool policy and the kagent experience client (4d64ee4)
+
+## v0.13.0 - 2026-11-05
+
+Agents:
+
+- `advantage` 0.2.1
+- `arkos` 0.2.2
+- `cognos` 0.2.1
+- `comage` 0.2.1
+- `finage` 0.2.2
+- `naveo` 0.1.1
+- `soursage` 0.1.0
+- `tekos` 0.4.5
+
+Changes:
+
 - release: bump VERSION to 0.13.0 (k8s read capabilities and the kagent experience client: zuno-demo ADR-0600, WP-206, WP-207) (65f859b)
 - feat(wp-206,wp-207): k8s capabilities in the tool policy and the kagent experience client (4d64ee4)
 
