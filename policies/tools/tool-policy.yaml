@@ -43,7 +43,8 @@
 # an external system (reads, searches, lists, and local generation of content);
 # `write` when it creates, updates, sends, deletes or runs automation. Absent
 # means `write` (fail closed). Gateway use: on a delegated call, a `write` tool is
-# refused while policies/limits/limits-policy.yaml `delegation.allow_write` is false.
+# refused unless the executing agent/task is listed in policies/limits/limits-policy.yaml
+# `delegation.write_allowed` (or the legacy `delegation.allow_write` is true); a listed write asks for approval.
 #
 # Schema per entry:
 #   tool:              MCP tool name, unique key (legacy pre-ADR-0116 name,
