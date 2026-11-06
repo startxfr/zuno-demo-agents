@@ -2,6 +2,24 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v0.14.2 - 2026-11-06
+
+Agents:
+
+- `advantage` 0.2.1
+- `arkos` 0.2.2
+- `cognos` 0.2.1
+- `comage` 0.2.1
+- `finage` 0.2.2
+- `naveo` 0.1.1
+- `soursage` 0.1.0
+- `tekos` 0.5.0
+
+Changes:
+
+- release: bump VERSION to 0.14.2 (delegation.write_allowed names Tekos answer-technical-question: zuno-demo ADR-0409 amendment 2026-11-06) (ef690a1)
+- fix(policy): delegation.write_allowed names Tekos answer-technical-question, the reachable target (zuno-demo ADR-0409) (9e81f8e)
+
 ## v0.14.1 - 2026-11-06
 
 Agents:
