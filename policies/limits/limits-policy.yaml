@@ -33,7 +33,10 @@ delegation:
   # Targets a delegated call may write through, each write asking the initiating user for approval
   # (zuno-demo ADR-0409). A write tool is offered and allowed only when the executing agent/task is
   # listed. Every later target stays read-only until reviewed and listed here.
+  # The entry is the TARGET of a delegation: Arkos delegates to Tekos, and the only write tool Tekos
+  # carries is aap.cluster.audit (a Day 0 health check run through AAP). Nothing delegates to Arkos, so an
+  # arkos entry could never be reached.
   write_allowed:
-    - agent: arkos
-      task: draft-architecture-testimonial
+    - agent: tekos
+      task: answer-technical-question
 
