@@ -100,11 +100,13 @@
           "pattern": "^[a-z][a-z0-9-]*$"
         },
         "status": {
-          "description": "Lifecycle status of this agent instance in the current release. `active` means a real Agent Runtime task graph, FE and BFF are deployed and reachable. `placeholder` means only this declarative definition and a reserved namespace exist (ADR-0007): the portal renders an access-gated \"coming soon\" tile and no FE/BFF Deployment is applied. See platform/architecture/agent-platform-separation.md.",
+          "description": "Lifecycle status of this agent instance in the current release. `active` means a real Agent Runtime task graph, FE and BFF are deployed and reachable. `placeholder` means only this declarative definition and a reserved namespace exist (ADR-0007): the portal renders an access-gated \"coming soon\" tile and no FE/BFF Deployment is applied. See platform/architecture/agent-platform-separation.md. `deprecated` keeps the agent served as `active` and marks its sheet (zuno-demo ADR-0584 clause 3). `retired` removes the agent: it is not served, its objects are removed, and existing sessions stay readable by their owner but cannot resume. A state change is a reviewed pull request. A zuno-demo platform that predates the operator release of zuno-demo WP-221 refuses a bundle in either state, so do not release an agent in `deprecated` or `retired` before that release is pinned.",
           "type": "string",
           "enum": [
             "active",
-            "placeholder"
+            "placeholder",
+            "deprecated",
+            "retired"
           ]
         },
         "tasks": {
