@@ -2,6 +2,23 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v0.14.0 - 2026-11-06
+
+Agents:
+
+- `advantage` 0.2.1
+- `arkos` 0.2.2
+- `cognos` 0.2.1
+- `comage` 0.2.1
+- `finage` 0.2.2
+- `naveo` 0.1.1
+- `soursage` 0.1.0
+- `tekos` 0.5.0
+
+Changes:
+
+- feat(tekos): declare the five k8s read tools on the primary task, ocp-ai-ops only (766348f)
+
 ## v0.13.0 - 2026-11-05
 
 Agents:
