@@ -2,6 +2,25 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v0.14.1 - 2026-11-06
+
+Agents:
+
+- `advantage` 0.2.1
+- `arkos` 0.2.2
+- `cognos` 0.2.1
+- `comage` 0.2.1
+- `finage` 0.2.2
+- `naveo` 0.1.1
+- `soursage` 0.1.0
+- `tekos` 0.5.0
+
+Changes:
+
+- release: bump VERSION to 0.14.1 (delegation.write_allowed for the approval of a delegated write: zuno-demo ADR-0409; deprecated and retired lifecycle states in the OKF schema: ADR-0584, WP-221) (11538c6)
+- feat(policy): delegation.write_allowed lists Arkos draft-architecture-testimonial (zuno-demo ADR-0409) (70ef019)
+- feat(okf): zuno.status accepts deprecated and retired (zuno-demo ADR-0584, WP-221) (9350faa)
+
 ## v0.14.0 - 2026-11-06
 
 Agents:
