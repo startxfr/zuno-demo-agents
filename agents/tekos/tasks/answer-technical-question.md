@@ -29,6 +29,15 @@ zuno:
     # agent without re-reading ADR-0355's Security considerations.
     - aap.platform.audit
     - aap.cluster.audit
+    # ADR-0600/WP-206 (zuno-demo): governed, read-only Kubernetes reads of the
+    # zuno-* namespaces, for "why does this pod not start?". tool-policy.yaml
+    # admits `ocp-ai-ops` only, so this declaration reaches the operations
+    # persona alone; the business personas keep Tekos without cluster reads.
+    - k8s.resource.read
+    - k8s.resource.list
+    - k8s.events.read
+    - k8s.logs.read
+    - metrics.query
   live_read_tool: search_confluence
   allowed_knowledge:
     - knowledge.tech
