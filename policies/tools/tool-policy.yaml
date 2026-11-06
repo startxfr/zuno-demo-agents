@@ -557,8 +557,8 @@ tools:
       - ocp-ai-ops
 
   # zuno-demo ADR-0600 (WP-206): governed, read-only Kubernetes reads (components behind the `k8s` backend,
-  # gitops/charts/mcp-k8s). Operations groups only: `ocp-ai-ops` (admin on the zuno-* namespaces) and
-  # `aap_ops`. The server's own ServiceAccount does the read (`view` per namespace, no Secret, no ConfigMap
+  # gitops/charts/mcp-k8s). Operations group only: `ocp-ai-ops` (admin on the zuno-* namespaces). `aap_ops`
+  # (also held by the consultant personas and the Dify/OpenClaw service accounts) is NOT admitted. The server's own ServiceAccount does the read (`view` per namespace, no Secret, no ConfigMap
   # data); these entries decide who may call it. Logs can carry secrets an application printed, hence C2.
   - tool: k8s.resource.read
     access: read
@@ -570,7 +570,6 @@ tools:
     min_classification: C2
     allowed_groups:
       - ocp-ai-ops
-      - aap_ops
 
   - tool: k8s.resource.list
     access: read
@@ -582,7 +581,6 @@ tools:
     min_classification: C2
     allowed_groups:
       - ocp-ai-ops
-      - aap_ops
 
   - tool: k8s.events.read
     access: read
@@ -594,7 +592,6 @@ tools:
     min_classification: C2
     allowed_groups:
       - ocp-ai-ops
-      - aap_ops
 
   - tool: k8s.logs.read
     access: read
@@ -606,7 +603,6 @@ tools:
     min_classification: C2
     allowed_groups:
       - ocp-ai-ops
-      - aap_ops
 
   - tool: metrics.query
     access: read
@@ -618,7 +614,6 @@ tools:
     min_classification: C2
     allowed_groups:
       - ocp-ai-ops
-      - aap_ops
 
   # ADR-0415: stable-diffusion-xl image generation via OVHcloud AI
   # Endpoints, for advantage/cognos/comage's preferred image model. Policy
