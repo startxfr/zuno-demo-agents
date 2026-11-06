@@ -27,7 +27,13 @@ max_steps: 30
 max_delegation_depth: 2
 
 delegation:
-  # Whether the gateway lets a delegated call use write or destructive tools.
-  # false until human approval works across a delegation end to end (ADR-0409).
+  # Legacy global switch: whether any delegated call may use write or destructive tools without a
+  # listed target. Stays false; superseded by write_allowed below (zuno-demo ADR-0409 clause 5).
   allow_write: false
+  # Targets a delegated call may write through, each write asking the initiating user for approval
+  # (zuno-demo ADR-0409). A write tool is offered and allowed only when the executing agent/task is
+  # listed. Every later target stays read-only until reviewed and listed here.
+  write_allowed:
+    - agent: arkos
+      task: draft-architecture-testimonial
 
