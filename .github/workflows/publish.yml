@@ -29,12 +29,12 @@ jobs:
     env:
       OKF_REGISTRY: ${{ vars.OKF_REGISTRY || 'quay.io/zuno' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
       - name: The tag is the VERSION of its tree
         run: test "$GITHUB_REF_TYPE" = tag && test "v$(cat VERSION)" = "$GITHUB_REF_NAME"
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.11"
       - run: pip install pyyaml==6.0.2 jsonschema==4.23.0
@@ -48,10 +48,10 @@ jobs:
           python3 platform/okf/generate_authorization_matrix.py --check --all
           python3 platform/okf/run_agent_contract_tests.py
           python3 -m unittest discover -s platform/release/tests
-      - uses: oras-project/setup-oras@v1
+      - uses: oras-project/setup-oras@22ce207df3b08e061f537244349aac6ae1d214f6 # v1
         with:
           version: 1.2.2
-      - uses: sigstore/cosign-installer@v3
+      - uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
         with:
           cosign-release: v2.4.1
       - name: Log in to the registry
@@ -90,7 +90,7 @@ jobs:
             --identity '^https://github\.com/startxfr/zuno-demo-agents/\.github/workflows/publish\.yml@refs/tags/v' --clean-above 16 \
             --type https://zuno.startx.fr/okf/contract-tests/v1 --predicate predicate.json
       - name: Attest build provenance of the release
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
         with:
           subject-name: ${{ steps.refs.outputs.corp_name }}
           subject-digest: ${{ steps.refs.outputs.corp_digest }}
