@@ -10,6 +10,13 @@ zuno:
     - k8s.events.read
     - k8s.logs.read
     - metrics.query
+  # zuno-demo ADR-0596, user decision 2026-11-07: answer with the fast local reasoning model first (gpt-oss-20b,
+  # about 85 tok/s, 131k context). Without a preference the ai-gateway walked its providers in file order and served
+  # qwen3.6-27b (about 22 tok/s): 24 to 56 s for a short answer on demo333. Only reorders: the other local models
+  # follow as fallbacks, and the classification and local-only rules are unchanged.
+  models:
+    preferred:
+      - reasoning
 ---
 
 # Diagnose

@@ -20,6 +20,10 @@ max_concurrent_requests: 10
 # 50 rounds, zuno-demo scenario #11, 2026-10-25).
 max_steps: 30
 
+# Model tokens of one agent turn (zuno.limits.max_tokens_per_turn, agent or task level). No corp ceiling is set: an
+# agent that declares nothing has none (today's behaviour). Uncomment to bound every bundle, for example:
+# max_tokens_per_turn: 120000
+
 # Agent-to-agent delegation (zuno-demo ADR-0406). Ceiling on the hops a chain
 # may have: a bundle's `zuno.limits.delegation.max_depth` may not exceed it.
 # The default for an agent that declares nothing is 1 (it may call a target; the
