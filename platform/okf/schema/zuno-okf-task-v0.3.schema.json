@@ -154,6 +154,11 @@
               "type": "integer",
               "minimum": 1
             },
+            "max_tokens_per_turn": {
+              "description": "Maximum model tokens one agent turn may use (one user submit, all model calls of the turn). The turn ends cleanly when the ceiling is reached: the last text the model produced, a blank line and the notice \"Token ceiling reached for this turn (<used>/<cap> tokens)\". The cap is checked between model calls, so the last call can exceed it. At most the corp ceiling max_tokens_per_turn when the corp policy sets one (policies/limits/limits-policy.yaml). A task-level value overrides the agent's. Absent: no ceiling (today's behaviour). Needs unifai-operator 0.1.65 or later.",
+              "type": "integer",
+              "minimum": 1
+            },
             "quota_class": {
               "description": "A class of policies/quotas/quota-policy.yaml.",
               "type": "string",
