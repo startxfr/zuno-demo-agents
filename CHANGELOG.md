@@ -2,6 +2,25 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v0.14.3 - 2026-11-07
+
+Agents:
+
+- `advantage` 0.2.1
+- `arkos` 0.2.2
+- `cognos` 0.2.1
+- `comage` 0.2.1
+- `finage` 0.2.2
+- `naveo` 0.1.1
+- `soursage` 0.1.0
+- `tekos` 0.5.0
+
+Changes:
+
+- feat(okf): zuno.limits.max_tokens_per_turn, a token ceiling per agent turn (UnifAI fork) (3b534da)
+- feat(experience-clients): answer chat with the local reasoning model first (gpt-oss-20b) (bc46e14)
+- feat(experience-clients): blender, a workstation client with one task bpy (zuno-demo ADR-0610, WP-244); VERSION 0.14.3 (b8ac031)
+
 ## v0.14.2 - 2026-11-06
 
 Agents:
