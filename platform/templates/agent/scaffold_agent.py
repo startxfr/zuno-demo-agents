@@ -377,7 +377,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "{sync_wave - 1}"
 spec:
-  project: zuno
+  project: zuno-apps
   source:
     repoURL: https://github.com/startxfr/zuno-demo.git
     targetRevision: main
@@ -413,7 +413,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "{sync_wave}"
 spec:
-  project: zuno
+  project: zuno-apps
   source:
     repoURL: https://github.com/startxfr/zuno-demo.git
     targetRevision: main
