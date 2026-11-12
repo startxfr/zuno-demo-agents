@@ -34,7 +34,7 @@ directories are retained, not deleted, and still await real content —
   agent-runtime degrades gracefully to indexed-only (`knowledge.sales`)
   context when the live tool call fails, it just never reaches
   `source_mode: live`/`both` until that gap closes. Carved out 2026-08-30
-  to [WP-101](../../docs/roadmap/work-packages/wp-101-salesforce-sandbox-credentials.md)
+  to [WP-101](https://github.com/startxfr/zuno-demo/blob/main/docs/roadmap/work-packages/wp-101-salesforce-sandbox-credentials.md)
   (v0.7) as its own owner rather than an unowned residual note — no
   Salesforce org has ever existed in this cluster.
 
