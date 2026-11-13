@@ -49,7 +49,8 @@ tagged tree, publishes the agent and corp artifacts, signs them keyless,
 attests the checks and the build provenance, and creates the GitHub release
 whose notes give the corp digest to pin.
 
-Nothing is ever re-tagged. A broken release is fixed by a new one.
+Nothing is ever re-tagged. A broken release is fixed by a new one. How a consumer verifies a release, rolls back to
+the previous one and adapts the trust settings is in [docs/publish-and-verify.md](docs/publish-and-verify.md).
 
 ## Dev artifacts
 

@@ -8,16 +8,35 @@ This repository has its own life cycle. It knows nothing about the platforms
 that consume it: a platform (today [zuno-demo](https://github.com/startxfr/zuno-demo))
 picks a release when it wants, verifies it, and configures itself from it.
 
+## Use it for your own agents
+
+This repository is a **reference you can copy**. Its structure, its checks and its release chain do not depend on Zuno:
+copy it, replace the agents with yours, and you have signed, verifiable agent releases. Zuno's own agents stay here as
+worked examples.
+
+To adapt it, change four things and keep the rest:
+
+- **Agents and corp policies:** your agents under `agents/`, your limits, tools, knowledge domains, quotas and model roles
+  under `policies/`. The checks keep every agent inside the corp policies.
+- **Registry:** the variable `OKF_REGISTRY` (default `quay.io/zuno`).
+- **Trusted identity:** the workflow identity your consumers verify, which contains your repository path and the workflow
+  file name `publish.yml`.
+- **Attestation type:** the predicate type URL of the checks attestation, which should be one you own.
+
+Adding agents is explained in [docs/add-an-agent.md](docs/add-an-agent.md); the registry, the identity and the attestation
+type in [docs/publish-and-verify.md](docs/publish-and-verify.md). Start with the [documentation index](docs/README.md).
+
 ## Contents
 
 | Path | What it is |
 |---|---|
-| `agents/<name>/` | One agent: `agent.okf.md`, `tasks/`, `prompts/`, `tools/`, `rag/`, `policies/` (OKF v0.2, Markdown + YAML frontmatter), `tests/`, and its own `VERSION` |
+| `agents/<name>/` | One agent: `agent.okf.md`, `tasks/`, `prompts/`, `tools/`, `rag/`, `policies/` (OKF v0.2 or v0.3, Markdown + YAML frontmatter), `tests/`, and its own `VERSION` |
 | `experience-clients/<name>/` | One experience client (zuno-demo ADR-0592: Open WebUI, OpenClaw): `client.okf.md` (who may use the logical agent name) and `tasks/` (the tools each task allows). Not an agent: no bundle, group, prompt or `VERSION`; it ships in the corp artifact's clients layer. See `experience-clients/README.md` |
 | `policies/` | Corp policies, the ceiling for every agent: `tools/`, `knowledge/`, `quotas/`, `model-routing/`, `models/model-catalog.yaml` (the model vocabulary), `guardrails/` |
 | `platform/okf/` | OKF schemas and checks: schema validation, authorization matrices, quota lint, contract-test runner |
 | `platform/supply-chain/validate_okf_bundle.py` | Bundle structure and corp policy references |
 | `platform/release/` | Release tooling: build, version gate, publish, changelog, dev-run rendering |
+| `docs/` | Documentation: how to [add an agent](docs/add-an-agent.md), the [OKF field reference](docs/okf-reference.md), [what travels in a release](docs/bundle-files.md), how to [publish, verify and roll back a release](docs/publish-and-verify.md), and [the `UnifaiAgentBundle` resource](docs/unifaiagentbundle.md) that turns a released bundle into running agents |
 | `VERSION` | The release version |
 | `CHANGELOG.md` | Written by the release chain on `stable` |
 
@@ -45,12 +64,14 @@ must be bumped, which `check-versions` enforces).
 A bundle may only narrow the corp policies: `platform/okf/check_narrowing.py`
 refuses any widening, naming the corp clause it exceeds. v0.2 stays valid.
 
-Bundles may move to `okf_version: v0.3`, one agent at a time (`tekos`
-first). The consumers read v0.3: unifai-operator since 0.1.27 and the
-zuno-demo readers (zuno-demo WP-163). The operator does not map
-`zuno.models`, `zuno.guardrails` or `zuno.limits` yet, so they have no
-runtime effect there: the corp routing and guardrail policies remain the
-authority, and a bundle's v0.3 fields must restate them, never change them.
+Bundles may be at `okf_version: v0.2` or `v0.3`, one agent at a time; each document is
+checked against the schema of its own version. Consumers read both: the ai-gateway applies
+the model roles (`zuno.models`) and guardrail modes (`zuno.guardrails`) and enforces
+`max_tokens`. UnifAI applies `max_steps`, `max_tokens_per_turn` and the history settings of
+`zuno.limits`, and passes `max_tokens` on (as the client's `max_tokens` and as a request header).
+A consumer that does not map a field gives it no runtime effect: the corp policies remain
+the authority, and a v0.3 field restates or narrows them, never changes them. The field
+reference is [docs/okf-reference.md](docs/okf-reference.md).
 
 ## What a release is
 
