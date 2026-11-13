@@ -12,13 +12,13 @@ picks a release when it wants, verifies it, and configures itself from it.
 
 | Path | What it is |
 |---|---|
-| `agents/<name>/` | One agent: `agent.okf.md`, `tasks/`, `prompts/`, `tools/`, `rag/`, `policies/` (OKF v0.2, Markdown + YAML frontmatter), `tests/`, and its own `VERSION` |
+| `agents/<name>/` | One agent: `agent.okf.md`, `tasks/`, `prompts/`, `tools/`, `rag/`, `policies/` (OKF v0.2 or v0.3, Markdown + YAML frontmatter), `tests/`, and its own `VERSION` |
 | `experience-clients/<name>/` | One experience client (zuno-demo ADR-0592: Open WebUI, OpenClaw): `client.okf.md` (who may use the logical agent name) and `tasks/` (the tools each task allows). Not an agent: no bundle, group, prompt or `VERSION`; it ships in the corp artifact's clients layer. See `experience-clients/README.md` |
 | `policies/` | Corp policies, the ceiling for every agent: `tools/`, `knowledge/`, `quotas/`, `model-routing/`, `models/model-catalog.yaml` (the model vocabulary), `guardrails/` |
 | `platform/okf/` | OKF schemas and checks: schema validation, authorization matrices, quota lint, contract-test runner |
 | `platform/supply-chain/validate_okf_bundle.py` | Bundle structure and corp policy references |
 | `platform/release/` | Release tooling: build, version gate, publish, changelog, dev-run rendering |
-| `docs/` | Documentation: [the `UnifaiAgentBundle` resource](docs/unifaiagentbundle.md) that turns a released bundle into running agents |
+| `docs/` | Documentation: the [OKF field reference](docs/okf-reference.md), and [the `UnifaiAgentBundle` resource](docs/unifaiagentbundle.md) that turns a released bundle into running agents |
 | `VERSION` | The release version |
 | `CHANGELOG.md` | Written by the release chain on `stable` |
 
@@ -46,12 +46,13 @@ must be bumped, which `check-versions` enforces).
 A bundle may only narrow the corp policies: `platform/okf/check_narrowing.py`
 refuses any widening, naming the corp clause it exceeds. v0.2 stays valid.
 
-Bundles may move to `okf_version: v0.3`, one agent at a time (`tekos`
-first). The consumers read v0.3: unifai-operator since 0.1.27 and the
-zuno-demo readers (zuno-demo WP-163). The operator does not map
-`zuno.models`, `zuno.guardrails` or `zuno.limits` yet, so they have no
-runtime effect there: the corp routing and guardrail policies remain the
-authority, and a bundle's v0.3 fields must restate them, never change them.
+Bundles may be at `okf_version: v0.2` or `v0.3`, one agent at a time; each document is
+checked against the schema of its own version. Consumers read both: the ai-gateway applies
+the model roles (`zuno.models`) and guardrail modes (`zuno.guardrails`), and UnifAI applies
+`max_steps`, `max_tokens`, `max_tokens_per_turn` and the history settings of `zuno.limits`.
+A consumer that does not map a field gives it no runtime effect: the corp policies remain
+the authority, and a v0.3 field restates or narrows them, never changes them. The field
+reference is [docs/okf-reference.md](docs/okf-reference.md).
 
 ## What a release is
 
