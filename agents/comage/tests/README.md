@@ -23,7 +23,7 @@ cluster, no credentials, no model calls; **behavioral** checks stay in
 **Blocking rule (ADR-0504):** Comage is not exempt from this structure
 requirement. `contract/`, `tasks/` and `prompts/` must contain real, green
 tests before Comage can be promoted to Stage 2 -
-`platform/templates/agent/PROMOTION.md` step 4 is explicit: empty stub
+`https://github.com/startxfr/zuno-demo/blob/main/https://github.com/startxfr/zuno-demo/blob/main/platform/templates/agent/PROMOTION.md` step 4 is explicit: empty stub
 directories are not Stage 2. Filling these suites is owned by whichever
 work promotes Comage, but the requirement itself blocks promotion, not
 just documents an aspiration.
