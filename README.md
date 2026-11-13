@@ -8,6 +8,24 @@ This repository has its own life cycle. It knows nothing about the platforms
 that consume it: a platform (today [zuno-demo](https://github.com/startxfr/zuno-demo))
 picks a release when it wants, verifies it, and configures itself from it.
 
+## Use it for your own agents
+
+This repository is a **reference you can copy**. Its structure, its checks and its release chain do not depend on Zuno:
+copy it, replace the agents with yours, and you have signed, verifiable agent releases. Zuno's own agents stay here as
+worked examples.
+
+To adapt it, change four things and keep the rest:
+
+- **Agents and corp policies:** your agents under `agents/`, your limits, tools, knowledge domains, quotas and model roles
+  under `policies/`. The checks keep every agent inside the corp policies.
+- **Registry:** the variable `OKF_REGISTRY` (default `quay.io/zuno`).
+- **Trusted identity:** the workflow identity your consumers verify, which contains your repository path and the workflow
+  file name `publish.yml`.
+- **Attestation type:** the predicate type URL of the checks attestation, which should be one you own.
+
+Adding agents is explained in [docs/add-an-agent.md](docs/add-an-agent.md); the registry, the identity and the attestation
+type in [docs/publish-and-verify.md](docs/publish-and-verify.md). Start with the [documentation index](docs/README.md).
+
 ## Contents
 
 | Path | What it is |

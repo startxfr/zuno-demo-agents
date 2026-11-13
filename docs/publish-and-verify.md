@@ -131,6 +131,5 @@ That is a decision for the maintainers, not something this page promises.
 
 No software bill of materials is produced today. A bundle is text (Markdown and YAML) plus deterministic layers; it
 holds no code, no packages and no model, so an SBOM would list nothing a consumer can act on. The evidence that matters
-here is the signature, the attestation of the checks and the build provenance. **Recommendation: do not add an SBOM
-now**, and revisit it if a bundle ever embeds code, a dependency list or a model file. This is a maintainer decision;
-the page states the current situation either way.
+here is the signature, the attestation of the checks and the build provenance. **Decision (2026-11-13): no SBOM.** Revisit
+it if a bundle ever embeds code, a dependency list or a model file.
