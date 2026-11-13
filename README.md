@@ -18,7 +18,7 @@ picks a release when it wants, verifies it, and configures itself from it.
 | `platform/okf/` | OKF schemas and checks: schema validation, authorization matrices, quota lint, contract-test runner |
 | `platform/supply-chain/validate_okf_bundle.py` | Bundle structure and corp policy references |
 | `platform/release/` | Release tooling: build, version gate, publish, changelog, dev-run rendering |
-| `docs/` | Documentation: the [OKF field reference](docs/okf-reference.md), how to [publish, verify and roll back a release](docs/publish-and-verify.md), and [the `UnifaiAgentBundle` resource](docs/unifaiagentbundle.md) that turns a released bundle into running agents |
+| `docs/` | Documentation: how to [add an agent](docs/add-an-agent.md), the [OKF field reference](docs/okf-reference.md), [what travels in a release](docs/bundle-files.md), how to [publish, verify and roll back a release](docs/publish-and-verify.md), and [the `UnifaiAgentBundle` resource](docs/unifaiagentbundle.md) that turns a released bundle into running agents |
 | `VERSION` | The release version |
 | `CHANGELOG.md` | Written by the release chain on `stable` |
 
@@ -48,8 +48,9 @@ refuses any widening, naming the corp clause it exceeds. v0.2 stays valid.
 
 Bundles may be at `okf_version: v0.2` or `v0.3`, one agent at a time; each document is
 checked against the schema of its own version. Consumers read both: the ai-gateway applies
-the model roles (`zuno.models`) and guardrail modes (`zuno.guardrails`), and UnifAI applies
-`max_steps`, `max_tokens`, `max_tokens_per_turn` and the history settings of `zuno.limits`.
+the model roles (`zuno.models`) and guardrail modes (`zuno.guardrails`) and enforces
+`max_tokens`. UnifAI applies `max_steps`, `max_tokens_per_turn` and the history settings of
+`zuno.limits`, and passes `max_tokens` on (as the client's `max_tokens` and as a request header).
 A consumer that does not map a field gives it no runtime effect: the corp policies remain
 the authority, and a v0.3 field restates or narrows them, never changes them. The field
 reference is [docs/okf-reference.md](docs/okf-reference.md).

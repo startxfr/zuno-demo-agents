@@ -27,7 +27,7 @@ skeleton directories at all until promotion grows them.
   and the operator deploy + 75 % gate are the open promotion steps**
   (NEXT_STEPS 7–8, now the PROMOTION.md checklist).
 
-**Next step:** `platform/templates/agent/PROMOTION.md` step 1 (scenario
+**Next step:** `https://github.com/startxfr/zuno-demo/blob/main/https://github.com/startxfr/zuno-demo/blob/main/platform/templates/agent/PROMOTION.md` step 1 (scenario
 review of `evaluations/naveo/scenarios.yaml`).
 
 ## Declarative structure (ADR-0038; Stage-1 lean shape)

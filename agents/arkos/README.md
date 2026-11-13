@@ -74,7 +74,8 @@ See WP-31 for the full measurement.
 ```text
 arkos/
 ├── README.md
-├── agent.okf.md         Agent index bundle (YAML frontmatter + Markdown body)
+├── VERSION               the agent's own version (bumped when published files change)
+├── agent.okf.md          Agent index bundle (YAML frontmatter + Markdown body)
 ├── tasks/
 │   ├── draft-architecture-testimonial.md   (primary task)
 │   ├── workshop-presentation.md
@@ -86,13 +87,13 @@ arkos/
 │   ├── workshop-presentation.md
 │   ├── workshop-presentation--reflect.md
 │   └── structure-demo.md
-├── policies/            (stub)
-├── rag/                 (stub)
-├── tools/               (stub)
-├── deployment/          Generated ADR-0503 snapshot + README (WP-45)
-└── tests/               ADR-0504 suites, real content (WP-9)
+├── policies/             (stub)
+├── rag/                  (stub)
+├── tools/                (stub)
+└── tests/                contract/, tasks/, prompts/, with real suites
 ```
 
-The runtime implementation is shared. This directory contains only
-agent-specific declarative behavior, policy, knowledge references and
-deployment configuration.
+The agent is declarative. A platform that consumes a release supplies the runtime. This
+directory contains only the agent's behavior, policy and knowledge references. See the
+[OKF field reference](../../docs/okf-reference.md) and the
+[guide to add an agent](../../docs/add-an-agent.md).

@@ -945,7 +945,7 @@ human:
    `python3 operator/aiagent-operator/validate_contract.py`,
    `python3 platform/docs/check_docs.py`.
 7. **Promote** (ADR-0502): follow
-   `platform/templates/agent/PROMOTION.md` - the named Stage-1 -> Stage-2
+   `https://github.com/startxfr/zuno-demo/blob/main/https://github.com/startxfr/zuno-demo/blob/main/platform/templates/agent/PROMOTION.md` - the named Stage-1 -> Stage-2
    checklist (scenario review, CR deploy, 75% gate, Stage-2 directory
    content, `zuno.status: active`, README update). Steps 1-6 above are
    its assumed scaffold-time baseline.
