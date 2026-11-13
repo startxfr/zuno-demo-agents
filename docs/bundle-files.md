@@ -31,7 +31,8 @@ files did not change keeps the same digest from one release to the next, whateve
 
 Manifest annotations: `org.opencontainers.image.source`, `.revision`, `.created`, `.version` (the agent `VERSION`), and
 `zuno.okf.agent` and `zuno.okf.version` (the agent name and its `okf_version`). The revision and date come from the last
-commit that touched the agent's own files, which is also why an unchanged agent keeps its digest.
+commit that touched a **published** file of the agent (or an embedded corp skill). Editing a README, a test, `VERSION` or
+`NEXT_STEPS.md` therefore does not move them, which is why an unchanged agent keeps its digest.
 
 ## The corp artifact (`okf-corp`)
 

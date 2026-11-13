@@ -310,7 +310,12 @@ class AgentBuild:
 def build_agent(agent_dir: pathlib.Path) -> AgentBuild:
     rel = agent_dir.relative_to(REPO_ROOT).as_posix()
     skills = corp_skills(agent_dir)
-    history = [rel] + [p.relative_to(REPO_ROOT).as_posix() for p in skills.values()]
+    # The revision and date annotations follow the commits that touched what the artifact contains: the published
+    # files and folders, minus README files, plus the embedded corp skills. A README, a test or VERSION edit must not
+    # move them, or it would change the manifest digest of an agent whose content did not change.
+    history = ([f"{rel}/{name}" for name in RUNTIME_FILES] + [f"{rel}/{name}" for name in RUNTIME_DIRS]
+               + [f":(exclude,glob){rel}/**/{name}" for name in sorted(EXCLUDED_NAMES)]
+               + [p.relative_to(REPO_ROOT).as_posix() for p in skills.values()])
     revision = git("log", "-1", "--format=%H", "--", *history)
     created = git("log", "-1", "--format=%cI", "--", *history)
     if not revision:
