@@ -18,7 +18,7 @@ picks a release when it wants, verifies it, and configures itself from it.
 | `platform/okf/` | OKF schemas and checks: schema validation, authorization matrices, quota lint, contract-test runner |
 | `platform/supply-chain/validate_okf_bundle.py` | Bundle structure and corp policy references |
 | `platform/release/` | Release tooling: build, version gate, publish, changelog, dev-run rendering |
-| `docs/` | Documentation: the [OKF field reference](docs/okf-reference.md), and [the `UnifaiAgentBundle` resource](docs/unifaiagentbundle.md) that turns a released bundle into running agents |
+| `docs/` | Documentation: the [OKF field reference](docs/okf-reference.md), how to [publish, verify and roll back a release](docs/publish-and-verify.md), and [the `UnifaiAgentBundle` resource](docs/unifaiagentbundle.md) that turns a released bundle into running agents |
 | `VERSION` | The release version |
 | `CHANGELOG.md` | Written by the release chain on `stable` |
 
