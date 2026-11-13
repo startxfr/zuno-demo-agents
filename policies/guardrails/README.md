@@ -58,5 +58,5 @@ which observer answers:
   live-proven; `components/agent-runtime/tests/test_guardrails.py`
   (`PolicyParityWithRails`) fails if the two copies drift.
 
-See [ADR-0534](../../docs/adr/0534-integrate-trustyai-for-ai-evaluation-and-guardrails.md)
-and [ADR-0540](../../docs/adr/0540-express-guardrail-policy-as-nemo-rails-configuration.md).
+See [ADR-0534](https://github.com/startxfr/zuno-demo/blob/main/docs/adr/0534-integrate-trustyai-for-ai-evaluation-and-guardrails.md)
+and [ADR-0540](https://github.com/startxfr/zuno-demo/blob/main/docs/adr/0540-express-guardrail-policy-as-nemo-rails-configuration.md).

@@ -36,24 +36,23 @@ notes only change their version.
 ```text
 tekos/
 ├── README.md
-├── agent.okf.md         Agent index bundle (YAML frontmatter + Markdown body)
+├── VERSION               the agent's own version (bumped when published files change)
+├── agent.okf.md          Agent index bundle (YAML frontmatter + Markdown body)
 ├── tasks/
 │   ├── answer-technical-question.md   (primary task, the live chat route)
 │   ├── find-relevant-docs.md
-│   └── check-my-drive-docs.md
+│   ├── check-my-drive-docs.md
+│   └── write-code.md
 ├── prompts/
-│   └── answer-technical-question.md   System prompt, loaded by app/registry.py
-├── policies/            1 narrowing-only addendum (ADR-0513, WP-56)
-├── rag/                 2 per-domain retrieval notes (ADR-0513, WP-56)
-├── tools/               3 per-tool usage notes (ADR-0513, WP-56)
-├── deployment/          Generated ADR-0503 snapshot + README (WP-45)
-└── tests/               ADR-0504 structure (WP-46; suites fill at promotion)
+│   └── answer-technical-question.md   System prompt of the primary task
+├── policies/             1 narrowing-only addendum (web-search-scope.md)
+├── rag/                  2 per-domain retrieval notes (tech.md, project.md)
+├── tools/                3 per-tool usage notes
+└── tests/                contract/, tasks/, prompts/ (structure; suites are added at promotion)
 ```
 
-The earlier `agent.okf.yaml` (a single Kubernetes-style YAML file) was
-replaced by `agent.okf.md` plus linked per-task/per-prompt Markdown
-documents under `tasks/`/`prompts/` per ADR-0038.
-
-The runtime implementation is shared. This directory contains only
-agent-specific declarative behavior, policy, knowledge references and
-deployment configuration.
+The agent is declarative: `agent.okf.md` plus linked per-task and per-prompt Markdown
+documents. A platform that consumes a release supplies the runtime. This directory
+contains only the agent's behavior, policy and knowledge references. See the
+[OKF field reference](../../docs/okf-reference.md) and the
+[guide to add an agent](../../docs/add-an-agent.md).

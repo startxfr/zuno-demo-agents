@@ -40,7 +40,7 @@ someone chooses to build Soursage, per WP-43's own scope). Statuses:
    merge: `validate_okf_bundle.py`, `check_knowledge_refs.py`,
    `check_docs.py` all PASS).
 7. **Promote** (ADR-0502): follow
-   `platform/templates/agent/PROMOTION.md` - the named Stage-1 -> Stage-2
+   `https://github.com/startxfr/zuno-demo/blob/main/https://github.com/startxfr/zuno-demo/blob/main/platform/templates/agent/PROMOTION.md` - the named Stage-1 -> Stage-2
    checklist (scenario review, CR deploy, 75% gate, Stage-2 directory
    content, `zuno.status: active`, README update). Steps 1-6 above are
    its assumed scaffold-time baseline; for Soursage, real tasks (via

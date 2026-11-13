@@ -28,7 +28,7 @@ the evaluations skeleton (see `NEXT_STEPS.md` steps 4 and 7).
 
 **Next step:** author real tasks through the ADR-0307 template workflow
 (which also brings chart + evaluations), then
-`platform/templates/agent/PROMOTION.md`.
+`https://github.com/startxfr/zuno-demo/blob/main/https://github.com/startxfr/zuno-demo/blob/main/platform/templates/agent/PROMOTION.md`.
 
 ## Declarative structure (ADR-0038; Stage-1 identity-first shape)
 

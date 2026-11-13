@@ -21,7 +21,7 @@ empty directories retained, filled at promotion).
   hand-authored narrative security checks). Human scenario review and
   a live 75% gate run both completed 2026-08-30 (WP-35) — the suite is
   explicitly written for placeholder behavior (tiles/chat "correctly
-  blocked"), Layer 1 100% (20/20). [ADR-0532](../../docs/adr/0532-accept-knowledge-adv-as-sourceless-pending-a-replacement-adapter.md)
+  blocked"), Layer 1 100% (20/20). [ADR-0532](https://github.com/startxfr/zuno-demo/blob/main/docs/adr/0532-accept-knowledge-adv-as-sourceless-pending-a-replacement-adapter.md)
   formally accepts `knowledge.adv` staying sourceless — this is not an
   open decision anymore, it is the decided, final state, so there is
   no pending "flip to active" step.
