@@ -2,6 +2,30 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v0.14.4 - 2026-11-13
+
+Agents:
+
+- `advantage` 0.2.1
+- `arkos` 0.2.2
+- `cognos` 0.2.1
+- `comage` 0.2.1
+- `finage` 0.2.2
+- `naveo` 0.1.1
+- `soursage` 0.1.0
+- `tekos` 0.5.0
+
+Changes:
+
+- docs: documentation index, positioning of the repository as a reference to copy; VERSION 0.14.4 (zuno-demo WP-259) (f908eb3)
+- docs: add-an-agent guide and the list of files in a release artifact; fix the tekos and arkos structure sections and the dangling PROMOTION.md references (zuno-demo WP-256) (e7170d0)
+- docs: publish, verify and roll back a release - cosign verify and verify-attestation, provenance, the 32-layer limit, rollback, adaptation, signing without GitHub OIDC, SBOM (zuno-demo WP-257) (ef03a67)
+- docs: OKF field reference - agent, task, prompt, tool, rag, policy, skill and experience-client fields, narrowing rules, v0.2 to v0.3 (zuno-demo WP-255) (c7e4ba2)
+- docs: UnifaiAgentBundle page - keyless is required for v2 artifacts, artifact types table, complete list of emitted objects (1c29ab5)
+- docs: the UnifaiAgentBundle custom resource, field by field, with conditions, revocation and an example (zuno-demo WP-258) (21c821e)
+- docs: link zuno-demo ADRs and WPs by their GitHub URL (00ad990)
+- fix(scaffold): emit project zuno-apps in the generated Applications (zuno-demo WP-224) (b855f7e)
+
 ## v0.14.3 - 2026-11-07
 
 Agents:
