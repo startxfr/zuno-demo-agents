@@ -16,9 +16,14 @@ A failed step emits nothing and leaves what the last good version emitted.
 3. **Verify** the signature, before any file of the bundle is parsed (condition `Verified`).
 4. **Validate** every OKF document against the schemas and the graph shape, and check the entitlement (condition `Valid`).
 5. **Check the ceilings**: the bundle may narrow what the resource allows, never widen it (condition `WithinCeilings`).
-6. **Emit** the UnifAI objects (condition `Emitted`): one `router_direct` condition object, and per task an LLM, an agent
-   and a linear workflow. The primary task's workflow is named after the bundle. Objects of a task removed from the bundle
-   are deleted. Everything emitted is owned and labelled `unifai.startx.fr/agent-bundle: <bundle name>`.
+6. **Emit** the UnifAI objects (condition `Emitted`). Everything emitted is owned and labelled
+   `unifai.startx.fr/agent-bundle: <bundle name>`; objects of a task removed from the bundle are deleted.
+   - One `router_direct` condition object.
+   - Per task: an LLM, an agent and a linear workflow. The primary task's workflow is named after the bundle. For the
+     graph shape `plan_draft_write` the task gets the agents of its plan, draft and write stages instead of a single agent.
+   - Per task that declares `allowed_tools`, an MCP provider, when `spec.mcp` is set.
+   - A team `agent-<bundle>` when `spec.groupTeam` is true.
+   - With `spec.delegation`, an orchestrator `<task>-orchestrator` over each task and inline A2A nodes, one per target.
 
 The overall `Ready` condition is true when the whole pipeline passed.
 
@@ -37,9 +42,19 @@ Set **exactly one** of the two:
 
 | Field | Meaning |
 |---|---|
-| `publicKeyRef` | `{name, key}` of a Secret holding the PEM public key. The operator checks an ECDSA signature of the bundle's **content digest**. Use it when the artifacts are signed with a key you hold. |
-| `keyless` | The artifact manifest carries a cosign keyless signature (Fulcio certificate and Rekor entry), checked **offline**. Fields: `issuer` (the OIDC issuer of the certificate, for GitHub Actions `https://token.actions.githubusercontent.com`), `subjectRegExp` (a regular expression the workflow identity must match; **anchor it**), `trustedRootRef` (`{name, key}` of a Secret holding a Sigstore `trusted_root.json`). |
+| `publicKeyRef` | **`v1` artifacts only.** `{name, key}` of a Secret holding the PEM public key. The operator checks the `cosign sign-blob` ECDSA signature of the bundle's **content digest**, carried in the manifest annotation `zuno.okf.signature`. With a `v2` artifact the bundle is refused (`a v2 artifact is signed keyless: set spec.verify.keyless`). |
+| `keyless` | **Required for `v2` artifacts**, also accepted for a `v1` artifact whose manifest has a cosign signature. The manifest carries a cosign keyless signature (Fulcio certificate and Rekor entry), checked **offline**. Fields: `issuer` (the OIDC issuer of the certificate, for GitHub Actions `https://token.actions.githubusercontent.com`), `subjectRegExp` (a regular expression the workflow identity must match; **anchor it**), `trustedRootRef` (`{name, key}` of a Secret holding a Sigstore `trusted_root.json`). |
 
+### Artifact types
+
+The operator accepts two artifact types and ties the verification mode to the type:
+
+| Artifact type | Layer | Signature | `verify` to use |
+|---|---|---|---|
+| `application/vnd.zuno.okf.bundle.v2` (what the releases of this repository publish) | `…v2.tar+gzip` | keyless, on the manifest | `keyless` (mandatory) |
+| `application/vnd.zuno.okf.bundle.v1` | `…v1.tar+gzip` | `cosign sign-blob` of the content digest | `publicKeyRef`, or `keyless` if the manifest has a cosign signature |
+
+Each OKF document is validated against the schema of its own `okf_version` (v0.2 and v0.3 are embedded in the operator).
 The releases of this repository are signed keyless by their `publish.yml` workflow (see the README, "What a release is").
 Its identity regular expression is the one in the `cosign verify` command shown there.
 
@@ -71,7 +86,7 @@ never more.
 
 | Field | Meaning |
 |---|---|
-| `llm` | Template of the LLM emitted for every task: `type` (`openai_compatible`), `config` (`model_name`, `base_url`, `forward_user_token`, `timeout_seconds`…), `maxTokens` (1 to 8192, the generation ceiling of every task that declares none; sent as `X-Zuno-Max-Tokens`). The operator adds the agent, task, effective classification and run-id headers to `config.default_headers`. |
+| `llm` | Template of the LLM emitted for every task: `type` (`openai_compatible`), `config` (`model_name`, `base_url`, `forward_user_token`, `timeout_seconds`…), `maxTokens` (1 to 8192, the generation ceiling of every task that declares none; sent as `X-<Ns>-Max-Tokens`, see [Header namespace](#header-namespace-contractnamespace)). The operator adds the agent, task, effective classification and run-id headers to `config.default_headers`. |
 | `mcp` | Template of the MCP provider emitted per task that declares `allowed_tools`, with the same agent headers added to `config.additional_headers`. |
 | `providers` | Names of shared MCP provider objects attached to tasks that declare `allowed_tools`, sent without the agent headers. |
 | `retriever` | Name of the retriever object attached to tasks that declare `allowed_knowledge`. |
@@ -114,18 +129,10 @@ Rules that follow:
 
 ## Example
 
-The digest and the key are placeholders. The example uses a public key; for keyless, replace `publicKeyRef` as shown after it.
+The digest and the repository are placeholders. The example verifies a release of this repository (a `v2` artifact, keyless).
+The Secret `sigstore-trusted-root` holds the Sigstore `trusted_root.json` and must exist in the namespace.
 
 ```yaml
-apiVersion: v1
-kind: Secret
-metadata: {name: okf-signer}
-stringData:
-  cosign.pub: |
-    -----BEGIN PUBLIC KEY-----
-    REPLACE-WITH-YOUR-PUBLIC-KEY
-    -----END PUBLIC KEY-----
----
 apiVersion: unifai.startx.fr/v1alpha1
 kind: UnifaiAgentBundle
 metadata: {name: my-agent}
@@ -134,7 +141,10 @@ spec:
     oci:
       reference: quay.io/zuno/okf-my-agent@sha256:0000000000000000000000000000000000000000000000000000000000000000
   verify:
-    publicKeyRef: {name: okf-signer, key: cosign.pub}
+    keyless:
+      issuer: https://token.actions.githubusercontent.com
+      subjectRegExp: '^https://github\.com/<owner>/<repo>/\.github/workflows/publish\.yml@refs/tags/v'
+      trustedRootRef: {name: sigstore-trusted-root, key: trusted_root.json}
   ceilings:                       # reviewed in Git: the bundle may narrow these, never widen them
     toolCapabilities: [search_confluence, web_search]
     knowledgeDomains: [knowledge.tech]
@@ -153,14 +163,21 @@ spec:
     write-code: C2                # may only raise the bundle's level
 ```
 
-Keyless verification instead of the key:
+For a `v1` artifact signed with a key you hold, replace the `verify` block and add the key Secret:
 
 ```yaml
+apiVersion: v1
+kind: Secret
+metadata: {name: okf-signer}
+stringData:
+  cosign.pub: |
+    -----BEGIN PUBLIC KEY-----
+    REPLACE-WITH-YOUR-PUBLIC-KEY
+    -----END PUBLIC KEY-----
+---
+# in the UnifaiAgentBundle spec:
   verify:
-    keyless:
-      issuer: https://token.actions.githubusercontent.com
-      subjectRegExp: '^https://github\.com/<owner>/<repo>/\.github/workflows/publish\.yml@refs/tags/v'
-      trustedRootRef: {name: sigstore-trusted-root, key: trusted_root.json}
+    publicKeyRef: {name: okf-signer, key: cosign.pub}
 ```
 
 ## Conditions
