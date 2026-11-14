@@ -118,7 +118,8 @@ Field by field: [The `UnifaiAgentBundle` resource](unifaiagentbundle.md). What e
 
 ## Moving a legacy bundle to profile 1.0
 
-A bundle written with `okf_version: v0.2` or `v0.3` is read until 2026-12-01. To move it:
+A bundle written with `okf_version: v0.2` or `v0.3` is still read during a transition, until unifai-operator line 0.2
+(zuno-demo WP-268). To move it:
 1. Set `okf_version: "0.2"` and add `zuno.profile: "1.0"` to every document.
 2. Replace the envelope ([mapping](okf-reference.md#from-the-legacy-envelope)).
 3. Add a prompt for every task.
