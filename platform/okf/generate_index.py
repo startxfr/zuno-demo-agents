@@ -116,7 +116,10 @@ def profile_bundles() -> List[pathlib.Path]:
 
 
 def main(argv: List[str]) -> int:
-    check = "--check" in argv
+    import argparse
+    parser = argparse.ArgumentParser(description="Write or check the root index.md of every profile 1.0 bundle.")
+    parser.add_argument("--check", action="store_true", help="fail when an index.md is missing or stale; write nothing")
+    check = parser.parse_args(argv).check
     problems: List[str] = []
     bundles = profile_bundles()
     for agent_dir in bundles:
