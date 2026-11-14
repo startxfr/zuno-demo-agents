@@ -1,8 +1,11 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: task
 title: Diagnose
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/experience-clients/kagent/tasks/diagnose.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   # Read-only cluster reads, nothing else (zuno-demo ADR-0600 clauses 1 and 6): no write capability exists.
   allowed_tools:
     - k8s.resource.read

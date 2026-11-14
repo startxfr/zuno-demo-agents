@@ -1,11 +1,15 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: task
 title: Draft an architecture testimonial
+description: Draft a Design & Architecture Testimonial (DAT) from the technical documentation, Confluence and project memory, with diagrams on request.
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/arkos/tasks/draft-architecture-testimonial.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
-  # Reply cap (ADR-0544): without one, a reply ran to ~40k tokens on
-  # gpt-oss-20b on 2026-10-31. A DAT is about 4k tokens; 8192 is the schema
-  # ceiling and leaves room for a long one.
+  profile: "1.0"
+  # Reply cap (zuno-demo ADR-0544): without one, a reply once ran to about
+  # 40k tokens. A DAT is about 4k tokens; 8192 is the schema ceiling and
+  # leaves room for a long one.
   max_tokens: 8192
   allowed_tools:
     - confluence.page.read
@@ -16,42 +20,27 @@ zuno:
     - git.repository.private.list
     - git.file.write
     - git.repository.create
-    # ADR-0516: Mermaid-to-SVG rendering, offered to the drafting model as
-    # a callable tool for architecture/sequence/relationship diagrams
-    # needing precise structure or legible text. `image.generation.create`
-    # (ADR-0415, stable-diffusion-xl) was offered here too until this
-    # policy update - photorealistic image generation is now Comage-only,
-    # scoped to marketing visuals; Arkos's own "does this need an
-    # illustration" cases are all diagram-shaped in practice, so
-    # generate_diagram alone covers them.
+    # Mermaid-to-SVG rendering for architecture, sequence and relationship
+    # diagrams (zuno-demo ADR-0516). Photorealistic image generation is not
+    # declared: the visuals a DAT needs are diagrams.
     - diagram.generation.create
-    # ADR-0355/WP-074: the read-only half of the AAP audits only. Arkos
-    # writes architecture narratives, so live platform state is genuinely
-    # useful context; launching cluster automation is not something an
-    # architecture-drafting task can justify, so aap.cluster.audit is
-    # deliberately absent here (see agents/tekos/tasks/
-    # answer-technical-question.md, which does declare it).
+    # The read-only AAP audit only (zuno-demo ADR-0355): live platform state
+    # is useful context for an architecture narrative, but a drafting task
+    # has no reason to launch automation, so aap.cluster.audit is not
+    # declared.
     - aap.platform.audit
   allowed_knowledge:
     - knowledge.tech
     - knowledge.project
-  # ADR-0419: the reflect step (app/graph/arkos_nodes.py::reflect_node) is
-  # a distinct call within this same task - a self-review pass over
-  # draft_node's own output. `classification_ceiling` below is superseded
-  # by ADR-0550 decision 4 for THIS task: reflect_node now ignores it here
-  # and follows the turn's own effective_classification instead, the same
-  # placement draft_node's call already uses. Left declared (rather than
-  # removed) only because this slot still carries the reflect prompt text
-  # override; workshop-presentation's own `reflect` slot is unaffected and
-  # still honors its `classification_ceiling` as a real fixed ceiling
-  # (ADR-0416/ADR-0514).
+  # `reflect`: a self-review pass over the draft, with its own prompt
+  # (prompts/draft-architecture-testimonial--reflect.md). zuno-demo
+  # ADR-0550 decision 4: for this task the review follows the turn's
+  # classification, like the draft, rather than the C2 ceiling below; the
+  # slot stays declared because it carries the review prompt.
   prompts:
     reflect:
-      classification_ceiling: C2  # superseded for this task, see above
-  # ADR-0515: editable starters. Shown in the chat empty state, and in the
-  # composer's slash menu (agent-frontend web/src/chat/TaskPromptMenu.tsx).
-  # UX only - never parsed or enforced server-side, and picking one does NOT
-  # select this task: the chat route always runs primary_task (ADR-0342).
+      classification_ceiling: C2
+  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "Draft an architecture testimonial for a customer running OpenShift with Keycloak-backed SSO."
     - "Write a Design and Architecture Testimonial covering a GitOps delivery chain based on Argo CD."
@@ -59,70 +48,36 @@ zuno:
 
 # Draft an architecture testimonial
 
-Draft a Design & Architecture Testimonial (DAT) - a long-form document
-describing an architecture, grounded in the Tekos technical RAG corpus and
-internal Confluence content, and return it in the reply.
+Draft a Design & Architecture Testimonial (DAT): a long-form document that
+describes an architecture, grounded in the technical documentation corpus,
+internal Confluence content and the user's project memory, and return it in
+the reply. A plain factual question gets a direct, short answer instead of a
+document.
 
-This is the task Agent Runtime's `plan_draft_write` graph shape
-(`components/agent-runtime/app/graph/shapes/plan_draft_write.py`, ADR-0342)
-executes: plan (derive the document's topic/title from the request) ->
-retrieve (`knowledge.tech` + `knowledge.project`, topic-driven) -> draft
-(long-form generation) -> reflect (self-review pass, ADR-0416) -> write -
-materially different from Tekos's retrieve/tool_call/reason/respond
-shape, proving a second agent can run a genuinely different workflow on
-the same shared runtime (ADR-0326).
+The `plan_draft_write` steps:
 
-`drive.document.create`/`.update` are deliberately not in `allowed_tools`:
-no `google-workspace` MCP server is deployed anywhere in this cluster -
-not "unverified," genuinely absent. `write_node` still attempts the call
-unconditionally (no code branch skips it); MCP Gateway's ADR-0011
-intersection now denies it with a fast, deterministic 403 (this task
-never declared the capability) instead of a slow/uncertain connection
-attempt to a host that doesn't exist, and `write_node`'s existing
-`except McpClientError` fallback returns the draft as the chat reply -
-the same outcome a live Drive write failure would have produced, just
-without depending on an absent service to get there. Re-add both once a
-real `google-workspace` MCP server exists.
+1. Plan: derive the document's topic and title from the request.
+2. Retrieve: search `knowledge.tech` and `knowledge.project` by topic.
+3. Draft: write the long-form document.
+4. Reflect: review and improve the draft with the `reflect` prompt.
+5. Write: return the document in the reply.
 
-ADR-0550 decision 2/4: this task's classification is derived from the
-selected project (C1 with no project selected) rather than Arkos's own
-ambient agent seed, and the reflect step's self-review pass over the
-draft now follows that same effective classification instead of a fixed
-ceiling - a C1 turn can still reach `ovhcloud-gpt-oss-120b` (OVHcloud AI
-Endpoints) for both the draft and the reflect call, but a C2/C3 turn
-never reaches an external provider for either. Still honors any
-source-level `local_only_required` restriction that turn's retrieval may
-have set (ADR-0035) regardless of classification. This supersedes
-ADR-0416's fixed-C2 external reflection exception for this task only;
-workshop-presentation's own reflect call keeps that fixed ceiling
-unchanged.
+Tools:
 
-v0 scope, honestly: this proves the plan -> retrieve -> draft -> write
-mechanism end to end in one turn. The full v1 DAT workflow described in
-`docs/agents/arkos.md`/MEMORY.md section 8 - collect -> outline ->
-explicit user review -> generation -> review -> final Google Doc, with
-resumable intermediate state - is staged work: the explicit-review
-checkpoints between stages are a later iteration, not built by this task.
-"Optional Lucidchart diagrams" from that same original plan is superseded
-by ADR-0516's `generate_diagram` (self-hosted Mermaid rendering) - built,
-not staged; a real Lucidchart integration was never built (its
-`components/mcp-servers/lucidchart` placeholder was removed when ADR-0516
-was closed out) and this task no longer depends on it. Live Jira is deferred until its MCP
-server exists (WP-02's template, not yet scheduled for Jira); Confluence
-read/search are live today (`components/mcp-servers/confluence`, ADR-0117).
+- `confluence.page.search`, `confluence.page.read`: internal Confluence
+  pages. Their content is processed by local models only.
+- `git.repository.read`, `git.repository.list`: public repositories, on
+  GitHub and GitLab.
+- `git.repository.private.read`, `git.repository.private.list`: private and
+  internal repositories, GitLab only.
+- `git.file.write`: commits land only in public repositories, whatever the
+  request. `git.repository.create`: creates a repository, public or
+  private. Both are write tools.
+- `diagram.generation.create`: renders Mermaid source into a diagram. Any
+  request for a diagram or schema goes through it.
+- `aap.platform.audit`: a read-only summary of the Ansible Automation
+  Platform's state.
 
-ADR-0121: the six `git.*` entries add GitHub/GitLab repository access
-(`components/mcp-servers/git-forge`, ADR-0120) so Arkos can cite/reference
-real source repositories in a testimonial and, when asked, publish
-supporting material as a new or updated repository. Arkos's exact
-authorization shape:
-- `git.repository.read`/`git.repository.list` - **public** repositories,
-  both GitHub and GitLab.
-- `git.repository.private.read`/`git.repository.private.list` - private/
-  internal repositories, **GitLab only** (this server never grants
-  private GitHub access to anyone, ADR-0121).
-- `git.file.write` - commits **only ever land in public repositories**,
-  on either provider, server-enforced regardless of what Arkos requests.
-- `git.repository.create` - unrestricted by visibility (Arkos chooses).
-No `git.repository.fork`/`git.repository.delete` - unused by this task;
-`delete_repository` always refuses regardless of declaration anyway.
+Not declared: writing to Google Drive or Docs, so the document comes back
+in the reply and is not saved; Jira; repository fork and delete; image
+generation.

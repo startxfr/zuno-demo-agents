@@ -1,31 +1,31 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: rag
 title: Project memory retrieval
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/tekos/rag/project.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   domain: knowledge.project
   used_by_tasks:
     - answer-technical-question
   freshness_expectation: semantic-read
   rationale: >-
-    answer-technical-question also retrieves knowledge.project (ADR-0209)
-    so a consultant's grounded answer can draw on durable, cross-session
-    memory scoped to their current engagement (project_id), not just the
-    static documentation corpus. This domain has no ingestion schedule to
-    tune against - knowledge/project/domain.yaml's freshness objective is
-    on-write (memory becomes retrievable the moment Agent Runtime's
-    memory-extraction step runs at session end), so no staleness/top_k
-    override applies here.
+    answer-technical-question also retrieves knowledge.project (zuno-demo
+    ADR-0209), so a consultant's answer can draw on the durable,
+    cross-session memory of their current engagement (project_id), not
+    just the documentation corpus. The domain is written when a session's
+    memory is extracted, not ingested on a schedule, so no staleness or
+    top_k override applies.
 ---
 
 # Project memory retrieval
 
-Cross-session, cross-agent project memory (ADR-0209), scoped by
-`project_id` and written directly by Agent Runtime's extraction step -
-never ingested by `components/rag-ingestion`. See
-`knowledge/project/domain.yaml`.
+Cross-session, cross-agent project memory, scoped by `project_id` and
+extracted from conversations rather than ingested from a source system.
+`policies/knowledge/knowledge-policy.yaml` lists every business group for
+this domain: membership of the project decides access. This note grants
+nothing.
 
-Documentary only, same posture as `rag/tech.md`: this file narrows or
-explains what `answer-technical-question.md`'s `zuno.allowed_knowledge`
-and `policies/knowledge/knowledge-policy.yaml` already authorize - it
-grants nothing on its own.
+This bundle's `policies/web-search-scope.md` forbids putting content from
+this domain in a `web_search` query.

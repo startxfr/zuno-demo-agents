@@ -54,7 +54,7 @@ The operator accepts two artifact types and ties the verification mode to the ty
 | `application/vnd.zuno.okf.bundle.v2` (what the releases of this repository publish) | `…v2.tar+gzip` | keyless, on the manifest | `keyless` (mandatory) |
 | `application/vnd.zuno.okf.bundle.v1` | `…v1.tar+gzip` | `cosign sign-blob` of the content digest | `publicKeyRef`, or `keyless` if the manifest has a cosign signature |
 
-Each OKF document is validated against the schema of its own `okf_version` (v0.2 and v0.3 are embedded in the operator).
+Each OKF document is validated against the schema its version selects ([dispatch](okf-reference.md#versions-and-dispatch)). The operator embeds the schemas: profile 1.0 from operator v0.1.71, legacy v0.2 and v0.3 until the release after 2026-11-27. What each operator version accepts is listed on the [operator page](https://github.com/startxfr/UnifAI/blob/devel/fork/unifai-operator/docs/okf-agent-bundles.md).
 The releases of this repository are signed keyless by their `publish.yml` workflow (see the README, "What a release is").
 Its identity regular expression is the one in the `cosign verify` command shown there.
 

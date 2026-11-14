@@ -2,6 +2,30 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v1.0.0 - 2026-11-14
+
+Agents:
+
+- `advantage` 1.0.0
+- `arkos` 1.0.0
+- `cognos` 1.0.0
+- `comage` 1.0.0
+- `finage` 1.0.0
+- `naveo` 1.0.0
+- `soursage` 1.0.0
+- `tekos` 1.0.0
+
+Changes:
+
+- chore(release): VERSION 1.0.0, the Zuno OKF profile 1.0 release (zuno-demo ADR-0615, WP-267) (d4281f9)
+- fix(prompts): name tools by the capability the model is offered (zuno-demo ADR-0615 clause 10, WP-266) (45269be)
+- fix(okf): narrowing applies when any document of the bundle is v0.3 or above (zuno-demo ADR-0615 clause 6) (48fe875)
+- docs: architecture, bundle lifecycle and the profile 1.0 reference; repo-native agent scaffold (zuno-demo ADR-0615, WP-262, WP-265) (4c41332)
+- feat(agents): platform-neutral content, complete notes and a prompt for every task (zuno-demo ADR-0615, WP-265, WP-266) (614a608)
+- refactor(okf): migrate every published document to profile 1.0 (mechanical; zuno-demo ADR-0615, WP-265) (2b7c55f)
+- feat(okf): profile 1.0 schemas, version dispatch, index generator and conformance cases (zuno-demo ADR-0615, WP-262) (03e0ba8)
+- fix(release): the revision and date annotations follow the published files only (78b2472)
+
 ## v0.14.4 - 2026-11-13
 
 Agents:

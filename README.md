@@ -1,7 +1,8 @@
 # zuno-demo-agents
 
-The definitions of the Zuno agents, as OKF bundles, and the corp policies
-that bound them. Released as signed OCI artifacts on quay.io; a platform
+The definitions of the Zuno agents, as bundles of the
+[Open Knowledge Format 0.2](https://github.com/GoogleCloudPlatform/open-knowledge-format/blob/main/SPEC.md) in the
+Zuno OKF profile 1.0, and the corp policies that bound them. Released as signed OCI artifacts on quay.io; a platform
 consumes a release by pinning its digest.
 
 This repository has its own life cycle. It knows nothing about the platforms
@@ -30,13 +31,14 @@ type in [docs/publish-and-verify.md](docs/publish-and-verify.md). Start with the
 
 | Path | What it is |
 |---|---|
-| `agents/<name>/` | One agent: `agent.okf.md`, `tasks/`, `prompts/`, `tools/`, `rag/`, `policies/` (OKF v0.2 or v0.3, Markdown + YAML frontmatter), `tests/`, and its own `VERSION` |
+| `agents/<name>/` | One agent: `agent.okf.md`, `tasks/`, `prompts/`, `tools/`, `rag/`, `policies/`, `skills/` (Markdown + YAML frontmatter, profile 1.0), a generated `index.md`, `tests/`, and its own `VERSION` |
 | `experience-clients/<name>/` | One experience client (zuno-demo ADR-0592: Open WebUI, OpenClaw): `client.okf.md` (who may use the logical agent name) and `tasks/` (the tools each task allows). Not an agent: no bundle, group, prompt or `VERSION`; it ships in the corp artifact's clients layer. See `experience-clients/README.md` |
 | `policies/` | Corp policies, the ceiling for every agent: `tools/`, `knowledge/`, `quotas/`, `model-routing/`, `models/model-catalog.yaml` (the model vocabulary), `guardrails/` |
-| `platform/okf/` | OKF schemas and checks: schema validation, authorization matrices, quota lint, contract-test runner |
-| `platform/supply-chain/validate_okf_bundle.py` | Bundle structure and corp policy references |
+| `platform/okf/` | OKF schemas (the frozen profile 1.0 and the legacy v0.2/v0.3) and checks: version dispatch, schema validation, narrowing, authorization matrices, index generation, quota lint, contract-test runner |
+| `platform/supply-chain/validate_okf_bundle.py` | Bundle structure, corp policy references and the profile 1.0 rules |
+| `conformance/` | Cases every reader of the format must parse to the same result; shipped in the corp artifact |
 | `platform/release/` | Release tooling: build, version gate, publish, changelog, dev-run rendering |
-| `docs/` | Documentation: how to [add an agent](docs/add-an-agent.md), the [OKF field reference](docs/okf-reference.md), [what travels in a release](docs/bundle-files.md), how to [publish, verify and roll back a release](docs/publish-and-verify.md), and [the `UnifaiAgentBundle` resource](docs/unifaiagentbundle.md) that turns a released bundle into running agents |
+| `docs/` | Documentation: the [architecture](docs/architecture.md), [the lifecycle of a bundle](docs/bundle-lifecycle.md), how to [add an agent](docs/add-an-agent.md), the [OKF field reference](docs/okf-reference.md), [what travels in a release](docs/bundle-files.md), how to [publish, verify and roll back a release](docs/publish-and-verify.md), and [the `UnifaiAgentBundle` resource](docs/unifaiagentbundle.md) that turns a released bundle into running agents |
 | `VERSION` | The release version |
 | `CHANGELOG.md` | Written by the release chain on `stable` |
 
@@ -44,45 +46,44 @@ An agent may only narrow the corp policies, never widen them. The model
 catalog names logical models; a consuming platform binds each name to a real
 backend and refuses a release that names one it cannot serve.
 
-## OKF v0.3
+## The format: Zuno OKF profile 1.0
 
-v0.3 (zuno-demo ADR-0579) lets an agent declare, in its own bundle, what
-used to be platform-side only. Schemas: `platform/okf/schema/*-v0.3.schema.json`.
+Every document follows upstream OKF 0.2: `okf_version: "0.2"`, `type`, `title`, `description`, `resource`, and the
+optional `tags`, `sources`, `generated`, `verified`, `status` and `stale_after`. Each bundle has a generated root
+`index.md`. The Zuno part lives under one namespaced key, `zuno`, which carries `profile: "1.0"` and the agent's
+declarations:
+- tasks, model classification, access groups and display;
+- model roles (`zuno.models`), guardrail modes (`zuno.guardrails`) and limits (`zuno.limits`);
+- delegation, and skills.
 
-| Field | Where | Bounded by |
-|---|---|---|
-| `zuno.skills: [name, corp/name]` | task | the skill (`skills/<name>.md` in the agent, or `policies/skills/<name>.md` for `corp/`) may only need tools and knowledge the task allows |
-| `zuno.models: {preferred, forbidden}` | agent, task | roles of `policies/models/model-catalog.yaml`, eligible for the agent's classification |
-| `zuno.guardrails: {mode, categories}` | agent | at least the minimum mode of `policies/guardrails/guardrails-policy.yaml` for the classification |
-| `zuno.limits: {max_tokens, max_concurrent_requests, max_steps, quota_class, memory}` | agent, task | ceilings of `policies/limits/limits-policy.yaml`, classes of `policies/quotas/quota-policy.yaml` |
+The profile schemas (`platform/okf/schema/zuno-okf-profile-1.0-*.schema.json`) are frozen by `SHA256SUMS`: a change
+needs a new profile version (zuno-demo ADR-0615). Legacy documents (`okf_version: v0.2` or `v0.3`) are read until
+2026-12-01.
 
-A corp skill a task references is embedded in that agent's artifact as
-`skills/corp/<name>.md`: an agent artifact is self-contained, and changing a
-corp skill changes the digest of every agent using it (so their versions
-must be bumped, which `check-versions` enforces).
+A bundle may only narrow the corp policies: `platform/okf/check_narrowing.py` refuses any widening, naming the corp
+clause it exceeds. A corp skill a task references is embedded in that agent's artifact as `skills/corp/<name>.md`, so
+an agent artifact is self-contained.
 
-A bundle may only narrow the corp policies: `platform/okf/check_narrowing.py`
-refuses any widening, naming the corp clause it exceeds. v0.2 stays valid.
+Consumers apply what they map. Today:
+- **the ai-gateway** applies the model roles and the guardrail modes, and enforces `max_tokens`;
+- **UnifAI** applies `max_steps`, `max_tokens_per_turn` and the history settings, and passes `max_tokens` on.
 
-Bundles may be at `okf_version: v0.2` or `v0.3`, one agent at a time; each document is
-checked against the schema of its own version. Consumers read both: the ai-gateway applies
-the model roles (`zuno.models`) and guardrail modes (`zuno.guardrails`) and enforces
-`max_tokens`. UnifAI applies `max_steps`, `max_tokens_per_turn` and the history settings of
-`zuno.limits`, and passes `max_tokens` on (as the client's `max_tokens` and as a request header).
-A consumer that does not map a field gives it no runtime effect: the corp policies remain
-the authority, and a v0.3 field restates or narrows them, never changes them. The field
-reference is [docs/okf-reference.md](docs/okf-reference.md).
+A field a consumer does not map has no runtime effect there: the corp policies remain the authority.
+
+Read [docs/architecture.md](docs/architecture.md) for the whole picture, and [docs/okf-reference.md](docs/okf-reference.md)
+for every field and the deviations from upstream.
 
 ## What a release is
 
 Each release publishes, to `quay.io/zuno` by default:
 
 - `okf-<agent>`: one artifact per agent, type `application/vnd.zuno.okf.bundle.v2`,
-  one layer with the files a consumer reads (never `tests/` nor `README.md`),
+  one layer with the files a consumer reads, `index.md` included (never `tests/` nor `README.md`),
   tagged `<agent>-v<agent version>`. An agent whose files did not change
   keeps its digest.
 - `okf-corp`: type `application/vnd.zuno.okf.corp.v1`, the corp policies plus
-  an index of the agent digests, tagged `v<VERSION>`. **This is what a
+  an index of the agent digests (with each agent's `okfProfile`), the experience
+  clients and the conformance cases, tagged `v<VERSION>`. **This is what a
   platform pins.**
 
 Every artifact is signed keyless by the `publish.yml` workflow of this
@@ -99,8 +100,11 @@ cosign verify quay.io/zuno/okf-corp@sha256:<digest> \
 
 ```sh
 pip install pyyaml jsonschema
+python3 platform/okf/build_profile_schemas.py --check
 python3 platform/okf/validate_okf_schema.py
+python3 platform/okf/generate_index.py               # regenerate after any document change (--check in CI)
 python3 platform/supply-chain/validate_okf_bundle.py
+python3 platform/okf/check_narrowing.py
 python3 platform/okf/validate_quota_policy.py
 python3 platform/okf/generate_authorization_matrix.py --all    # regenerate after any task/policy change
 python3 platform/okf/run_agent_contract_tests.py

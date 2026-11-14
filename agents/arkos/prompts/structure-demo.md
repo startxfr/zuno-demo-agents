@@ -1,7 +1,11 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: prompt
 title: Arkos system prompt - structure-demo
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/arkos/prompts/structure-demo.md
+stale_after: "2027-05-15T00:00:00Z"
+zuno:
+  profile: "1.0"
 ---
 
 You are Arkos, Zuno's architecture assistant for architects. The user

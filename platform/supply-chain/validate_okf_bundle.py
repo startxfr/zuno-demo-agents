@@ -1,70 +1,64 @@
 #!/usr/bin/env python3
-"""ADR-0106 OKF bundle validation: schema/structure validity plus policy
-reference validity, independent of signature verification
-(sign_okf_bundle.py). Deliberately duplicates the small amount of OKF
-frontmatter parsing `components/agent-runtime/app/registry.py` and
-`components/mcp-gateway/app/agent_declarations.py` already do - this
-repository's established convention (see components/agent-bff/README.md's
-"Why standard library only") of duplicating small, well-specified parsing
-logic across independently deployed services/tools rather than sharing a
-module.
+"""Bundle structure and corp policy references, independent of signature verification.
 
-Three checks per bundle:
+Checks per agent bundle (agents/<name>/) and experience client (experience-clients/<name>/):
 
-1. **Schema validity** - `agent.okf.md` has `okf_version: v0.2`,
-   `type: agent`, `zuno.name` matches the directory name; every task it
+1. **Structure.** The version of `agent.okf.md` follows zuno-demo ADR-0615 clause 5 (profile 1.0, or legacy
+   v0.2/v0.3 until 2026-12-01). It has `type: agent`, and `zuno.name` matches the directory name. Every task it
    declares has a `tasks/<task>.md` file with `type: task`.
-2. **Policy validity** - every tool a task declares in `zuno.allowed_tools`
-   resolves against `policies/tools/tool-policy.yaml` (either its legacy
-   `tool` name or its ADR-0116 canonical `capability` name - the same
-   equivalence WP-01's binding registry/policy evaluation uses, so a
-   bundle written with either naming style validates identically).
-   `policies/knowledge/knowledge-policy.yaml` (ADR-0202/0203, not yet
-   built) is feature-detected: validated the same way once it exists,
-   silently skipped until then - this script must not fail on a policy
-   layer this repository hasn't built yet.
-3. **Content-note cross-reference validity** (ADR-0513) - every `*.md`
-   under a bundle's `rag/`, `tools/`, `policies/` has the matching
-   `okf_version`/`type`, and its cross-reference back to the bundle's own
-   tasks resolves: a `rag/<domain>.md`'s `used_by_tasks` must each declare
-   `domain` in their own `zuno.allowed_knowledge`; a `tools/<capability>.md`'s
-   `used_by_tasks` must each declare `capability` in their own
-   `zuno.allowed_tools`; a `policies/<name>.md`'s `applies_to.tasks` must
-   each exist in the bundle, and any `applies_to.tools`/`applies_to.knowledge`
-   must each be declared by at least one of those tasks. These three
-   directories are documentation only (never an enforcement input, ADR-0513
-   Security considerations) - this check only catches drift between the
-   note and the tasks it claims to describe, the same spirit as checks 1-2.
+2. **Policy references.** Every tool a task declares in `zuno.allowed_tools` is a name of
+   `policies/tools/tool-policy.yaml` (its `tool` or `capability` name). Every knowledge domain is a domain of
+   `policies/knowledge/knowledge-policy.yaml`.
+3. **Content notes.** Every `*.md` under `rag/`, `tools/` and `policies/` has the right `type`, and its
+   cross-reference back to the bundle's tasks resolves. These notes are documentation: they never grant anything.
+4. **Profile 1.0 rules** (ADR-0615 clauses 3, 4, 9, 10), for a bundle whose agent is on profile 1.0:
+   - one profile per bundle;
+   - `resource` is the document's URL on the main branch;
+   - published text is platform-neutral;
+   - a root `index.md` exists (`generate_index.py --check` checks its content);
+   - every task has a prompt;
+   - the upstream `status` agrees with `zuno.status`;
+   - a tool note's `capability` is in the tool policy;
+   - `used_by_tasks` lists every task that declares the item;
+   - a prompt or a skill names a tool by its `capability`, the name the model is offered, never by a legacy
+     `tool` name.
 
-Fails closed: an unreadable/malformed bundle, an unknown tool reference, or
-a task file that doesn't exist are all reported as findings, never
-silently ignored.
+   A `stale_after` in the past is a warning, never a failure.
+
+Fails closed: an unreadable bundle, an unknown reference or a missing task file is a finding.
 
 Run from the repository root:
 
     python3 platform/supply-chain/validate_okf_bundle.py [agents/<name> ...]
-
-With no arguments, validates every `agents/*/` bundle.
 """
 from __future__ import annotations
 
 import pathlib
+import re
 import sys
 from dataclasses import dataclass
-from typing import Dict, List, Set
+from typing import Dict, List, Optional, Set
 
 import yaml
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "platform" / "okf"))
+sys.path.insert(0, str(REPO_ROOT / "platform" / "release"))
+from okf_profile import UnsupportedVersion, document_version, is_profile  # noqa: E402
+import okf_release  # noqa: E402
+
 AGENTS_DIR = REPO_ROOT / "agents"
 CLIENTS_DIR = REPO_ROOT / "experience-clients"
 TOOL_POLICY_PATH = REPO_ROOT / "policies" / "tools" / "tool-policy.yaml"
 KNOWLEDGE_POLICY_PATH = REPO_ROOT / "policies" / "knowledge" / "knowledge-policy.yaml"
 
 
-# zuno-demo ADR-0579 clause 6: v0.2 and v0.3 documents may sit side by side in one bundle (the
-# schemas and the operator accept the mix), so a v0.3 agent can keep or move its content notes.
-NOTE_OKF_VERSIONS = ("v0.2", "v0.3")
+# Profile 1.0 rules (zuno-demo ADR-0615 clauses 4, 9 and 10). A legacy (v0.2/v0.3) bundle is checked as before.
+RESOURCE_BASE = "https://github.com/startxfr/zuno-demo-agents/blob/main/"
+# Published text names no component, path or version of one particular platform (ADR-0615 clause 10).
+PLATFORM_SPECIFIC = re.compile(r"Agent Runtime|agent-runtime|agent-frontend|agent-bff|components/|evaluations/|"
+                               r"gitops/|MEMORY\.md|docs/agents|platform/ai-gateway|\bv0\b")
+STATUS_FOR = {"active": {"stable"}, "placeholder": {"draft"}, "deprecated": {"deprecated"}, "retired": {"deprecated"}}
 
 
 @dataclass
@@ -97,6 +91,17 @@ def _known_tool_names() -> Set[str]:
         if "capability" in entry:
             names.add(entry["capability"])
     return names
+
+
+def _legacy_tool_names() -> Dict[str, str]:
+    """Legacy `tool` name -> its `capability`, for every entry of the tool policy where the two differ. The runtime
+    offers a tool to the model under its capability, so a prompt that names the legacy name names a tool the
+    model never sees."""
+    if not TOOL_POLICY_PATH.is_file():
+        return {}
+    doc = yaml.safe_load(TOOL_POLICY_PATH.read_text()) or {}
+    return {e["tool"]: e["capability"] for e in doc.get("tools", [])
+            if e.get("tool") and e.get("capability") and e["tool"] != e["capability"]}
 
 
 def tool_policy_findings(path: pathlib.Path = TOOL_POLICY_PATH) -> List["Finding"]:
@@ -153,8 +158,9 @@ def _validate_content_notes(bundle_dir: pathlib.Path, label: str, declared_tasks
         except ValueError as exc:
             findings.append(Finding(label, str(exc)))
             continue
-        if fm.get("okf_version") not in NOTE_OKF_VERSIONS or fm.get("type") != "rag":
-            findings.append(Finding(label, f"{rel}: expected okf_version v0.2 or v0.3 and type rag"))
+        if not _version_ok(fm, findings, label, rel) or fm.get("type") != "rag":
+            if fm.get("type") != "rag":
+                findings.append(Finding(label, f"{rel}: expected type rag"))
             continue
         zuno = fm.get("zuno") or {}
         domain = zuno.get("domain")
@@ -171,8 +177,9 @@ def _validate_content_notes(bundle_dir: pathlib.Path, label: str, declared_tasks
         except ValueError as exc:
             findings.append(Finding(label, str(exc)))
             continue
-        if fm.get("okf_version") not in NOTE_OKF_VERSIONS or fm.get("type") != "tool":
-            findings.append(Finding(label, f"{rel}: expected okf_version v0.2 or v0.3 and type tool"))
+        if not _version_ok(fm, findings, label, rel) or fm.get("type") != "tool":
+            if fm.get("type") != "tool":
+                findings.append(Finding(label, f"{rel}: expected type tool"))
             continue
         zuno = fm.get("zuno") or {}
         capability = zuno.get("capability")
@@ -189,8 +196,9 @@ def _validate_content_notes(bundle_dir: pathlib.Path, label: str, declared_tasks
         except ValueError as exc:
             findings.append(Finding(label, str(exc)))
             continue
-        if fm.get("okf_version") not in NOTE_OKF_VERSIONS or fm.get("type") != "policy":
-            findings.append(Finding(label, f"{rel}: expected okf_version v0.2 or v0.3 and type policy"))
+        if not _version_ok(fm, findings, label, rel) or fm.get("type") != "policy":
+            if fm.get("type") != "policy":
+                findings.append(Finding(label, f"{rel}: expected type policy"))
             continue
         zuno = fm.get("zuno") or {}
         applies_to = zuno.get("applies_to") or {}
@@ -214,6 +222,92 @@ def _validate_content_notes(bundle_dir: pathlib.Path, label: str, declared_tasks
     return findings
 
 
+def _version_ok(fm: Dict, findings: List["Finding"], label: str, rel: str) -> Optional[str]:
+    """The document's profile version, or None after recording why it is unsupported."""
+    try:
+        return document_version(fm)
+    except UnsupportedVersion as exc:
+        findings.append(Finding(label, f"{rel}: {exc}"))
+        return None
+
+
+WARNINGS: List[str] = []
+
+
+def _profile_documents(label: str, paths: List[pathlib.Path]) -> List["Finding"]:
+    """One profile per bundle, the canonical `resource`, platform-neutral text; `stale_after` only warns."""
+    import datetime
+    findings: List[Finding] = []
+    now = datetime.datetime.now(datetime.timezone.utc)
+    for path in paths:
+        rel = path.relative_to(REPO_ROOT).as_posix()
+        try:
+            fm = _split_frontmatter(path)
+        except ValueError as exc:
+            findings.append(Finding(label, str(exc)))
+            continue
+        version = _version_ok(fm, findings, label, rel)
+        if version is not None and not is_profile(version):
+            findings.append(Finding(label, f"{rel}: one profile per bundle - this document is legacy {version}"))
+        expected = RESOURCE_BASE + rel
+        if fm.get("resource") != expected:
+            findings.append(Finding(label, f"{rel}: resource must be {expected}, got {fm.get('resource')!r}"))
+        hit = PLATFORM_SPECIFIC.search(path.read_text(encoding="utf-8"))
+        if hit:
+            findings.append(Finding(label, f"{rel}: names {hit.group(0)!r}, which belongs to one platform "
+                                           f"(published text must be platform-neutral, ADR-0615 clause 10)"))
+        stale = fm.get("stale_after")
+        if isinstance(stale, str):
+            try:
+                if datetime.datetime.fromisoformat(stale.replace("Z", "+00:00")) < now:
+                    WARNINGS.append(f"{rel}: stale_after {stale} is past - review the document")
+            except ValueError:
+                pass  # the schema reports the format
+    return findings
+
+
+def _profile_rules(bundle_dir: pathlib.Path, label: str, agent: Dict,
+                   declared_tasks: Dict[str, Dict[str, Set[str]]], known_tools: Set[str]) -> List["Finding"]:
+    """Rules a profile 1.0 bundle adds (ADR-0615 clauses 3, 4, 9, 10)."""
+    findings: List[Finding] = []
+    docs = [p for p in okf_release.runtime_files(bundle_dir) if p.suffix == ".md" and p.name != "index.md"]
+    findings += _profile_documents(label, docs)
+    if not (bundle_dir / "index.md").is_file():
+        findings.append(Finding(label, "index.md is missing: run python3 platform/okf/generate_index.py"))
+    zuno = agent.get("zuno") or {}
+    status = agent.get("status")
+    if status is not None and status not in STATUS_FOR.get(zuno.get("status"), set()):
+        findings.append(Finding(label, f"agent.okf.md: status {status!r} disagrees with zuno.status "
+                                       f"{zuno.get('status')!r}"))
+    for task in declared_tasks:
+        if not (bundle_dir / "prompts" / f"{task}.md").is_file():
+            findings.append(Finding(label, f"task {task!r} has no prompts/{task}.md (every task has a prompt)"))
+    legacy = _legacy_tool_names()
+    for doc in docs:
+        rel = doc.relative_to(bundle_dir).as_posix()
+        if not rel.startswith(("prompts/", "skills/")):
+            continue
+        for name in sorted(set(re.findall(r"`([A-Za-z0-9_.]+)`", doc.read_text(encoding="utf-8"))) & set(legacy)):
+            findings.append(Finding(label, f"{rel}: names the tool {name!r}; the model is offered it as "
+                                           f"{legacy[name]!r}, write that"))
+    # Notes: a known capability, and used_by_tasks lists every task that declares it (both directions).
+    for kind, key, field in (("tools", "capability", "tools"), ("rag", "domain", "knowledge")):
+        for note in _content_notes(bundle_dir / kind):
+            try:
+                nz = _split_frontmatter(note).get("zuno") or {}
+            except ValueError:
+                continue
+            item = nz.get(key)
+            if kind == "tools" and known_tools and item not in known_tools:
+                findings.append(Finding(label, f"{kind}/{note.name}: capability {item!r} is not in tool-policy.yaml"))
+            users = {t for t, d in declared_tasks.items() if item in d[field]}
+            missing = sorted(users - set(nz.get("used_by_tasks") or []))
+            if missing:
+                findings.append(Finding(label, f"{kind}/{note.name}: used_by_tasks misses {missing}, which declare "
+                                               f"{item!r}"))
+    return findings
+
+
 def validate_bundle(bundle_dir: pathlib.Path, known_tools: Set[str], known_domains: Set[str]) -> List[Finding]:
     label = str(bundle_dir.relative_to(REPO_ROOT))
     findings: List[Finding] = []
@@ -224,11 +318,9 @@ def validate_bundle(bundle_dir: pathlib.Path, known_tools: Set[str], known_domai
     except ValueError as exc:
         return [Finding(label, str(exc))]
 
-    # v0.3 (zuno-demo ADR-0579) adds skills, model roles, guardrails and
-    # limits; platform/okf/check_narrowing.py checks them against the corp
-    # policies. v0.2 stays valid for the v0.12 band.
-    if frontmatter.get("okf_version") not in ("v0.2", "v0.3"):
-        findings.append(Finding(label, f"okf_version must be v0.2 or v0.3, got {frontmatter.get('okf_version')!r}"))
+    # Profile 1.0 (zuno-demo ADR-0615), or legacy v0.2/v0.3 until 2026-12-01.
+    # platform/okf/check_narrowing.py checks the v0.3-and-above fields against the corp policies.
+    version = _version_ok(frontmatter, findings, label, "agent.okf.md")
     if frontmatter.get("type") != "agent":
         findings.append(Finding(label, f"type must be 'agent', got {frontmatter.get('type')!r}"))
 
@@ -267,6 +359,8 @@ def validate_bundle(bundle_dir: pathlib.Path, known_tools: Set[str], known_domai
                 )
 
     findings.extend(_validate_content_notes(bundle_dir, label, declared_tasks))
+    if version and is_profile(version):
+        findings.extend(_profile_rules(bundle_dir, label, frontmatter, declared_tasks, known_tools))
 
     return findings
 
@@ -301,8 +395,12 @@ def validate_client(client_dir: pathlib.Path, known_tools: Set[str], agent_names
     except ValueError as exc:
         return [Finding(label, str(exc))]
 
-    if frontmatter.get("okf_version") != "v0.3":
-        findings.append(Finding(label, f"okf_version must be v0.3, got {frontmatter.get('okf_version')!r}"))
+    client_version = _version_ok(frontmatter, findings, label, "client.okf.md")
+    if client_version == "v0.2":
+        findings.append(Finding(label, "an experience client needs OKF v0.3 or profile 1.0, got v0.2"))
+    if client_version and is_profile(client_version):
+        docs = [client_dir / "client.okf.md"] + sorted((client_dir / "tasks").glob("*.md"))
+        findings.extend(_profile_documents(label, [d for d in docs if d.name not in ("README.md",)]))
     if frontmatter.get("type") != "experience-client":
         findings.append(Finding(label, f"type must be 'experience-client', got {frontmatter.get('type')!r}"))
 
@@ -359,6 +457,8 @@ def main() -> int:
         all_findings.extend(validate_client(client_dir, known_tools, agent_names))
 
     print(f"Validated {len(bundle_dirs)} OKF bundle(s) under agents/ and {len(client_dirs)} under experience-clients/.")
+    for warning in WARNINGS:
+        print(f"  ! warning: {warning}")
     if not all_findings:
         print("\nRESULT: PASS - every bundle is structurally valid and every policy reference resolves.")
         return 0

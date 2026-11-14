@@ -1,21 +1,18 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: agent
 title: Arkos
 description: >-
-  Architecture assistant for architects. Helps produce Design & Architecture
-  Testimonials (DAT) and prepare Odyssey architecture workshops, drawing on
-  the same technical RAG/Confluence knowledge base as Tekos plus Google
-  Drive/Docs and Mermaid diagram generation.
-provenance:
-  maintainer: Zuno Demo architecture team
-  repository: zuno-demo
-verification:
-  status: unverified
-freshness:
-  last_reviewed: "2026-08-05"
-sources: []
+  Architecture assistant for architects. Drafts Design & Architecture
+  Testimonials (DAT) and Odyssey architecture workshop presentations from the
+  technical documentation corpus, Confluence and project memory, with Git
+  repository access and Mermaid diagram generation. Also structures customer
+  demos and writes code.
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/arkos/agent.okf.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
+  maintainer: Zuno Demo architecture team
   name: arkos
   status: active
   graph_shape: plan_draft_write
@@ -26,50 +23,13 @@ zuno:
     - structure-demo
     - write-code
   memory:
-    # ADR-0215: Arkos is C3/local-only (see model.preferred_classification
-    # below), so its history-carrying model calls route to a local model
-    # only. Its two reflexional tasks lead gpt-oss-20b and structure-demo
-    # leads qwen3.6-27b-instruct, most of which serve 32768 - but
-    # qwen3.5-9b (the fleet default, ADR-0531, and the LAST entry in every
-    # one of this agent's C3 fallback chains below) serves only 8192, so a
-    # generous 6000-token budget here is not automatically safe on every
-    # reachable path.
-    #
-    # FIXED by ADR-0544 (2026-09-03): app/graph/prompt_budget.py clamps
-    # the WHOLE assembled prompt (system + history + project context + RAG
-    # context) against the fleet's real narrowest reachable window at
-    # assembly time - this declared 6000 is never rewritten, only bounded
-    # on the turns that actually need it. The measured numbers that
-    # exposed the bug are kept below as the record of what was wrong and
-    # as tests/test_prompt_clamp.py's regression fixture - not stale, the
-    # arithmetic behind the fix.
-    #
-    # Live rag-tech corpus, measured 2026-09-03: 68,962 chunks, median
-    # 1,247 chars (~312 tokens at the char/4 heuristic), p95 1,796 (~449).
-    # Arkos does not declare rag.top_k, so it retrieves the default 5.
-    #
-    #   draft-architecture-testimonial / workshop-presentation
-    #     (allowed_knowledge: knowledge.tech + knowledge.project)
-    #     6000 history + ~420 system prompt + up to 1200 project context
-    #     (PROJECT_CONTEXT_TOKEN_BUDGET) + 5 chunks
-    #     = ~9,180 tokens at median chunk size, ~9,865 at p95.
-    #     Both OVERFLOWED 8192 before a single output token - now clamped:
-    #     project context sheds first (to 0), then history, RAG kept
-    #     whole (it was retrieved for THIS question, so it gives way last).
-    #
-    #   structure-demo / write-code (allowed_knowledge: [])
-    #     6000 + ~214 + 1200 = ~7,414 against the raw 8192 window - fits,
-    #     but NOT once an output reserve is held back for the reply itself
-    #     (ADR-0544's prompt_token_ceiling): 8192 minus structure-demo's
-    #     own declared max_tokens (1536, agents/arkos/tasks/structure-
-    #     demo.md) leaves a 6656 ceiling, so even this pair now sheds a
-    #     few hundred tokens of project context. Caught only by actually
-    #     running the clamp against these numbers while building it - an
-    #     easy thing to get wrong by eyeballing the raw window alone.
-    #
-    # It is the LAST candidate in the chain, so full clamping only binds
-    # when gpt-oss-20b, the 27B and wesh have all already failed - the
-    # exact scenario the fallback exists for.
+    # Arkos is C3, so its history-carrying calls go to local models only. The
+    # narrowest local model in its fallback chains serves an 8192-token
+    # window, so 6000 tokens of history plus the system prompt, project
+    # context and retrieved passages can overflow it: a consumer must bound
+    # the assembled prompt to the serving model's window, shedding project
+    # context first, then history, and keeping the retrieved passages
+    # (zuno-demo ADR-0544).
     history:
       enabled: true
       max_turns: 6
@@ -77,11 +37,11 @@ zuno:
   model:
     preferred_classification: C3
     notes: >-
-      Placeholder pending v1 build; C3 anticipated because sovereign-marked
-      DAT workflows are local-model-only per MEMORY.md section 5.
-  # OKF v0.3 (ADR-0401, ADR-0406): Arkos may ask Tekos for a technical answer while it
-  # drafts. Read-only delegation through the zuno a2a-gateway, one hop. Arkos is already
-  # C3/local-only (ADR-0215), so the static C3 raise of a delegating task changes nothing.
+      C3 because sovereign-marked DAT workflows must run on local models
+      only.
+  # Arkos may ask Tekos for a technical answer while it drafts: read-only
+  # delegation, one hop (zuno-demo ADR-0401). Arkos is already C3, so the C3
+  # raise of a delegating task changes nothing.
   delegation:
     targets:
       - agent: tekos
@@ -90,12 +50,9 @@ zuno:
     delegation:
       max_depth: 1
   access:
-    # ADR-0040: agent entitlement group, orthogonal to the `consultant`
-    # business role that governs tool/data permissions inside Arkos
-    # (ADR-0349: architects are the consultant tier - the
-    # confluence-archi-* skill subgroups live under /consultant - so
-    # Arkos's audience moved from board to consultant; `board` means
-    # Direction only).
+    # Entitlement group (zuno-demo ADR-0040). Inside Arkos, the business
+    # role that gates tools and knowledge is `consultant`: architects are
+    # the consultant tier (zuno-demo ADR-0349).
     groups:
       - agent_arkos
   ui:
@@ -107,43 +64,37 @@ zuno:
 
 # Arkos
 
-ADR-0326 (WP-31): Arkos's real OKF task bundle, graph shape and deployment
-surface merged with `status: placeholder` until the operator confirmed
-Arkos was ready to go live (WP-31's own Status-updates section; ADR-0326's
-"moves placeholder -> active only after the full common completion
-pattern passes"). WP-11 (2026-08-21) flips `status` to `active` at the
-operator's explicit direction: the portal now renders Arkos's tile as
-enabled and Agent Runtime's generic dispatch serves
-`/v1/agents/arkos/chat` instead of 404ing it. The two remaining
-`platform/templates/agent/PROMOTION.md` steps (a formal 20-scenario human
-review sign-off and a live `run_acceptance_gate.py` run) had not
-completed as separate checkpoints at flip time - see
-`evaluations/arkos/README.md` for that gate's status. No dedicated
-namespace is reserved (ADR-0329, supersedes ADR-0023): Arkos's
-frontend/BFF deploy into the shared `zuno-ai-run` namespace, same as
-Tekos.
+Arkos is the architecture assistant for architects. It drafts Design &
+Architecture Testimonials (DAT) and Odyssey architecture workshop
+presentations, structures customer demos and writes code. Status: active.
 
-`zuno.graph_shape: plan_draft_write` (ADR-0342) names Agent Runtime's
-LangGraph workflow module for Arkos's chat turns - plan, retrieve
-(`knowledge.tech` + `knowledge.project`), draft, write (Drive, currently
-undeclared - see each task's own file) - structurally distinct from
-Tekos's `retrieve_reason_respond` shape,
-proving the graph-shape mechanism WP-30 built generalizes past one
-hardcoded workflow. Arkos has no agent-level `zuno.allowed_knowledge`
-field either (ADR-0203), for the same reason Tekos doesn't: its knowledge
-ceiling is the union of its one task's own `zuno.allowed_knowledge` -
-today `[knowledge.tech, knowledge.project]`.
+## Workflow
 
-Access group is `agent_arkos` (ADR-0040 entitlement dimension, orthogonal
-to the `consultant` business role that governs tool/data permissions
-inside Arkos once active - see `policies/tools/tool-policy.yaml`'s
-`drive.document.*`/`confluence.page.*` entries, both of which list
-`consultant`). ADR-0349 moved Arkos's audience from board to the
-consultant architect tier (the `confluence-archi-*` skill subgroups live
-under `/consultant`; `board` means Direction only) - DATs are still
-*reviewed* at board level as a business process, but the role gating an
-already-entitled Arkos session is `consultant`, matching every other
-agent's ADR-0040 dimension split.
+`zuno.graph_shape: plan_draft_write`. Each turn first plans the deliverable,
+then takes one of two paths:
+
+- **Document path** (`draft-architecture-testimonial`, the primary task, and
+  `workshop-presentation`): retrieve from `knowledge.tech` and
+  `knowledge.project` by topic, draft, review the draft with the task's
+  `reflect` prompt, and return the document in the reply. A request about a
+  workshop or Odyssey selects `workshop-presentation`.
+- **Direct path** (`structure-demo`, `write-code`): answer from the user's
+  message alone, with no retrieval and no tool call.
+
+## Authorization
+
+There is no agent-level `allowed_knowledge`: the ceiling is the union of the
+tasks' declarations. The two document tasks declare Confluence read and
+search, six Git repository capabilities, diagram generation and the
+read-only AAP platform audit, and the domains `knowledge.tech` and
+`knowledge.project`. `structure-demo` and `write-code` declare none.
+
+Arkos may delegate one read-only hop to `tekos` / `answer-technical-question`.
+
+The entitlement group is `agent_arkos`. Inside Arkos, the `consultant`
+business role gates tools and knowledge (`policies/tools/tool-policy.yaml`,
+`policies/knowledge/knowledge-policy.yaml`). The matrix below restates the
+enforced intersection and the effective model chain per task.
 
 <!-- BEGIN GENERATED AUTHORIZATION MATRIX (ADR-0503) - do not edit; regenerate with: python3 platform/okf/generate_authorization_matrix.py -->
 
@@ -187,7 +138,7 @@ Effective per-task model chain (ADR-0021/ADR-0303/ADR-0412), resolved from `poli
 | `draft-architecture-testimonial` (primary; prompt: `prompts/draft-architecture-testimonial.md`) (in a classified project) | `C1/C2/C3` | `local-gpt-oss-maas` → `gpt-oss-20b` (reasoning) | `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh`, `local-qwen35-maas`, `local-qwen35` | — | `policies/model-routing/model-routing-policy.yaml` |
 | `workshop-presentation` (prompt: `prompts/workshop-presentation.md`) (in a classified project) | `C1/C2/C3` | `local-gpt-oss-maas` → `gpt-oss-20b` (reasoning) | `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh`, `local-qwen35-maas`, `local-qwen35` | — | `policies/model-routing/model-routing-policy.yaml` |
 | `structure-demo` (prompt: `prompts/structure-demo.md`) | `C3` | `local-maas` → `qwen3.6-27b-instruct` (quality) | `local`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-wesh-maas`, `local-wesh`, `local-qwen35-maas`, `local-qwen35` | — | `policies/model-routing/model-routing-policy.yaml` |
-| `write-code` | `C3` | (none eligible) | — | — | `policies/model-routing/model-routing-policy.yaml` |
+| `write-code` (prompt: `prompts/write-code.md`) | `C3` | (none eligible) | — | — | `policies/model-routing/model-routing-policy.yaml` |
 
 **Available models** (ADR-0419, generated): the union of every model reachable by any task or prompt slot above, at any classification, each with the model id it serves and that model's role - `local-maas` → `qwen3.6-27b-instruct` (quality), `local` → `qwen3.6-27b-instruct` (quality), `local-gpt-oss-maas` → `gpt-oss-20b` (reasoning), `local-gpt-oss` → `gpt-oss-20b` (reasoning), `local-wesh-maas` → `qwen3.5-9b-wesh` (specialized), `local-wesh` → `qwen3.5-9b-wesh` (specialized), `local-qwen35-maas` → `qwen3.5-9b` (default), `local-qwen35` → `qwen3.5-9b` (default).
 

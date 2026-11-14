@@ -1,8 +1,11 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: policy
 title: Web search fallback scope
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/tekos/policies/web-search-scope.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   narrows_platform_policy: true
   constraint_type: data_handling_addendum
   applies_to:
@@ -13,32 +16,27 @@ zuno:
   rationale: >-
     web_search is answer-technical-question's fallback when the indexed
     knowledge.tech/knowledge.project corpus and search_confluence's live
-    read (ADR-0205) do not ground an answer. Unlike those two paths, its
-    results carry no classification/ACL metadata on the way back, and the
-    query text itself leaves the platform boundary to an external search
-    provider. This agent additionally restricts web_search queries to
-    public technical topics only: no customer name, project_id, or other
-    content derived from the knowledge.project domain may be included in a
-    web_search query, even though the task's declared
-    preferred_classification (C1)
-    would otherwise permit the call. This is strictly narrower than what
-    policies/tools/tool-policy.yaml already permits for web_search - it
-    grants nothing web_search's existing policy entry doesn't already
-    allow.
+    read do not ground an answer. Unlike those two paths, its results carry
+    no classification or ACL metadata, and the query text itself leaves the
+    platform for an external search provider. This agent therefore
+    restricts web_search queries to public technical topics: no customer
+    name, project_id or other content derived from the knowledge.project
+    domain may appear in a web_search query, even though the task's C1
+    classification would otherwise permit the call. This is strictly
+    narrower than what policies/tools/tool-policy.yaml permits for
+    web_search; it grants nothing.
   enforcement:
     mechanism: none-yet
     notes: >-
-      Followed by prompt convention today (see
-      prompts/answer-technical-question.md), not code-enforced. A future
-      MCP Gateway request-content filter on the web_search binding, or an
-      Agent Runtime guard before the tool call, would close this gap -
-      recorded here as a documented gap rather than a false claim of
-      enforcement (ADR-0513).
+      Stated as an instruction in prompts/answer-technical-question.md;
+      no code checks the query. A request-content filter on the web_search
+      call would enforce it. Recorded as a known gap rather than a false
+      claim of enforcement (zuno-demo ADR-0513).
 ---
 
 # Web search fallback scope
 
-Additional, agent-specific constraint on Tekos's `web_search` fallback.
-Narrows only - see `zuno.narrows_platform_policy` above and
-`policies/tools/tool-policy.yaml`'s own `web_search` entry for the
-platform floor this constraint sits inside of.
+Additional, agent-specific constraint on Tekos's `web_search` fallback: a
+query carries public technical terms only, never customer or project data.
+It narrows only; `policies/tools/tool-policy.yaml`'s `web_search` entry is
+the platform floor it sits inside.

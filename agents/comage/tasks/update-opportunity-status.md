@@ -1,14 +1,15 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: task
 title: Update opportunity status
+description: Change the stage, amount or close date of an existing Salesforce opportunity through the live update tool.
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/comage/tasks/update-opportunity-status.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   allowed_tools:
     - salesforce.opportunity.update
-  # ADR-0515: editable starters. Shown in the chat empty state, and in the
-  # composer's slash menu (agent-frontend web/src/chat/TaskPromptMenu.tsx).
-  # UX only - never parsed or enforced server-side, and picking one does NOT
-  # select this task: the chat route always runs primary_task (ADR-0342).
+  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "Move the Startx renewal opportunity to Negotiation."
     - "Update the close date on this opportunity to the end of next month."
@@ -17,12 +18,9 @@ zuno:
 # Update opportunity status
 
 Write a change (stage, amount, close date) to an existing Salesforce
-opportunity via the live `salesforce.opportunity.update` capability.
-ADR-0205: RAG/`knowledge.sales` stays write-free - a mutation always goes
-through a live tool capability, never through indexed retrieval.
+opportunity through the live `salesforce.opportunity.update` tool. This is
+the agent's only write task.
 
-Declared for the OKF catalog (ADR-0038); no distinct Agent Runtime route
-exists for it yet in v0 - the single `POST /v1/agents/comage/chat`
-endpoint only executes `check-deal-status`. Wiring a dedicated route for
-this task is v1 scope, matching Tekos's own `find-relevant-docs`/
-`check-my-drive-docs` catalog-only tasks.
+Indexed knowledge stays write-free (zuno-demo ADR-0205): a change always goes
+through the live tool, never through retrieval. The task declares no
+knowledge domain and no read tool.

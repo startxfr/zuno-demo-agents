@@ -1,29 +1,17 @@
-# Finage Contract Tests (ADR-0504)
+# Finage contract tests
 
-Per-agent, repo-side, static contract suites - run by
-`python3 platform/okf/run_agent_contract_tests.py` from the repository
-root (a blocking lint-chain step; test files are `test_*.py` under the
-three subdirectories, each executable standalone).
+Static, repository-only suites for this agent: no cluster, no credentials, no model calls. Each `test_*.py` runs as a
+plain script; `python3 platform/okf/run_agent_contract_tests.py` runs them all from the repository root. Tests are
+never published.
 
-Three-layer boundary (ADR-0504): **schema/structural** checks are
-platform-wide and live in `platform/supply-chain/` +
-`platform/okf/schema/` - never duplicated here; **contract** checks
-(this directory) are Finage-specific and need only repository files - no
-cluster, no credentials, no model calls; **behavioral** checks stay in
-`evaluations/finage/` (ADR-0027/ADR-0028, the shared ADR-0342 runner).
+- `contract/`: bundle self-consistency (every declared tool and knowledge domain resolves in the corp policies with a
+  non-empty group intersection; the generated authorization matrix is current).
+- `tasks/`: per-task declarations (`live_read_tool` within `allowed_tools`, `primary_task` declared,
+  `project_required` marks well-formed).
+- `prompts/`: prompt lint (OKF frontmatter, one prompt per task).
 
-- `contract/` - bundle-level self-consistency (declared tools/domains
-  exist in policy with non-empty group intersections; ADR-0503 matrix
-  and deployment snapshot are current)
-- `tasks/` - per-task assertions (live_read_tool within allowed_tools,
-  primary_task declared, ADR-0512 project_required marks well-formed)
-- `prompts/` - prompt lint (required OKF frontmatter, referenced by a
-  task, golden-format checks where a task defines one)
-
-**Blocking rule (ADR-0504):** Finage is not exempt from this structure
-requirement. `contract/`, `tasks/` and `prompts/` must contain real, green
-tests before Finage can be promoted to Stage 2 -
-`https://github.com/startxfr/zuno-demo/blob/main/https://github.com/startxfr/zuno-demo/blob/main/platform/templates/agent/PROMOTION.md` step 4 is explicit: empty stub
-directories are not Stage 2. Filling these suites is owned by whichever
-work promotes Finage, but the requirement itself blocks promotion, not
-just documents an aspiration.
+Only `tasks/` holds a suite today (`test_task_declarations.py`); `contract/` and `prompts/` hold none yet. Schema and
+structure checks are platform-wide (`platform/okf/`, `platform/supply-chain/`) and are not repeated here; behavioural
+evaluation belongs to the platform that serves the agent. The zuno-demo [promotion
+checklist](https://github.com/startxfr/zuno-demo/blob/main/platform/templates/agent/PROMOTION.md) asks for real, green
+suites in all three folders before the agent is promoted.

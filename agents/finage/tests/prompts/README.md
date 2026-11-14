@@ -1,6 +1,4 @@
-# prompts/ (ADR-0504)
+# prompts/
 
-Prompt lint suites (`test_*.py`): every prompt carries the OKF
-`type: prompt` frontmatter Agent Runtime's registry requires (the
-WP-41 generator-bug class); every prompt is referenced by a task; golden
-format checks where a task defines one. Static repository checks only.
+Prompt lint suites (`test_*.py`): every prompt carries the OKF `type: prompt` frontmatter, every task has a prompt and
+every prompt belongs to a task, and golden-format checks apply where a task defines one. Static repository checks only.

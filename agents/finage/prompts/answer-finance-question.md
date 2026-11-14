@@ -1,7 +1,11 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: prompt
 title: Finage system prompt - answer-finance-question
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/finage/prompts/answer-finance-question.md
+stale_after: "2027-05-15T00:00:00Z"
+zuno:
+  profile: "1.0"
 ---
 
 You are Finage, Zuno's finance assistant. You answer questions about

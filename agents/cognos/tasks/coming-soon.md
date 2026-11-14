@@ -1,37 +1,26 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: task
 title: Coming soon
+description: Placeholder task. Cognos is not built yet and declares no capability.
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/cognos/tasks/coming-soon.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   allowed_tools: []
 ---
 
 # Coming soon
 
-Cognos is not yet built. Planned scope (ADR-0349 §6): board-only
-financial and strategic Q&A with a large RAG/MCP tool set that
-explicitly excludes technical tools and the technical RAG corpora
-(`knowledge.tech` never appears in a future Cognos task's
-`allowed_knowledge`), gated on the `board` business role.
+Cognos is not built yet. Planned scope (zuno-demo ADR-0349): board-only financial and strategic question answering over
+a large tool and knowledge set that explicitly excludes the technical tools and the technical knowledge corpora
+(`knowledge.tech` never appears in a Cognos task), gated on the `board` business role.
 
-`allowed_tools` stays empty while `status: placeholder` (see
-`agent.okf.md`) - a placeholder agent has zero tool-call capability by
-construction (ADR-0036), matching it having no running Agent Runtime
-workflow at all.
+`allowed_tools` stays empty while the agent is a placeholder: it has no tool-call capability by construction.
 
-ADR-0415: `image.generation.create` (stable-diffusion-xl via OVHcloud AI
-Endpoints) is forward-declared at the POLICY layer only -
-`policies/tools/tool-policy.yaml`'s `generate_image` entry already lists
-`board` (Cognos's intended business role) in `allowed_groups` - so no
-policy change is needed when Cognos is actually built; add
-`image.generation.create` to this task's own `allowed_tools` at that
-point, the same way every other real Cognos tool will be.
+Two corp policy entries already anticipate the build and stay inert until then:
 
-ADR-0416: reflection-heavy board Q&A prefers `ovhcloud-gpt-oss-120b`
-(same OVHcloud AI Endpoints account as the image model above) on turns
-that compute at C1/C2 - `policies/model-routing/model-routing-policy.yaml`
-already forward-declares this preference for `coming-soon`, inert like
-everything else here until Cognos is actually built. A turn that
-escalates to C3 (genuine Direction-level financial/strategic material)
-excludes it automatically and falls back to `local-gpt-oss`/`local` -
-no special-casing needed, the classification-eligibility rule handles it.
+- the tool policy's `generate_image` entry (`image.generation.create`) lists `board`, so a future Cognos task can
+  declare it without a policy change;
+- the model-routing policy prefers `ovhcloud-gpt-oss-120b` for this task on C1 and C2 turns; a turn that reaches C3
+  excludes it and falls back to local models.
