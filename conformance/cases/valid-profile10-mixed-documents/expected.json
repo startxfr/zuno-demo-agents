@@ -1,0 +1,50 @@
+{
+  "description": "A profile 1.0 agent whose task is still legacy v0.3: readers check the version per document and load it (the agents CI alone requires one profile per bundle).",
+  "mcp_gateway": {
+    "load_error": null,
+    "agents": {
+      "epsilon": {
+        "status": "active",
+        "access_groups": [
+          "agent_demo"
+        ],
+        "tasks": {
+          "ask": [
+            "search_docs"
+          ]
+        }
+      }
+    }
+  },
+  "admission": {
+    "error": null,
+    "agents": {
+      "epsilon": {
+        "status": "active",
+        "groups": [
+          "agent_demo"
+        ],
+        "classification": "C1",
+        "tasks": {
+          "ask": {
+            "tools": [
+              "search_docs"
+            ],
+            "knowledge": [
+              "knowledge.tech"
+            ],
+            "quota_class": "standard"
+          }
+        }
+      }
+    }
+  },
+  "ui": {
+    "epsilon": {
+      "displayName": "Epsilon",
+      "tileDescription": "Fixture agent.",
+      "color": "#0066CC",
+      "icon": "code"
+    }
+  }
+}

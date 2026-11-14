@@ -1,0 +1,9 @@
+1b178d258af0b308dd45e268e98dd1377a234d43917baf67fb6b5b080405d64b  zuno-okf-profile-1.0-agent.schema.json
+69b2190d1662367057f91034b962ab10f9da0b7aa829da37783d36a352c3c9f6  zuno-okf-profile-1.0-experience-client.schema.json
+9f66466173c2d3742f596652d8adaf4001754239c8dfd282a00374ff38d30b0e  zuno-okf-profile-1.0-index.schema.json
+c502f602e99001d24312afec89f9c01c1635226ac53cfc0bd09faebcb5a9c9db  zuno-okf-profile-1.0-policy.schema.json
+41dd94bd8f68fd1da4b3ef2772d9e161659a7658600b3b45dcabb56452e51a2b  zuno-okf-profile-1.0-prompt.schema.json
+f1356f8cb3d24261b942edbb39e0c64690f3d3a12fd7f16a27f3a019b4332f03  zuno-okf-profile-1.0-rag.schema.json
+0e833e76a204831cb365a531740273a4f5fe3723a62e9303d7654a50439a313f  zuno-okf-profile-1.0-skill.schema.json
+1ee3a635bc520882c202a01033542028366b72d679531390d5095b5e7437f59c  zuno-okf-profile-1.0-task.schema.json
+144e6784405d5ae9f5f4703fc0a6051f25004024a424dbbfbc17da194c8412c2  zuno-okf-profile-1.0-tool.schema.json

@@ -95,6 +95,16 @@ class FixtureTests(unittest.TestCase):
                 self.assertEqual(((zuno.get("limits") or {}).get("delegation") or {}).get("max_depth"),
                                  want["max_depth"], case.name)
 
+    def test_version_refusals_name_the_unsupported_value(self):
+        """Every case refused for its version is refused by the schema check with the same named error (ADR-0615)."""
+        validators = schema.validators()
+        for case in self.cases():
+            needle = json.loads((case / "expected.json").read_text())["admission"]["error"]
+            if not (case.name.startswith("invalid-") and needle and needle.startswith("unsupported")):
+                continue
+            findings = [f for b in sorted((case / "agents").iterdir()) for f in schema.check_bundle(b, validators)]
+            self.assertTrue(any(needle in f for f in findings), f"{case.name}: {needle!r} not in {findings}")
+
     def test_security_cases_are_schema_invalid_on_purpose(self):
         validators = schema.validators()
         for case in self.cases():

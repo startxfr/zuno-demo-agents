@@ -1,0 +1,11 @@
+{
+  "description": "zuno.profile \"2.0\" is not supported: refused with a named error.",
+  "mcp_gateway": {
+    "load_error": "unsupported zuno.profile '2.0'",
+    "agents": {}
+  },
+  "admission": {
+    "error": "unsupported zuno.profile '2.0'",
+    "agents": null
+  }
+}

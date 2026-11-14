@@ -1,0 +1,50 @@
+{
+  "description": "A profile 1.0 agent (okf_version \"0.2\" + zuno.profile \"1.0\") with the upstream envelope (resource, tags, sources, generated, verified, status, stale_after), a root index.md, a prompt and a skill.",
+  "mcp_gateway": {
+    "load_error": null,
+    "agents": {
+      "delta": {
+        "status": "active",
+        "access_groups": [
+          "agent_demo"
+        ],
+        "tasks": {
+          "ask": [
+            "search_docs"
+          ]
+        }
+      }
+    }
+  },
+  "admission": {
+    "error": null,
+    "agents": {
+      "delta": {
+        "status": "active",
+        "groups": [
+          "agent_demo"
+        ],
+        "classification": "C2",
+        "tasks": {
+          "ask": {
+            "tools": [
+              "search_docs"
+            ],
+            "knowledge": [
+              "knowledge.tech"
+            ],
+            "quota_class": "standard"
+          }
+        }
+      }
+    }
+  },
+  "ui": {
+    "delta": {
+      "displayName": "Delta",
+      "tileDescription": "Fixture agent.",
+      "color": "#0066CC",
+      "icon": "code"
+    }
+  }
+}

@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Validate every OKF document's frontmatter against its JSON schema.
 
-Mirrors what unifai-operator does before it emits anything
-(fork/unifai-operator/internal/okf/schema.go `ValidateSchemas`): every `.md`
-file of a bundle whose frontmatter declares a known OKF `type` is checked
-against the schema of that type, and must declare the schema's
-`okf_version`. Files without frontmatter (README notes) are not OKF
-documents and are skipped, as are `tests/` trees, which never enter a
-published layer (ADR-0577 clause 1).
+Mirrors what unifai-operator does before it emits anything: every `.md` file
+of a bundle whose frontmatter declares a known OKF `type` is checked against
+the schema of that type and of its version. The version comes from
+`okf_profile.document_version` (zuno-demo ADR-0615 clause 5): profile 1.0
+(`okf_version: "0.2"` + `zuno.profile: "1.0"`), or legacy `v0.2`/`v0.3`.
+A bundle-root `index.md` is checked against the index schema (its only
+frontmatter is `okf_version: "0.2"`). Files without frontmatter (README
+notes) are not OKF documents and are skipped, as are `tests/` trees, which
+never enter a published layer.
 
 A bundle that fails here would be refused by the operator with
 `Valid=False`; catching it in CI keeps that from being discovered on a
@@ -26,6 +28,9 @@ from typing import Dict, List, Optional
 
 import yaml
 from jsonschema import Draft202012Validator
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from okf_profile import UnsupportedVersion, document_version  # noqa: E402
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 AGENTS_DIR = REPO_ROOT / "agents"
@@ -55,7 +60,11 @@ SCHEMAS: Dict[str, Dict[str, str]] = {
         # zuno-demo ADR-0592: experience clients (experience-clients/<name>).
         "experience-client": "zuno-okf-experience-client-v0.3.schema.json",
     },
+    # zuno-demo ADR-0615: the frozen profile 1.0 (build_profile_schemas.py).
+    "1.0": {typ: f"zuno-okf-profile-1.0-{typ}.schema.json"
+            for typ in ("agent", "task", "prompt", "tool", "rag", "policy", "skill", "experience-client")},
 }
+INDEX_SCHEMA = "zuno-okf-profile-1.0-index.schema.json"
 CORP_SKILLS_DIR = REPO_ROOT / "policies" / "skills"
 SKIPPED_DIRS = {"tests", "__pycache__"}
 
@@ -80,6 +89,10 @@ def validators() -> Dict[str, Dict[str, Draft202012Validator]]:
     return out
 
 
+def index_validator() -> Draft202012Validator:
+    return Draft202012Validator(json.loads((SCHEMA_DIR / INDEX_SCHEMA).read_text(encoding="utf-8")))
+
+
 def check_bundle(bundle_dir: pathlib.Path, schemas: Dict[str, Dict[str, Draft202012Validator]]) -> List[str]:
     problems: List[str] = []
     for path in sorted(bundle_dir.rglob("*.md")):
@@ -92,11 +105,17 @@ def check_bundle(bundle_dir: pathlib.Path, schemas: Dict[str, Dict[str, Draft202
         except yaml.YAMLError as exc:
             problems.append(f"{label}: frontmatter is not valid YAML: {exc}")
             continue
+        if path.name == "index.md" and path.parent == bundle_dir:
+            if doc is not None:
+                for error in index_validator().iter_errors(doc if isinstance(doc, dict) else {}):
+                    problems.append(f"{label}: (index) {error.message}")
+            continue
         if not isinstance(doc, dict) or "type" not in doc:
             continue
-        version = doc.get("okf_version")
-        if version not in schemas:
-            problems.append(f"{label}: okf_version {version!r} is not one of {sorted(schemas)}")
+        try:
+            version = document_version(doc)
+        except UnsupportedVersion as exc:
+            problems.append(f"{label}: {exc}")
             continue
         validator = schemas[version].get(doc["type"])
         if validator is None:
