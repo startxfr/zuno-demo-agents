@@ -4,7 +4,7 @@
 Checks per agent bundle (agents/<name>/) and experience client (experience-clients/<name>/):
 
 1. **Structure.** The version of `agent.okf.md` follows zuno-demo ADR-0615 clause 5 (profile 1.0, or legacy
-   v0.2/v0.3 until 2026-12-01). It has `type: agent`, and `zuno.name` matches the directory name. Every task it
+   v0.2/v0.3 during the transition). It has `type: agent`, and `zuno.name` matches the directory name. Every task it
    declares has a `tasks/<task>.md` file with `type: task`.
 2. **Policy references.** Every tool a task declares in `zuno.allowed_tools` is a name of
    `policies/tools/tool-policy.yaml` (its `tool` or `capability` name). Every knowledge domain is a domain of
@@ -318,7 +318,7 @@ def validate_bundle(bundle_dir: pathlib.Path, known_tools: Set[str], known_domai
     except ValueError as exc:
         return [Finding(label, str(exc))]
 
-    # Profile 1.0 (zuno-demo ADR-0615), or legacy v0.2/v0.3 until 2026-12-01.
+    # Profile 1.0 (zuno-demo ADR-0615), or legacy v0.2/v0.3 during the transition (until operator line 0.2).
     # platform/okf/check_narrowing.py checks the v0.3-and-above fields against the corp policies.
     version = _version_ok(frontmatter, findings, label, "agent.okf.md")
     if frontmatter.get("type") != "agent":

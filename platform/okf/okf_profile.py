@@ -6,7 +6,7 @@ in their own code; the conformance cases under `conformance/cases/` keep them al
 
 | okf_version            | zuno.profile            | version     |
 |------------------------|-------------------------|-------------|
-| "v0.2" or "v0.3"       | absent                  | that legacy version (read until 2026-12-01) |
+| "v0.2" or "v0.3"       | absent                  | that legacy version (transition, until operator line 0.2) |
 | "0.2"                  | "1.0"                   | "1.0"       |
 | "0.2"                  | absent or another value | refused: unsupported zuno.profile |
 | anything else          | -                       | refused: unsupported okf_version |

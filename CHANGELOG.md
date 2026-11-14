@@ -2,6 +2,27 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v1.0.1 - 2026-11-14
+
+Agents:
+
+- `advantage` 1.0.0
+- `arkos` 1.0.1
+- `cognos` 1.0.0
+- `comage` 1.0.0
+- `finage` 1.0.0
+- `naveo` 1.0.0
+- `soursage` 1.0.0
+- `tekos` 1.0.1
+
+Changes:
+
+- chore(release): VERSION 1.0.1 (arkos write-code on local gpt-oss-20b, tekos write-code without the wesh fallback, legacy wording, security policy) (185e946)
+- feat(tekos): write-code no longer prefers the wesh providers (tekos 1.0.1) (d800855)
+- docs: add a security policy (private vulnerability reporting) (5dc4c92)
+- docs: legacy documents stay readable during a transition, refused from unifai-operator line 0.2 (zuno-demo ADR-0615, WP-268) (cdc93b4)
+- fix(arkos): write-code runs on local gpt-oss-20b, Codestral coding stays with tekos (81b090a)
+
 ## v1.0.0 - 2026-11-14
 
 Agents:

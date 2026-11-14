@@ -11,8 +11,8 @@ here, and every schema refuses unknown fields (`additionalProperties: false`).
 - **The Zuno profile 1.0** adds the namespaced `zuno` block and the constraints of this page (zuno-demo
   [ADR-0615](https://github.com/startxfr/zuno-demo/blob/devel/docs/adr/0615-align-the-zuno-okf-profile-with-upstream-okf-0-2-and-freeze-it-as-profile-1-0.md)).
   The profile schemas are frozen (`platform/okf/schema/SHA256SUMS`): a change needs a new profile version.
-- **Legacy documents** (`okf_version: v0.2` or `v0.3`) are read until 2026-12-01, then refused. See
-  [Legacy versions](#legacy-versions).
+- **Legacy documents** (`okf_version: v0.2` or `v0.3`) are still read during a transition, then refused from
+  unifai-operator line 0.2. See [Legacy versions](#legacy-versions).
 - Fields marked **required** are required by the schema. The others are optional.
 - Check your files with these, in order:
   1. `python3 platform/okf/validate_okf_schema.py`;
@@ -30,7 +30,7 @@ Every reader of this format applies the same table, one document at a time:
 
 | `okf_version` | `zuno.profile` | Result |
 |---|---|---|
-| `"v0.2"` or `"v0.3"` | absent | Legacy document, legacy schema (until 2026-12-01) |
+| `"v0.2"` or `"v0.3"` | absent | Legacy document, legacy schema (during the transition) |
 | `"0.2"` | `"1.0"` | Profile 1.0 schema of the document's `type` |
 | `"0.2"` | absent or another value | Refused: `unsupported zuno.profile` |
 | anything else | - | Refused: `unsupported okf_version` |
@@ -250,8 +250,9 @@ The profile meets every MUST of upstream §11 for published files. Where it diff
 
 ## Legacy versions
 
-Documents written with `okf_version: v0.2` or `v0.3` (the profile before 1.0) are read until 2026-12-01 and refused
-after it. Their envelope used `provenance`, `verification` and `freshness`; their `zuno` fields are those of this page.
+Documents written with `okf_version: v0.2` or `v0.3` (the profile before 1.0) are still read during a transition. The
+unifai-operator 0.1 line keeps reading them; zuno-demo refuses them from the operator's 0.2 line (zuno-demo ADR-0615,
+WP-268), with a date announced in advance. Their envelope used `provenance`, `verification` and `freshness`; their `zuno` fields are those of this page.
 v0.3 added `models`, `guardrails`, `limits`, `delegation` and skills to v0.2, and profile 1.0 keeps them all. To move a
 bundle, see [the lifecycle page](bundle-lifecycle.md#moving-a-legacy-bundle-to-profile-10).
 

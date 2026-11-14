@@ -25,7 +25,8 @@ Case prefixes: `valid-` (loads, schema-valid, narrows the corp policies), `secur
 but `platform/okf/check_narrowing.py` refuses it with the expected message).
 
 Supported versions (zuno-demo ADR-0615 clause 5): profile 1.0 (`okf_version: "0.2"`, a quoted string, plus
-`zuno.profile: "1.0"`), and the legacy `okf_version` values `v0.2` and `v0.3` until 2026-12-01. The version is
+`zuno.profile: "1.0"`), and the legacy `okf_version` values `v0.2` and `v0.3` during the transition (until unifai-operator line 0.2,
+zuno-demo WP-268). The version is
 checked per document: a `valid-profile10-mixed-documents` bundle mixes both and loads. A reader that compares
 versions to decide whether the narrowing rules apply must compare levels (v0.2 < v0.3 <= profile 1.0): the
 `narrowing-profile10-*` case fails a reader that tests `== "v0.3"`. A profile 1.0 bundle may carry a root

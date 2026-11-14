@@ -17,6 +17,9 @@ writes code.
 | `structure-demo` | Structure a customer demo with talking points | none | none |
 | `write-code` | Write code, configuration or a script | none | none |
 
+`write-code` runs on local models only (gpt-oss-20b first): Arkos is C3. For code on C1/C2 data with Codestral, use
+Tekos's `write-code`.
+
 ```text
 arkos/
 ├── README.md       this file (not published)

@@ -57,8 +57,8 @@ declarations:
 - delegation, and skills.
 
 The profile schemas (`platform/okf/schema/zuno-okf-profile-1.0-*.schema.json`) are frozen by `SHA256SUMS`: a change
-needs a new profile version (zuno-demo ADR-0615). Legacy documents (`okf_version: v0.2` or `v0.3`) are read until
-2026-12-01.
+needs a new profile version (zuno-demo ADR-0615). Legacy documents (`okf_version: v0.2` or `v0.3`) are still read
+during a transition: zuno-demo refuses them from unifai-operator line 0.2 (zuno-demo ADR-0615, WP-268).
 
 A bundle may only narrow the corp policies: `platform/okf/check_narrowing.py` refuses any widening, naming the corp
 clause it exceeds. A corp skill a task references is embedded in that agent's artifact as `skills/corp/<name>.md`, so
