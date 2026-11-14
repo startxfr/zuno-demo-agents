@@ -278,14 +278,18 @@ preferences:
   # app/main.py's _invoke_with_fallback (unchanged) naturally drops to
   # local if Codestral errors, giving "use local also for coding" for
   # free from already-live machinery.
-  # ADR-0526 (WP-087): the variant goes SECOND here too - mistral-codestral
-  # stays at index 0 and this entry stays non-strict. Both are enforced in
-  # CI by evaluations/tekos/gate_checks.py's
+  # ADR-0526 (WP-087) put the wesh variant SECOND here. 2026-11-14 (owner's
+  # decision): the wesh providers (local-wesh-maas, local-wesh) are no longer
+  # preferred for write-code; the first fallback is gpt-oss. They stay eligible
+  # (this entry is not strict), so they still come after the listed names, in
+  # provider-routing.yaml order. mistral-codestral stays at index 0 and this
+  # entry stays non-strict. Both are enforced in CI by
+  # evaluations/tekos/gate_checks.py's
   # tekos_write_code_prefers_mistral_codestral check, which fails the gate
   # outright if either changes.
   - agent: tekos
     task: write-code
-    prefer: [mistral-codestral, local-wesh-maas, local-wesh, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
+    prefer: [mistral-codestral, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
 
 # ADR-0304 (WP-40 Part B): per (agent, task) "task class" quality/cost/
 # latency objectives, consumed by evaluations/routing_report.py alongside
