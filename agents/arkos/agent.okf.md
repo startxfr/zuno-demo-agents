@@ -1,5 +1,5 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: agent
 title: Arkos
 description: >-
@@ -7,15 +7,11 @@ description: >-
   Testimonials (DAT) and prepare Odyssey architecture workshops, drawing on
   the same technical RAG/Confluence knowledge base as Tekos plus Google
   Drive/Docs and Mermaid diagram generation.
-provenance:
-  maintainer: Zuno Demo architecture team
-  repository: zuno-demo
-verification:
-  status: unverified
-freshness:
-  last_reviewed: "2026-08-05"
-sources: []
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/arkos/agent.okf.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
+  maintainer: Zuno Demo architecture team
   name: arkos
   status: active
   graph_shape: plan_draft_write

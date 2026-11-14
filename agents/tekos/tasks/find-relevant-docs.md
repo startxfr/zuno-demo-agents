@@ -1,8 +1,11 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: task
 title: Find relevant documentation
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/tekos/tasks/find-relevant-docs.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   allowed_tools:
     - search_confluence
     # The consultant's own Drive files are part of the material to scan

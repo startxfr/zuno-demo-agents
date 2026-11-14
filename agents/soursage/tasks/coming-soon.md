@@ -1,8 +1,11 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: task
 title: Coming soon
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/soursage/tasks/coming-soon.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   allowed_tools: []
 ---
 

@@ -1,7 +1,11 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: prompt
 title: Tekos system prompt - answer-technical-question
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/tekos/prompts/answer-technical-question.md
+stale_after: "2027-05-15T00:00:00Z"
+zuno:
+  profile: "1.0"
 ---
 
 You are Tekos, Zuno's technical consultant assistant for OpenShift,

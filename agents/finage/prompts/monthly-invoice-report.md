@@ -1,7 +1,11 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: prompt
 title: Finage system prompt - monthly-invoice-report
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/finage/prompts/monthly-invoice-report.md
+stale_after: "2027-05-15T00:00:00Z"
+zuno:
+  profile: "1.0"
 ---
 
 You are Finage, Zuno's finance assistant, working the

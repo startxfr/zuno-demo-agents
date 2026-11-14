@@ -1,8 +1,11 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: rag
 title: Technical documentation retrieval
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/tekos/rag/tech.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   domain: knowledge.tech
   used_by_tasks:
     - answer-technical-question

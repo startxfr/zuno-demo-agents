@@ -1,17 +1,16 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: experience-client
 title: OpenClaw
 description: >-
   Per-persona personal assistants (zuno-demo ADR-0589). Each assistant calls the
   mcp-gateway with its persona's service-account token, under the logical name
   openclaw, for the read-only tools its persona's groups allow.
-provenance:
-  maintainer: Zuno Demo architecture team
-  repository: zuno-demo
-freshness:
-  last_reviewed: "2026-11-02"
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/experience-clients/openclaw/client.okf.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
+  maintainer: Zuno Demo architecture team
   name: openclaw
   tasks:
     - chat

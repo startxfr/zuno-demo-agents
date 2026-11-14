@@ -1,8 +1,11 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: task
 title: Update opportunity status
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/comage/tasks/update-opportunity-status.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   allowed_tools:
     - salesforce.opportunity.update
   # ADR-0515: editable starters. Shown in the chat empty state, and in the

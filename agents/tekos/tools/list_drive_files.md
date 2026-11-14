@@ -1,8 +1,11 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: tool
 title: List Drive files
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/tekos/tools/list_drive_files.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   capability: list_drive_files
   used_by_tasks:
     - check-my-drive-docs

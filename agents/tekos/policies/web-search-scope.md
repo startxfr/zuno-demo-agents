@@ -1,8 +1,11 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: policy
 title: Web search fallback scope
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/tekos/policies/web-search-scope.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   narrows_platform_policy: true
   constraint_type: data_handling_addendum
   applies_to:

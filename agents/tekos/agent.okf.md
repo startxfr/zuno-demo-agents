@@ -1,5 +1,5 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: agent
 title: Tekos
 description: >-
@@ -7,17 +7,18 @@ description: >-
   official product documentation and internal Confluence content, with
   concise citations, and helps consultants locate relevant reference
   material across the RAG corpus and their own Drive.
-provenance:
-  maintainer: Zuno Demo architecture team
-  repository: zuno-demo
-verification:
-  status: unverified
-freshness:
-  last_reviewed: "2026-08-05"
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/tekos/agent.okf.md
 sources:
-  - "technical-docs (RAG corpus: OpenShift/Kubernetes/Keycloak/Ansible/Argo CD/Helm/Go documentation)"
-  - confluence
+- id: technical-docs
+  resource: urn:zuno:knowledge:tech
+  title: Official product documentation (OpenShift, Kubernetes, Keycloak, Ansible, Argo CD, Helm, Go), indexed as knowledge.tech
+- id: confluence
+  resource: urn:zuno:source:confluence
+  title: Internal Confluence spaces, through the search_confluence tool
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
+  maintainer: Zuno Demo architecture team
   name: tekos
   status: active
   graph_shape: retrieve_reason_respond

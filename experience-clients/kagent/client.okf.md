@@ -1,17 +1,16 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: experience-client
 title: kagent
 description: >-
   Kubernetes-native operations assistant (zuno-demo ADR-0600). A thin client: its model calls and tool
   calls go through the zuno-token-proxy (ADR-0601) to the ai-gateway and the mcp-gateway, signed with the
   kagent Keycloak client's persona token. It brings no tool server of its own.
-provenance:
-  maintainer: Zuno Demo architecture team
-  repository: zuno-demo
-freshness:
-  last_reviewed: "2026-11-05"
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/experience-clients/kagent/client.okf.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
+  maintainer: Zuno Demo architecture team
   name: kagent
   tasks:
     - diagnose

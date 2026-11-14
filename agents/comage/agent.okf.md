@@ -1,22 +1,23 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: agent
 title: Comage
 description: >-
   Sales assistant. Answers deal-status questions grounded in indexed and
   live Salesforce data, updates opportunities, and checks the user's own
   Drive/Gmail for account-relevant material.
-provenance:
-  maintainer: Zuno Demo architecture team
-  repository: zuno-demo
-verification:
-  status: unverified
-freshness:
-  last_reviewed: "2026-08-05"
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/comage/agent.okf.md
 sources:
-  - "knowledge.sales (asynchronously ingested from Salesforce, WP-22)"
-  - salesforce
+- id: knowledge.sales
+  resource: urn:zuno:knowledge:sales
+  title: Knowledge domain knowledge.sales, ingested from Salesforce
+- id: salesforce
+  resource: urn:zuno:source:salesforce
+  title: Salesforce, through the opportunity tools
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
+  maintainer: Zuno Demo architecture team
   name: comage
   status: active
   graph_shape: retrieve_reason_respond

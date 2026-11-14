@@ -1,20 +1,17 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: agent
 title: Cognos
 description: >-
   Board-only financial and strategic assistant. Answers Direction-level
   financial and strategic questions with access to a large tool set
   explicitly excluding technical tools and the technical RAG corpora.
-provenance:
-  maintainer: Zuno Demo architecture team
-  repository: zuno-demo
-verification:
-  status: unverified
-freshness:
-  last_reviewed: "2026-08-15"
-sources: []
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/cognos/agent.okf.md
+status: draft
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
+  maintainer: Zuno Demo architecture team
   name: cognos
   status: placeholder
   tasks:

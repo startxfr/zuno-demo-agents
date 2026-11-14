@@ -1,8 +1,11 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: task
 title: Draft an architecture testimonial
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/arkos/tasks/draft-architecture-testimonial.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   # Reply cap (ADR-0544): without one, a reply ran to ~40k tokens on
   # gpt-oss-20b on 2026-10-31. A DAT is about 4k tokens; 8192 is the schema
   # ceiling and leaves room for a long one.

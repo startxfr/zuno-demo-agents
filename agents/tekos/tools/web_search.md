@@ -1,8 +1,11 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: tool
 title: Constrained web search
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/tekos/tools/web_search.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   capability: web_search
   used_by_tasks:
     - answer-technical-question

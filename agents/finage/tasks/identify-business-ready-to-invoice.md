@@ -1,8 +1,11 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: task
 title: Identify business ready to invoice
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/finage/tasks/identify-business-ready-to-invoice.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   allowed_tools:
     - salesforce.opportunity.read
   allowed_knowledge:

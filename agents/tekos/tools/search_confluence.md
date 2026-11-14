@@ -1,8 +1,11 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: tool
 title: Confluence page search
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/tekos/tools/search_confluence.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   capability: search_confluence
   used_by_tasks:
     - answer-technical-question

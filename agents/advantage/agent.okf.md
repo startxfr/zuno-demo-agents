@@ -1,5 +1,5 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: agent
 title: Advantage
 description: >-
@@ -10,17 +10,19 @@ description: >-
   implicit inheritance from Comage). ADR-0218 removed `knowledge.adv`'s
   only ingestion adapter; ADR-0532 formally accepts the domain staying
   sourceless (agent stays `placeholder`) rather than leaving it open.
-provenance:
-  maintainer: Zuno Demo architecture team
-  repository: zuno-demo
-verification:
-  status: unverified
-freshness:
-  last_reviewed: "2026-08-05"
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/advantage/agent.okf.md
 sources:
-  - "knowledge.adv (sourceless by decision, ADR-0532 - no ingestion adapter since ADR-0218, no replacement adopted)"
-  - "knowledge.project"
+- id: knowledge.adv
+  resource: urn:zuno:knowledge:adv
+  title: Knowledge domain knowledge.adv (no ingestion source at present)
+- id: knowledge.project
+  resource: urn:zuno:knowledge:project
+  title: Knowledge domain knowledge.project (project memory)
+status: draft
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
+  maintainer: Zuno Demo architecture team
   name: advantage
   status: placeholder
   graph_shape: retrieve_reason_respond

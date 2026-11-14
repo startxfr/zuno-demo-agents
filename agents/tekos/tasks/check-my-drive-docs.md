@@ -1,8 +1,11 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: task
 title: Check my Drive documents
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/tekos/tasks/check-my-drive-docs.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   allowed_tools:
     - list_drive_files
   # OKF v0.3 (ADR-0579 clause 2): the roles, in order, of this task's entry in

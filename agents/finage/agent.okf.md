@@ -1,5 +1,5 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: agent
 title: Finage
 description: >-
@@ -8,16 +8,16 @@ description: >-
   pre-2021 SXA billing history is no longer served, WP-185) - never live
   Salesforce or ADV/project-delivery data (ADR-0326: strictly
   finance-scoped, no implicit inheritance from Comage/Advantage).
-provenance:
-  maintainer: Zuno Demo architecture team
-  repository: zuno-demo
-verification:
-  status: unverified
-freshness:
-  last_reviewed: "2026-08-05"
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/finage/agent.okf.md
 sources:
-  - "knowledge.project"
+- id: knowledge.project
+  resource: urn:zuno:knowledge:project
+  title: Knowledge domain knowledge.project (project memory)
+status: draft
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
+  maintainer: Zuno Demo architecture team
   name: finage
   status: placeholder
   graph_shape: retrieve_reason_respond

@@ -1,20 +1,17 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: agent
 title: Soursage
 description: >-
   Recruiting assistant. Interacts with Workday and LinkedIn to source new
   consultant candidates and to find, among existing consultants, the best
   profile for a mission.
-provenance:
-  maintainer: Zuno Demo architecture team
-  repository: zuno-demo
-verification:
-  status: unverified
-freshness:
-  last_reviewed: "2026-08-15"
-sources: []
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/soursage/agent.okf.md
+status: draft
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
+  maintainer: Zuno Demo architecture team
   name: soursage
   status: placeholder
   tasks:

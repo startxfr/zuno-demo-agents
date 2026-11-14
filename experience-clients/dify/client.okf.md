@@ -1,17 +1,16 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: experience-client
 title: Dify
 description: >-
   No-code LLM workflow canvas (zuno-demo ADR-0599). Every model and tool call goes through
   the zuno-token-proxy (ADR-0601), which signs it with the dify Keycloak client's persona
   token, to the ai-gateway and the mcp-gateway.
-provenance:
-  maintainer: Zuno Demo architecture team
-  repository: zuno-demo
-freshness:
-  last_reviewed: "2026-11-04"
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/experience-clients/dify/client.okf.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
+  maintainer: Zuno Demo architecture team
   name: dify
   tasks:
     - chat

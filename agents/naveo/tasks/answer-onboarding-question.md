@@ -1,8 +1,11 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: task
 title: Answer an onboarding question
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/naveo/tasks/answer-onboarding-question.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   allowed_tools:
     - search_confluence
     - web_search

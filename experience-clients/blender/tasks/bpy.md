@@ -1,8 +1,11 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: task
 title: Blender Python script
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/experience-clients/blender/tasks/bpy.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   # zuno-demo ADR-0610 clause 2: gpt-oss-20b (reasoning) first, qwen3.5-9b (default)
   # after it, then the rest of the corp order. Every external role is excluded; the
   # ai-gateway's C3 floor on the client `blender` already keeps the call local.

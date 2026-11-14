@@ -1,20 +1,22 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: agent
 title: Naveo
 description: >-
   Onboarding assistant for new team members. Answers questions about internal processes, tooling and where to find reference material, grounded in the technical RAG corpus and internal Confluence content, and can check the caller's own Drive for onboarding documents.
-provenance:
-  maintainer: Zuno Demo architecture team
-  repository: zuno-demo
-verification:
-  status: unverified
-freshness:
-  last_reviewed: "2026-08-15"
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/naveo/agent.okf.md
 sources:
-    - "knowledge.tech"
-    - "knowledge.project"
+- id: knowledge.tech
+  resource: urn:zuno:knowledge:tech
+  title: Knowledge domain knowledge.tech (technical documentation)
+- id: knowledge.project
+  resource: urn:zuno:knowledge:project
+  title: Knowledge domain knowledge.project (project memory)
+status: draft
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
+  maintainer: Zuno Demo architecture team
   name: naveo
   status: placeholder
   graph_shape: retrieve_reason_respond
