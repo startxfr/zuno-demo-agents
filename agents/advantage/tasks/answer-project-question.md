@@ -1,21 +1,21 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: task
 title: Answer a project or bid question
+description: Answer a project, delivery or bid question from ADV and project knowledge, with a web-search fallback.
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/advantage/tasks/answer-project-question.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   allowed_tools:
     - web_search
-    # ADR-0415: stable-diffusion-xl via OVHcloud AI Endpoints, offered to
-    # the reasoning model as a callable tool for project/bid questions
-    # that call for a visual (mockup, diagram).
+    # zuno-demo ADR-0415: image generation, offered as a callable tool for
+    # project or bid questions that call for a visual (mockup, diagram).
     - image.generation.create
   allowed_knowledge:
     - knowledge.adv
     - knowledge.project
-  # ADR-0515: editable starters. Shown in the chat empty state, and in the
-  # composer's slash menu (agent-frontend web/src/chat/TaskPromptMenu.tsx).
-  # UX only - never parsed or enforced server-side, and picking one does NOT
-  # select this task: the chat route always runs primary_task (ADR-0342).
+  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "What is the current delivery status of this project?"
     - "Who owns this bid, and which business unit is it attached to?"
@@ -23,31 +23,14 @@ zuno:
 
 # Answer a project or bid question
 
-Answer a free-form question about project/delivery status, ownership,
-business-unit or bid/proposal support, grounded in `knowledge.adv`
-(no ingestion adapter since ADR-0218 - its source is an open decision)
-and any durable `knowledge.project` memory for the engagement. Falls back to a
-constrained web search when the internal corpus has no grounded answer.
+Answer a free-form question about project or delivery status, ownership, business unit, or bid and proposal support,
+grounded in `knowledge.adv` and in the engagement's durable `knowledge.project` memory. Fall back to a constrained web
+search when the internal corpus has no grounded answer. `image.generation.create` is available when a question calls
+for a visual, such as a mockup or a diagram.
 
-This is the task Agent Runtime's `retrieve_reason_respond` graph shape
-(`components/agent-runtime/app/graph/shapes/retrieve_reason_respond.py`,
-ADR-0342) executes for Advantage - the same shape module Tekos's and
-Comage's primary tasks run, closed over Advantage's own agent/task data
-(`app/graph/nodes.py`'s `_make_*` factories). Declares no `live_read_tool`:
-no live adv MCP capability exists, and ADR-0218 removed the batch adapter
-that used to fill `knowledge.adv`, so this task is indexed-read only -
-`tool_call_node` cleanly no-ops rather than attempting a live call
-(ADR-0326).
+The task declares no `live_read_tool`: no live ADV capability exists, and `knowledge.adv` has no ingestion source at
+present, so the task reads indexed knowledge only.
 
-ADR-0326's signature proof for this slice: `allowed_knowledge` above
-never includes Comage's own current-sales knowledge domain
-(`knowledge.sales`), and `allowed_tools` never includes any live-CRM MCP
-capability - Advantage proves the cross-domain authorization boundary by
-explicit omission, not by a runtime filter. Any further cross-domain
-commercial access this agent might need must be added here explicitly and
-policy-controlled, never inherited from Comage.
-
-The pre-2021 SXA record was the one deliberate exception (ADR-0217, then ADR-0219, which widened its
-reader groups to include `adv`). It is no longer declared: the domain stopped being served when the RAG moved to
-UnifAI (WP-185, 2026-11-02). The boundary that still holds - and that WP-35's negative test asserts - is
-`knowledge.sales`, which continues to exclude `adv`.
+`allowed_knowledge` never includes the current-sales domain `knowledge.sales`, and `allowed_tools` never includes a live
+CRM capability: Advantage holds this cross-domain boundary by explicit omission, not by a runtime filter (zuno-demo
+ADR-0326). Any further commercial access must be added here explicitly and stay policy-controlled.

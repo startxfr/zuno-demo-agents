@@ -1,8 +1,11 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: task
 title: Chat
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/experience-clients/openclaw/tasks/chat.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   # Read-only, as open-webui's chat: no writes, no Git, AAP or Salesforce.
   allowed_tools:
     - list_drive_files

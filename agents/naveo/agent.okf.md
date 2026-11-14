@@ -1,20 +1,22 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: agent
 title: Naveo
 description: >-
   Onboarding assistant for new team members. Answers questions about internal processes, tooling and where to find reference material, grounded in the technical RAG corpus and internal Confluence content, and can check the caller's own Drive for onboarding documents.
-provenance:
-  maintainer: Zuno Demo architecture team
-  repository: zuno-demo
-verification:
-  status: unverified
-freshness:
-  last_reviewed: "2026-08-15"
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/naveo/agent.okf.md
 sources:
-    - "knowledge.tech"
-    - "knowledge.project"
+- id: knowledge.tech
+  resource: urn:zuno:knowledge:tech
+  title: Knowledge domain knowledge.tech (technical documentation)
+- id: knowledge.project
+  resource: urn:zuno:knowledge:project
+  title: Knowledge domain knowledge.project (project memory)
+status: draft
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
+  maintainer: Zuno Demo architecture team
   name: naveo
   status: placeholder
   graph_shape: retrieve_reason_respond
@@ -26,15 +28,12 @@ zuno:
   model:
     preferred_classification: C1
     notes: >-
-      Scaffolded by platform/templates/agent/ (ADR-0307/WP-41) - reuses
-      the retrieve_reason_respond shape and existing knowledge/tool
-      capabilities only, no new external systems (ADR-0410).
+      Reuses the retrieve_reason_respond shape and existing knowledge and
+      tool capabilities only; no new external system.
   access:
     # ADR-0040: agent entitlement group, orthogonal to the
     # `consultant` business role that governs tool/data
-    # permissions inside Naveo (policies/tools/tool-policy.yaml -
-    # see this bundle's own NEXT_STEPS.md for the exact policy entries to
-    # add).
+    # permissions inside Naveo (policies/tools/tool-policy.yaml).
     groups:
       - agent_naveo
   ui:
@@ -46,19 +45,19 @@ zuno:
 
 # Naveo
 
-Onboarding assistant for new team members. Answers questions about internal processes, tooling and where to find reference material, grounded in the technical RAG corpus and internal Confluence content, and can check the caller's own Drive for onboarding documents.
+Onboarding assistant for new team members. It answers questions about internal processes, tooling and where to find
+reference material, grounded in the technical documentation corpus and internal Confluence content, and can check the
+user's own Drive for onboarding documents.
 
-Conforms to `platform/okf/schema/zuno-okf-v0.2.schema.json` (ADR-0005,
-ADR-0038). `status` stays `placeholder` until the operator confirms the
-live ADR-0027/ADR-0028 acceptance gate passes (ADR-0326's completion
-pattern, the same bar every hand-built agent clears) - see this bundle's
-own `NEXT_STEPS.md` for what remains.
+`status: placeholder`: the agent is declared but not served, and a portal shows its tile as "coming soon".
 
-Scaffolded by `platform/templates/agent/scaffold_agent.py` (ADR-0307,
-roadmap WP-41). No dedicated namespace is reserved (ADR-0329): Naveo's
-frontend/BFF deploy into the shared `zuno-ai-run` namespace via the
-`zuno.zuno.ai/v1alpha1 AIAgent` CR the operator (ADR-0327/ADR-0308)
-reconciles - see `gitops/charts/naveo/templates/aiagent.yaml`.
+Its single task, `answer-onboarding-question`, reuses existing knowledge domains (`knowledge.tech`, `knowledge.project`)
+and existing tool capabilities (`search_confluence`, `web_search`, `list_drive_files`) only, with no new knowledge
+domain or external system (zuno-demo ADR-0410). `search_confluence` is its live-read tool. The entitlement group is
+`agent_naveo`; inside the agent, the `consultant` business role governs tool and data access through
+`policies/tools/tool-policy.yaml` and `policies/knowledge/knowledge-policy.yaml`.
+
+The bundle follows the Zuno OKF profile 1.0 (`platform/okf/schema/zuno-okf-profile-1.0-agent.schema.json`).
 
 <!-- BEGIN GENERATED AUTHORIZATION MATRIX (ADR-0503) - do not edit; regenerate with: python3 platform/okf/generate_authorization_matrix.py -->
 

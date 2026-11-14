@@ -1,27 +1,34 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: tool
 title: Constrained web search
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/tekos/tools/web_search.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   capability: web_search
   used_by_tasks:
     - answer-technical-question
   usage_notes: >-
-    Fallback path only: answer-technical-question tries the indexed
-    knowledge.tech/knowledge.project corpus and search_confluence's live
-    read first (ADR-0205, prefer indexed knowledge for reads); web_search
-    is invoked only when neither grounds an answer. Every answer still
-    carries concise source citations regardless of which path produced it.
+    Takes a search query and returns web results. answer-technical-question
+    calls it last, only when neither the retrieved documents
+    (knowledge.tech, knowledge.project) nor search_confluence ground an
+    answer; the answer still cites its sources. The query stays on public
+    technical topics (policies/web-search-scope.md of this bundle).
   known_limitations:
-    - "Widest-reach, least-controlled tool this agent declares: no
-      classification/ACL metadata comes back with results the way
-      RAG chunks or Confluence pages carry it. See
-      agents/tekos/policies/web-search-scope.md for the additional scope
-      constraint this agent applies to it."
+    - "Data classification C1 (min_classification); no external_model_policy restriction, so its results may reach external models."
+    - "Allowed groups: sales, consultant, adv, finance, board."
+    - "Access: read."
+    - "Results carry no classification or ACL metadata, and the query text leaves the platform for an external search provider."
+    - "Where no search provider is configured, the tool returns no results; the task then answers from the documents already retrieved."
 ---
 
 # Constrained web search
 
-Documentary only - actual authorization stays `allowed_tools` (per task)
-intersected with `policies/tools/tool-policy.yaml` and
-`platform/bindings/tools/tool-bindings.yaml`.
+The last-resort source of `answer-technical-question`, after the indexed
+documentation, project memory and the live Confluence read. This bundle
+narrows it further in `policies/web-search-scope.md`: no customer name,
+`project_id` or project-memory content in a query.
+
+This note grants nothing: the task's `allowed_tools` and
+`policies/tools/tool-policy.yaml` decide.

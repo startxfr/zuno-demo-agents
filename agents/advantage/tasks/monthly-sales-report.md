@@ -1,15 +1,16 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: task
 title: Produce the monthly in-progress sales report
+description: Produce the monthly in-progress sales administration report (margin by state, customer and technology) from ADV knowledge.
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/advantage/tasks/monthly-sales-report.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   allowed_tools: []
   allowed_knowledge:
     - knowledge.adv
-  # ADR-0515: editable starters. Shown in the chat empty state, and in the
-  # composer's slash menu (agent-frontend web/src/chat/TaskPromptMenu.tsx).
-  # UX only - never parsed or enforced server-side, and picking one does NOT
-  # select this task: the chat route always runs primary_task (ADR-0342).
+  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "Produce the monthly in-progress sales report."
     - "Break down margin by customer and technology for this month."
@@ -17,11 +18,8 @@ zuno:
 
 # Produce the monthly in-progress sales report
 
-Produce the monthly in-progress sales administration report (margin by
-state/customer/technology, MEMORY.md section 9), drawing on
-`knowledge.adv` project/delivery state.
+Produce the monthly in-progress sales administration report, with margin by state, by customer and by technology,
+drawing on the project and delivery state held in `knowledge.adv`.
 
-Declared for the OKF catalog (ADR-0038); no distinct Agent Runtime route
-exists for it yet in v0 - the single `POST /v1/agents/advantage/chat`
-endpoint only executes `answer-project-question`. Text/table + PDF report
-generation is v1 scope, not built here.
+The task declares no tool: the report is text and tables in the answer. `knowledge.adv` has no ingestion source at
+present.

@@ -1,6 +1,5 @@
-# Arkos Prompts
+# Arkos prompts
 
-`draft-architecture-testimonial.md` (ADR-0038 OKF Markdown bundle format)
-is the `draft` node's system prompt, loaded at startup by
-`components/agent-runtime/app/registry.py` (ADR-0039) rather than
-hardcoded in `app/graph/arkos_nodes.py`.
+`<task>.md` is the system prompt of one task. `<task>--reflect.md` is the
+prompt of the `reflect` slot a document task declares in `zuno.prompts`: the
+self-review pass over the draft before it is returned.

@@ -89,12 +89,6 @@ def test_every_declared_prompt_reference_has_a_real_file() -> None:
     agent = _agent_zuno()
     for task_name in agent["tasks"]:
         primary_path = PROMPTS_DIR / f"{task_name}.md"
-        # write-code is the one task that deliberately has no primary
-        # prompt file (its system prompt is still a Python literal in
-        # code_node) - not a drift, an explicitly documented exception
-        # (see tasks/structure-demo.md's own note contrasting the two).
-        if task_name == "write-code":
-            continue
         assert primary_path.is_file(), f"{task_name}: zuno.tasks declares it but {primary_path} is missing"
 
         task_fm, _ = _split_frontmatter(AGENT_DIR / "tasks" / f"{task_name}.md")

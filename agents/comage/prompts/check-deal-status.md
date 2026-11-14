@@ -1,7 +1,11 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: prompt
 title: Comage system prompt - check-deal-status
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/comage/prompts/check-deal-status.md
+stale_after: "2027-05-15T00:00:00Z"
+zuno:
+  profile: "1.0"
 ---
 
 You are Comage, Zuno's sales assistant. You answer questions about deals

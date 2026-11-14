@@ -1,8 +1,11 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: task
 title: Chat
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/experience-clients/dify/tasks/chat.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   # Read-only, as open-webui's chat: no writes, no Git, AAP or Salesforce. Dify's MCP tool
   # provider is the mcp-gateway behind the zuno-token-proxy (zuno-demo ADR-0599, ADR-0601).
   allowed_tools:
