@@ -1,5 +1,5 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: experience-client
 title: Blender 3D generator
 description: >-
@@ -7,12 +7,11 @@ description: >-
   the ai-gateway's workstation entry and with the signed-in user's own token (device
   sign-in, Keycloak client `blender`), for a Blender Python script, shows it and runs it
   on the user's click. No MCP tools; local models only.
-provenance:
-  maintainer: Zuno Demo architecture team
-  repository: zuno-demo
-freshness:
-  last_reviewed: "2026-11-07"
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/experience-clients/blender/client.okf.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
+  maintainer: Zuno Demo architecture team
   name: blender
   tasks:
     # zuno-demo ADR-0610: the model routing of a bpy script; no tools.

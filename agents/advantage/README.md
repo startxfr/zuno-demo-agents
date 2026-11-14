@@ -1,55 +1,32 @@
-# Advantage Agent
+# Advantage
 
-- **Purpose:** Sales administration assistant
-- **Primary integrations:** Sales data (Salesforce, indexed ADV knowledge)
-- **Initial tasks:** New client-PO-received business; monthly in-progress sales reporting
+Sales administration assistant: project, delivery and bid questions, new business whose client purchase order was just
+received, the monthly in-progress sales report, and the user's own Drive documents and Gmail messages. It reads indexed
+sales administration (ADV) and project knowledge, never live Salesforce data.
 
-## Stage (ADR-0502)
+**Status: placeholder.** Declared but not served. Its main knowledge domain, `knowledge.adv`, has no ingestion source
+(zuno-demo ADR-0532), so the agent stays a placeholder. Entitlement group: `agent_advantage`; business role: `adv`.
 
-**Stage 1 with reserved Stage-2 structure** (legacy full-skeleton shape:
-empty directories retained, filled at promotion).
-
-- `zuno.status: placeholder` — "coming soon" tile; no live chat route.
-- Deployed by `gitops/charts/advantage/` as **raw manifests** (not yet
-  CR-managed; CR migration is a promotion-time step).
-- Real bundle (ADR-0326 slice 3/4, WP-35 repo work merged):
-  `retrieve_reason_respond` shape, primary task
-  `answer-project-question` plus `identify-new-business-with-po`,
-  `monthly-sales-report` and `check-my-drive-and-mail` — four declared
-  tasks.
-- Evaluations: `evaluations/advantage/` authored (including its
-  hand-authored narrative security checks). Human scenario review and
-  a live 75% gate run both completed 2026-08-30 (WP-35) — the suite is
-  explicitly written for placeholder behavior (tiles/chat "correctly
-  blocked"), Layer 1 100% (20/20). [ADR-0532](https://github.com/startxfr/zuno-demo/blob/main/docs/adr/0532-accept-knowledge-adv-as-sourceless-pending-a-replacement-adapter.md)
-  formally accepts `knowledge.adv` staying sourceless — this is not an
-  open decision anymore, it is the decided, final state, so there is
-  no pending "flip to active" step.
-
-**Next step:** none for promotion — this agent is deliberately staying
-`placeholder` (ADR-0532). CR migration remains available whenever an
-operator wants to do it, independent of that decision.
-
-## Declarative structure (ADR-0038: OKF v0.2 Markdown bundles)
+| Task | What it does | Tools | Knowledge |
+|---|---|---|---|
+| `answer-project-question` (primary) | Answer a project, delivery or bid question | `web_search`, `image.generation.create` | `knowledge.adv`, `knowledge.project` |
+| `identify-new-business-with-po` | New business with a client PO received in the last three days | none | `knowledge.adv` |
+| `monthly-sales-report` | Monthly in-progress sales report (margin by state, customer, technology) | none | `knowledge.adv` |
+| `check-my-drive-and-mail` | The user's own Drive documents and Gmail messages | `list_drive_files`, `read_gmail` | none |
 
 ```text
 advantage/
-├── README.md
-├── agent.okf.md         Agent index bundle (YAML frontmatter + Markdown body)
+├── README.md         this file (not published)
+├── VERSION           the agent's version, bumped when a published file changes
+├── index.md          generated, do not edit
+├── agent.okf.md      the agent: identity, status, task list, model, access, tile
 ├── tasks/
-│   ├── answer-project-question.md     (primary task)
+│   ├── answer-project-question.md        primary task
 │   ├── identify-new-business-with-po.md
 │   ├── monthly-sales-report.md
 │   └── check-my-drive-and-mail.md
-├── prompts/
-│   └── answer-project-question.md
-├── policies/            (stub)
-├── rag/                 (stub)
-├── tools/               (stub)
-├── deployment/          Generated ADR-0503 snapshot + README (WP-45)
-└── tests/               ADR-0504 structure (WP-46; suites fill at promotion)
+├── prompts/          the system prompt of each task, one file per task, same name
+└── tests/            contract/, tasks/ and prompts/ suites (not published)
 ```
 
-The runtime implementation is shared. This directory contains only
-agent-specific declarative behavior, policy, knowledge references and
-deployment configuration.
+See the [OKF field reference](../../docs/okf-reference.md) and [how to add an agent](../../docs/add-an-agent.md).

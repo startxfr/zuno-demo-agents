@@ -1,17 +1,16 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: experience-client
 title: Open WebUI
 description: >-
   General-purpose chat for every employee (zuno-demo ADR-0588). It chats through
   the ai-gateway and calls the read-only tools the user's groups allow through the mcp-gateway, always
   with the signed-in user's own token.
-provenance:
-  maintainer: Zuno Demo architecture team
-  repository: zuno-demo
-freshness:
-  last_reviewed: "2026-11-02"
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/experience-clients/open-webui/client.okf.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
+  maintainer: Zuno Demo architecture team
   name: open-webui
   tasks:
     - chat

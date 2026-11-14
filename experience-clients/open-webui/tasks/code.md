@@ -1,8 +1,11 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: task
 title: Code
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/experience-clients/open-webui/tasks/code.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   # zuno-demo ADR-0596 (WP-194): the ai-gateway routes the "Zuno Code" model
   # (zuno-code) under this task. Codestral first, then the local models in the
   # corp order. No tools of its own: the MCP connection stays on `chat`. The

@@ -1,23 +1,23 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: agent
 title: Finage
 description: >-
   Finance assistant. Identifies business ready to invoice and produces
-  monthly invoice reporting, drawing on durable project memory (the
-  pre-2021 SXA billing history is no longer served, WP-185) - never live
-  Salesforce or ADV/project-delivery data (ADR-0326: strictly
-  finance-scoped, no implicit inheritance from Comage/Advantage).
-provenance:
-  maintainer: Zuno Demo architecture team
-  repository: zuno-demo
-verification:
-  status: unverified
-freshness:
-  last_reviewed: "2026-08-05"
+  monthly invoice reporting from the durable project memory of one client
+  engagement, never from live Salesforce or sales administration data.
+  No billing history is available, so every figure is retrieved and
+  attributed, never computed.
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/finage/agent.okf.md
 sources:
-  - "knowledge.project"
+- id: knowledge.project
+  resource: urn:zuno:knowledge:project
+  title: Knowledge domain knowledge.project (project memory)
+status: draft
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
+  maintainer: Zuno Demo architecture team
   name: finage
   status: placeholder
   graph_shape: retrieve_reason_respond
@@ -52,58 +52,31 @@ zuno:
 
 # Finage
 
-ADR-0326 (WP-36): Finage's real OKF task bundle, graph shape and
-deployment surface are now merged - `status` stays `placeholder` until
-the operator confirms the live acceptance gate passes (WP-36's own
-Status-updates section; ADR-0326's "moves placeholder -> active only
-after the full common completion pattern passes"), so the portal keeps
-rendering "coming soon" and Agent Runtime's generic dispatch keeps
-404ing `/v1/agents/finage/chat` until that flip happens. No dedicated
-namespace is reserved (ADR-0329, supersedes ADR-0023): Finage's
-frontend/BFF deploy into the shared `zuno-ai-run` namespace, same as
-every other agent.
+Finance assistant. Its tasks answer invoicing and billing questions, identify business ready to invoice, produce the
+monthly invoicing report for one engagement, and list the user's own Drive documents and Gmail messages about an
+account or invoice.
 
-`zuno.graph_shape: retrieve_reason_respond` (ADR-0342) names the exact
-same LangGraph workflow module Tekos's, Comage's and Advantage's chat
-turns execute - proving a FOURTH agent reuses this shape with zero code
-change. `answer-finance-question` (`tasks/answer-finance-question.md`) is
-the one live-routed task: it declares no `live_read_tool` at all, unlike
-Comage's/Arkos's live-read tools - every deterministic legacy SXA
-capability Finage's other tasks declare needs structured numeric
-arguments (year, customer_id, ...), not a free-text query, so it does not
-fit the generic freshness-triggered live-read mechanism and stays
-declared-but-not-live-routed (v1 scope) instead of forcing a mismatched
-integration.
+`status: placeholder`: the agent is declared but not served, and a portal shows its tile as "coming soon".
 
-**Documented gap (WP-36's own brief anticipates this)**: no
-finance-specific RAG knowledge domain exists in this repository. Rather
-than inventing one, Finage's tasks declare `knowledge.project` (cross-agent
-project memory) for retrieval. They also declared the pre-2021 commercial record until
-2026-11-02 (WP-185), when that domain stopped being served.
+No finance-specific knowledge domain exists, so the tasks that retrieve read `knowledge.project`, the durable memory of
+client engagements. No billing history and no exact-figure capability are available either: every number Finage
+reports is retrieved and attributed, never computed, and never presented as the current state of an invoice.
 
-What remains open, and is now the sharper gap, is the *deterministic* side:
-Finage has no exact-figure capability at all. It was built on the `sxa.*`
-capabilities that ADR-0219 removed, and they are not coming back through
-this route - SXA is a closed pre-2021 record with no live billing system
-behind it, so nothing here can be authoritative about a current invoice.
-Every number Finage reports is retrieved and attributed, never computed.
+The two invoice tasks set `project_required: true`. They run only after the user's project is verified with
+`salesforce.opportunity.read` under the user's own identity, failing closed. That capability is declared for the
+binding check only: no Salesforce record content reaches the model. A verified binding scopes `knowledge.project`
+retrieval to that engagement.
 
-**ADR-0326's signature proof for this slice**: no task above ever
-declares the current-sales or ADV/project-delivery knowledge domains in
-`allowed_knowledge`, or any live-Salesforce/Aramis capability in
-`allowed_tools` - Finage proves least-privilege, finance-scoped access by
-explicit omission from its own OKF declaration (the ADR-0011/ADR-0203
-agent_declaration factor), never a runtime filter.
+Least privilege (zuno-demo ADR-0326): no task declares `knowledge.sales`, `knowledge.adv` or a capability that reads
+Salesforce data into an answer, so Finage stays finance-scoped by explicit omission from its own declaration, not by a
+runtime filter. `model.local_only: true` keeps finance material on local models at every classification (zuno-demo
+ADR-0416).
 
-Finage has no agent-level `zuno.allowed_knowledge` field either
-(ADR-0203), for the same reason every other agent doesn't: its knowledge
-ceiling is the union of every task's own `zuno.allowed_knowledge` - today
-just `[knowledge.project]`.
+The knowledge ceiling is the union of the tasks' `allowed_knowledge`: `knowledge.project`. The entitlement group is
+`agent_finage`; inside the agent, the `finance` business role governs tool and data access through
+`policies/tools/tool-policy.yaml` and `policies/knowledge/knowledge-policy.yaml`.
 
-Access group is `agent_finage` (ADR-0040 entitlement dimension,
-orthogonal to the `finance` business role that governs tool/data
-permissions inside Finage once active - see
-`policies/tools/tool-policy.yaml`'s Drive/Gmail entries).
+The bundle follows the Zuno OKF profile 1.0 (`platform/okf/schema/zuno-okf-profile-1.0-agent.schema.json`).
 
 <!-- BEGIN GENERATED AUTHORIZATION MATRIX (ADR-0503) - do not edit; regenerate with: python3 platform/okf/generate_authorization_matrix.py -->
 
@@ -119,8 +92,8 @@ Generated per ADR-0503 from this bundle's frontmatter, `policies/tools/tool-poli
 | `identify-business-ready-to-invoice` (project-required; prompt: `prompts/identify-business-ready-to-invoice.md`) | `knowledge.project` | knowledge | — | — | consultant, board, sales, adv, finance, cdp | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.project` |
 | `monthly-invoice-report` (project-required; prompt: `prompts/monthly-invoice-report.md`) | `salesforce.opportunity.read` | tool | `salesforce.opportunity.read` @ salesforce | C2 | sales, board | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `salesforce.opportunity.read` |
 | `monthly-invoice-report` (project-required; prompt: `prompts/monthly-invoice-report.md`) | `knowledge.project` | knowledge | — | — | consultant, board, sales, adv, finance, cdp | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.project` |
-| `check-my-drive-and-mail` | `list_drive_files` | tool | `drive.document.search` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `list_drive_files` |
-| `check-my-drive-and-mail` | `read_gmail` | tool | `gmail.message.read` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `read_gmail` |
+| `check-my-drive-and-mail` (prompt: `prompts/check-my-drive-and-mail.md`) | `list_drive_files` | tool | `drive.document.search` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `list_drive_files` |
+| `check-my-drive-and-mail` (prompt: `prompts/check-my-drive-and-mail.md`) | `read_gmail` | tool | `gmail.message.read` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `read_gmail` |
 
 ### Model routing
 
@@ -131,7 +104,7 @@ Effective per-task model chain (ADR-0021/ADR-0303/ADR-0412), resolved from `poli
 | `answer-finance-question` (primary; prompt: `prompts/answer-finance-question.md`) | `C2` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh` | — | `policies/model-routing/model-routing-policy.yaml` |
 | `identify-business-ready-to-invoice` (project-required; prompt: `prompts/identify-business-ready-to-invoice.md`) | `C2` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh` | — | `policies/model-routing/model-routing-policy.yaml` |
 | `monthly-invoice-report` (project-required; prompt: `prompts/monthly-invoice-report.md`) | `C2` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh` | — | `policies/model-routing/model-routing-policy.yaml` |
-| `check-my-drive-and-mail` | `C2` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh` | — | `policies/model-routing/model-routing-policy.yaml` |
+| `check-my-drive-and-mail` (prompt: `prompts/check-my-drive-and-mail.md`) | `C2` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh` | — | `policies/model-routing/model-routing-policy.yaml` |
 
 **Available models** (ADR-0419, generated): the union of every model reachable by any task or prompt slot above, at any classification, each with the model id it serves and that model's role - `local-maas` → `qwen3.6-27b-instruct` (quality), `local` → `qwen3.6-27b-instruct` (quality), `local-gpt-oss-maas` → `gpt-oss-20b` (reasoning), `local-gpt-oss` → `gpt-oss-20b` (reasoning), `local-wesh-maas` → `qwen3.5-9b-wesh` (specialized), `local-wesh` → `qwen3.5-9b-wesh` (specialized), `local-qwen35-maas` → `qwen3.5-9b` (default), `local-qwen35` → `qwen3.5-9b` (default).
 

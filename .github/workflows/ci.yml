@@ -22,13 +22,17 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install pyyaml==6.0.2 jsonschema==4.23.0
+      - name: OKF profile 1.0 schemas are frozen (zuno-demo ADR-0615)
+        run: python3 platform/okf/build_profile_schemas.py --check
       - name: OKF schemas (what unifai-operator validates before emitting)
         run: python3 platform/okf/validate_okf_schema.py
+      - name: Bundle index.md files match their generator (profile 1.0)
+        run: python3 platform/okf/generate_index.py --check
       - name: Bundle structure and corp policy references
         run: python3 platform/supply-chain/validate_okf_bundle.py
       - name: Quota policy and task quota-class references
         run: python3 platform/okf/validate_quota_policy.py
-      - name: Bundles only narrow the corp policies (OKF v0.3)
+      - name: Bundles only narrow the corp policies (v0.3 and profile 1.0)
         run: python3 platform/okf/check_narrowing.py
       - name: Authorization matrices match regeneration
         run: python3 platform/okf/generate_authorization_matrix.py --check --all
@@ -46,10 +50,14 @@ jobs:
       - run: pip install pyyaml==6.0.2 jsonschema==4.23.0
       - name: Agent contract suites
         run: python3 platform/okf/run_agent_contract_tests.py
+      - name: OKF profile 1.0 version dispatch and frozen schemas
+        run: python3 platform/okf/tests/test_okf_profile.py
       - name: OKF v0.3 schemas and narrowing rule
         run: python3 platform/okf/tests/test_okf_v03.py
       - name: Content notes may be v0.2 or v0.3
         run: python3 platform/okf/tests/test_content_note_versions.py
+      - name: Prompts name tools by capability
+        run: python3 platform/okf/tests/test_prompt_tool_names.py
       - name: tool-policy access field
         run: python3 platform/okf/tests/test_tool_policy_access.py
       - name: Experience clients (zuno-demo ADR-0592)

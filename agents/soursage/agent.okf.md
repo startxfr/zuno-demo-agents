@@ -1,20 +1,17 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: agent
 title: Soursage
 description: >-
   Recruiting assistant. Interacts with Workday and LinkedIn to source new
   consultant candidates and to find, among existing consultants, the best
   profile for a mission.
-provenance:
-  maintainer: Zuno Demo architecture team
-  repository: zuno-demo
-verification:
-  status: unverified
-freshness:
-  last_reviewed: "2026-08-15"
-sources: []
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/soursage/agent.okf.md
+status: draft
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
+  maintainer: Zuno Demo architecture team
   name: soursage
   status: placeholder
   tasks:
@@ -43,22 +40,19 @@ zuno:
 
 # Soursage
 
-ADR-0349 §6: `status` is `placeholder` - this bundle, the
-`soursage-frontend` Keycloak client, the `agent_soursage` entitlement
-group and this portal tile are the only things that exist for Soursage
-today (the original placeholder pattern comage/advantage/finage/arkos
-each started from). No dedicated namespace is reserved (ADR-0329): a
-future active Soursage deployment would run in the shared `zuno-ai-run`
-namespace, CR-managed via the AIAgent operator (ADR-0327/ADR-0308) like
-every agent onboarded since WP-38.
+Recruiting assistant: it will source new consultant candidates and find, among existing consultants, the best profile
+for a mission (zuno-demo ADR-0349).
 
-`tasks/coming-soon.md` describes the intended build - sourcing new
-consultant candidates and matching existing consultants to missions via
-Workday (`workday.profile.any.read`, the read-only ADR-0340 scoped
-capability WP-32 already registered) and a future LinkedIn capability -
-kept here so onboarding Soursage later is primarily a `status: active`
-flip plus real task implementation through the ADR-0307 template
-workflow (`platform/templates/agent/`), not a redesign.
+`status: placeholder`: the agent is declared but not served, and a portal shows its tile as "coming soon" to members of
+`agent_soursage`. Its single task, `coming-soon`, declares no tool and no knowledge domain, so the agent has no
+capability by construction.
+
+The intended build reads consultant profiles from Workday and candidates from LinkedIn, gated on the `recrut` and
+`sales` business roles. The corp tool policy already registers the read-only `workday.profile.any.read` capability
+(granted to `cdp` only today); no LinkedIn capability exists yet. Building the agent means authoring real tasks with
+their prompts and policy entries, then setting `status: active`.
+
+The bundle follows the Zuno OKF profile 1.0 (`platform/okf/schema/zuno-okf-profile-1.0-agent.schema.json`).
 
 <!-- BEGIN GENERATED AUTHORIZATION MATRIX (ADR-0503) - do not edit; regenerate with: python3 platform/okf/generate_authorization_matrix.py -->
 
@@ -74,7 +68,7 @@ Effective per-task model chain (ADR-0021/ADR-0303/ADR-0412), resolved from `poli
 
 | Task | Classification ceiling | Reference model | Fallback chain | Adapter | Policy source |
 |---|---|---|---|---|---|
-| `coming-soon` | `C2` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh`, `openai`, `anthropic`, `mistral-codestral`, `ovhcloud-gpt-oss-120b` | — | `policies/model-routing/model-routing-policy.yaml` |
+| `coming-soon` (prompt: `prompts/coming-soon.md`) | `C2` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh`, `openai`, `anthropic`, `mistral-codestral`, `ovhcloud-gpt-oss-120b` | — | `policies/model-routing/model-routing-policy.yaml` |
 
 **Available models** (ADR-0419, generated): the union of every model reachable by any task or prompt slot above, at any classification, each with the model id it serves and that model's role - `local-maas` → `qwen3.6-27b-instruct` (quality), `local` → `qwen3.6-27b-instruct` (quality), `local-gpt-oss-maas` → `gpt-oss-20b` (reasoning), `local-gpt-oss` → `gpt-oss-20b` (reasoning), `local-wesh-maas` → `qwen3.5-9b-wesh` (specialized), `local-wesh` → `qwen3.5-9b-wesh` (specialized), `local-qwen35-maas` → `qwen3.5-9b` (default), `local-qwen35` → `qwen3.5-9b` (default), `openai` → `gpt-4o-mini` (general-external), `anthropic` → `claude-3-5-sonnet-latest` (general-external), `mistral-codestral` → `codestral-latest` (code), `ovhcloud-gpt-oss-120b` → `gpt-oss-120b` (reasoning-external).
 
