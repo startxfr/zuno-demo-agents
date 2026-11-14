@@ -79,8 +79,8 @@ intersected with the corp policies and the caller's groups.
 | Agent version | `agents/<name>/VERSION` | Semantic version of one agent's published files |
 | Release version | `VERSION` | Semantic version of the whole release, the tag `vX.Y.Z` a platform pins |
 
-Legacy documents with `okf_version: v0.2` or `v0.3` are read until 2026-12-01, then refused
-([okf-reference.md](okf-reference.md#legacy-versions)).
+Legacy documents with `okf_version: v0.2` or `v0.3` are still read during a transition. zuno-demo refuses them from
+unifai-operator line 0.2 ([okf-reference.md](okf-reference.md#legacy-versions)).
 
 ## Where each part is documented
 
