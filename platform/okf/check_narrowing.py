@@ -152,10 +152,21 @@ def check_bundle(bundle: pathlib.Path, corp: Corp) -> List[str]:
         version = document_version(agent)
     except UnsupportedVersion:
         return []  # reported by validate_okf_schema.py
-    if not at_least_v03(version):
-        if z.get("delegation") or (z.get("limits") or {}).get("delegation"):
-            return [f"{label}/agent.okf.md: delegation is an OKF v0.3 field (profile 1.0 included); this bundle declares "
-                    f"okf_version {agent.get('okf_version')!r}"]
+    # The rules apply when ANY document of the bundle is at v0.3 or above: a legacy v0.2 agent whose tasks are
+    # profile 1.0 is narrowed too (readers accept mixed bundles, ADR-0615 clause 5).
+    effective = version
+    for task in z.get("tasks") or []:
+        try:
+            task_version = document_version(frontmatter(bundle / "tasks" / f"{task}.md"))
+        except (UnsupportedVersion, OSError):
+            continue  # reported by validate_okf_schema.py / validate_okf_bundle.py
+        if at_least_v03(task_version) and not at_least_v03(effective):
+            effective = task_version
+    # delegation lives in the agent document: it needs the AGENT to be at v0.3 or above.
+    if not at_least_v03(version) and (z.get("delegation") or (z.get("limits") or {}).get("delegation")):
+        return [f"{label}/agent.okf.md: delegation is an OKF v0.3 field (profile 1.0 included); this bundle declares "
+                f"okf_version {agent.get('okf_version')!r}"]
+    if not at_least_v03(effective):
         return []
     classification = (z.get("model") or {}).get("preferred_classification", "")
     findings: List[str] = []

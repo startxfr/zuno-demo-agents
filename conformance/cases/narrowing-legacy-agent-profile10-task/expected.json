@@ -1,0 +1,51 @@
+{
+  "description": "A legacy v0.2 agent whose task is profile 1.0 and asks for max_steps 99, above the corp ceiling: readers load the mixed bundle, and the narrowing check still refuses it (the level is the highest of the agent and its tasks).",
+  "mcp_gateway": {
+    "load_error": null,
+    "agents": {
+      "alpha": {
+        "status": "active",
+        "access_groups": [
+          "agent_demo"
+        ],
+        "tasks": {
+          "ask": [
+            "search_docs"
+          ]
+        }
+      }
+    }
+  },
+  "admission": {
+    "error": null,
+    "agents": {
+      "alpha": {
+        "status": "active",
+        "groups": [
+          "agent_demo"
+        ],
+        "classification": "C1",
+        "tasks": {
+          "ask": {
+            "tools": [
+              "search_docs"
+            ],
+            "knowledge": [
+              "knowledge.tech"
+            ],
+            "quota_class": "standard"
+          }
+        }
+      }
+    }
+  },
+  "delegation": {
+    "agents": {
+      "alpha": {
+        "targets": [],
+        "max_depth": null
+      }
+    },
+    "narrowing_error": "max_steps 99 exceeds the corp ceiling"
+  }
+}
