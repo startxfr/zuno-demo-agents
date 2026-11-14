@@ -56,6 +56,8 @@ jobs:
         run: python3 platform/okf/tests/test_okf_v03.py
       - name: Content notes may be v0.2 or v0.3
         run: python3 platform/okf/tests/test_content_note_versions.py
+      - name: Prompts name tools by capability
+        run: python3 platform/okf/tests/test_prompt_tool_names.py
       - name: tool-policy access field
         run: python3 platform/okf/tests/test_tool_policy_access.py
       - name: Experience clients (zuno-demo ADR-0592)
