@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""OKF v0.3: an agent bundle may only narrow the corp policies (zuno-demo ADR-0579 clause 5).
+"""An agent bundle may only narrow the corp policies (zuno-demo ADR-0579 clause 5, ADR-0615 clause 6).
 
-Runs on every bundle; v0.2 bundles have none of the v0.3 fields and pass
-trivially. For a v0.3 bundle, a declaration that would WIDEN what the corp
-policies allow is a finding, naming the corp clause it exceeds:
+Runs on every bundle. The rules apply from legacy v0.3 up, profile 1.0
+included: the gate compares levels (okf_profile.at_least_v03), never a
+version string, so a new profile can never skip them in silence. Legacy
+v0.2 bundles have none of these fields and pass trivially. A declaration
+that would WIDEN what the corp policies allow is a finding, naming the corp
+clause it exceeds:
 
 - skills       every skill a task lists exists (agents/<agent>/skills/<name>.md, or
                policies/skills/<name>.md for `corp/<name>`, shipped in the
@@ -38,6 +41,9 @@ import sys
 from typing import Dict, List, Optional, Set
 
 import yaml
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from okf_profile import UnsupportedVersion, at_least_v03, document_version, is_profile  # noqa: E402
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 AGENTS_DIR = REPO_ROOT / "agents"
@@ -142,10 +148,25 @@ def check_bundle(bundle: pathlib.Path, corp: Corp) -> List[str]:
     label = bundle.relative_to(REPO_ROOT).as_posix()
     agent = frontmatter(bundle / "agent.okf.md")
     z = agent.get("zuno") or {}
-    if agent.get("okf_version") != "v0.3":
-        if z.get("delegation") or (z.get("limits") or {}).get("delegation"):
-            return [f"{label}/agent.okf.md: delegation is an OKF v0.3 field; this bundle declares "
-                    f"okf_version {agent.get('okf_version')!r}"]
+    try:
+        version = document_version(agent)
+    except UnsupportedVersion:
+        return []  # reported by validate_okf_schema.py
+    # The rules apply when ANY document of the bundle is at v0.3 or above: a legacy v0.2 agent whose tasks are
+    # profile 1.0 is narrowed too (readers accept mixed bundles, ADR-0615 clause 5).
+    effective = version
+    for task in z.get("tasks") or []:
+        try:
+            task_version = document_version(frontmatter(bundle / "tasks" / f"{task}.md"))
+        except (UnsupportedVersion, OSError):
+            continue  # reported by validate_okf_schema.py / validate_okf_bundle.py
+        if at_least_v03(task_version) and not at_least_v03(effective):
+            effective = task_version
+    # delegation lives in the agent document: it needs the AGENT to be at v0.3 or above.
+    if not at_least_v03(version) and (z.get("delegation") or (z.get("limits") or {}).get("delegation")):
+        return [f"{label}/agent.okf.md: delegation is an OKF v0.3 field (profile 1.0 included); this bundle declares "
+                f"okf_version {agent.get('okf_version')!r}"]
+    if not at_least_v03(effective):
         return []
     classification = (z.get("model") or {}).get("preferred_classification", "")
     findings: List[str] = []
@@ -208,8 +229,16 @@ def main(argv: List[str]) -> int:
             print(f"  ✗ {f}")
         print("\nRESULT: FAIL - a bundle may only narrow the corp policies (ADR-0579 clause 5).")
         return 1
-    v03 = sum(1 for b in bundles if frontmatter(b / "agent.okf.md").get("okf_version") == "v0.3")
-    print(f"Checked {len(bundles)} bundle(s), {v03} in OKF v0.3.")
+    versions = []
+    for b in bundles:
+        try:
+            versions.append(document_version(frontmatter(b / "agent.okf.md")))
+        except UnsupportedVersion:
+            versions.append("unsupported")
+    profile = sum(1 for v in versions if v != "unsupported" and is_profile(v))
+    v03 = versions.count("v0.3")
+    print(f"Checked {len(bundles)} bundle(s): {profile} on profile 1.0, {v03} on legacy v0.3, "
+          f"{versions.count('v0.2')} on legacy v0.2.")
     print("\nRESULT: PASS - no bundle widens the corp policies.")
     return 0
 

@@ -1,7 +1,11 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: prompt
 title: Arkos system prompt - workshop-presentation (reflect slot)
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/arkos/prompts/workshop-presentation--reflect.md
+stale_after: "2027-05-15T00:00:00Z"
+zuno:
+  profile: "1.0"
 ---
 
 You are reviewing your own draft of an Odyssey architecture workshop

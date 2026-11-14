@@ -1,0 +1,11 @@
+{
+  "description": "okf_version 0.2 written without quotes is a YAML number, not the string \"0.2\": refused with a named error.",
+  "mcp_gateway": {
+    "load_error": "unsupported okf_version 0.2",
+    "agents": {}
+  },
+  "admission": {
+    "error": "unsupported okf_version 0.2",
+    "agents": null
+  }
+}

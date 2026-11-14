@@ -9,21 +9,19 @@ Three-layer boundary (ADR-0504): **schema/structural** checks are
 platform-wide and live in `platform/supply-chain/` +
 `platform/okf/schema/` - never duplicated here; **contract** checks
 (this directory) are Arkos-specific and need only repository files - no
-cluster, no credentials, no model calls; **behavioral** checks stay in
-`evaluations/arkos/` (ADR-0027/ADR-0028, the shared ADR-0342 runner).
+cluster, no credentials, no model calls; **behavioral** checks (live
+evaluation scenarios) live in the zuno-demo repository.
 
 - `contract/` - bundle-level self-consistency (declared tools/domains
-  exist in policy with non-empty group intersections; ADR-0503 matrix
-  and deployment snapshot are current)
+  exist in policy with non-empty group intersections; the ADR-0503
+  matrix is current)
 - `tasks/` - per-task assertions (live_read_tool within allowed_tools,
-  primary_task declared, ADR-0512 project_required marks well-formed)
-- `prompts/` - prompt lint (required OKF frontmatter, referenced by a
-  task, golden-format checks where a task defines one)
+  primary_task declared, ADR-0512 project_required marks well-formed,
+  max_tokens within the schema bound)
+- `prompts/` - prompt lint (required OKF frontmatter, every prompt
+  referenced by a task or prompt slot, every task and slot has its file)
 
-**Blocking rule (ADR-0504):** Arkos is not exempt from this structure
-requirement. `contract/`, `tasks/` and `prompts/` must contain real, green
-tests before Arkos can be promoted to Stage 2 -
-`https://github.com/startxfr/zuno-demo/blob/main/https://github.com/startxfr/zuno-demo/blob/main/platform/templates/agent/PROMOTION.md` step 4 is explicit: empty stub
-directories are not Stage 2. Filling these suites is owned by whichever
-work promotes Arkos, but the requirement itself blocks promotion, not
-just documents an aspiration.
+**Blocking rule (ADR-0504):** `contract/`, `tasks/` and `prompts/` must
+contain real, green tests; step 4 of the promotion checklist
+([PROMOTION.md](https://github.com/startxfr/zuno-demo/blob/main/platform/templates/agent/PROMOTION.md))
+requires them. Empty stub directories do not count.

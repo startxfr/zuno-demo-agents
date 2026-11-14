@@ -26,44 +26,57 @@ agents/<name>/
   agent.okf.md
   tasks/<task>.md
   prompts/<task>.md
+  index.md          (generated in step 3)
   VERSION
 ```
 
-- `agent.okf.md`: `okf_version`, `type: agent`, `title`, `description`, and the `zuno:` block (`name`, `status`, `tasks`,
+Every document starts with the profile 1.0 envelope (see the [field reference](okf-reference.md#the-envelope-every-document)):
+`okf_version: "0.2"` (quoted), `type`, `title`, `resource` (the file's URL on the main branch) and `zuno.profile: "1.0"`.
+
+- `agent.okf.md`: the envelope with `description`, and the `zuno:` block (`profile`, `maintainer`, `name`, `status`, `tasks`,
   `primary_task`, `graph_shape`, `model.preferred_classification`, `access.groups`, `ui`). `access.groups` is
   `agent_<name>`; the directory name, `zuno.name` and that group must agree.
-- `tasks/<task>.md`: one file per entry of `zuno.tasks`, with `allowed_tools` (required) and `allowed_knowledge`.
-- `prompts/<task>.md`: the prompt text of the task, in the body.
+- `tasks/<task>.md`: one file per entry of `zuno.tasks`, with a one-line `description`, `allowed_tools` (required) and `allowed_knowledge`.
+- `prompts/<task>.md`: the prompt text of the task, in the body. Every task has one.
 - `VERSION`: `0.1.0` for a new agent.
 
 Optional: `tools/`, `rag/`, `policies/` notes, `skills/`, and a `tests/` folder (see step 6). A minimal agent is the example
 at the end of the [field reference](okf-reference.md#examples).
 
-There is a scaffold, `platform/templates/agent/scaffold_agent.py`, written for the platform that owns this repository. It writes
-a valid `agents/<name>/` skeleton, **and also** `gitops/` charts and `evaluations/` folders that belong to that platform and do not
-exist in this repository, plus a `keycloak-fragment.json` and a `NEXT_STEPS.md` for it. Those extra files are not part of the
-agent and are never published. Use the scaffold only to get the skeleton, and delete what you do not need; it does not
-create `VERSION`. Writing the three files by hand is just as quick.
+There is a scaffold that writes a valid profile 1.0 skeleton (`agent.okf.md` as a placeholder, the primary task, its
+prompt, a README, `VERSION` 0.1.0) and generates the matrix and the index. It refuses a tool or a domain the corp
+policies do not know:
 
-## 3. Generate the authorization matrix
+```sh
+python3 platform/templates/agent/scaffold_agent.py --name <name> --title <Title> --description "<one line>" \
+    --primary-task <task> --primary-task-title "<Task title>" --knowledge knowledge.tech --tool web_search \
+    --tile-description "<tile text>"
+```
 
-Each `agent.okf.md` body carries a generated section that restates who may use which tool for which task. A release refuses
-a file where it is missing or stale:
+## 3. Generate the authorization matrix and the index
+
+Each `agent.okf.md` body carries a generated section that restates who may use which tool for which task, and each
+bundle has a generated `index.md` that lists its documents (upstream OKF §8). A release refuses a bundle where either
+is missing or stale:
 
 ```sh
 python3 platform/okf/generate_authorization_matrix.py --all      # writes the section
+python3 platform/okf/generate_index.py                           # writes agents/<name>/index.md
 python3 platform/okf/generate_authorization_matrix.py --check --all
+python3 platform/okf/generate_index.py --check
 ```
 
-Regenerate it after any change to a task or to a corp policy.
+Regenerate both after any change to a task, a prompt, a note or a corp policy.
 
 ## 4. Run the checks
 
 These are the checks the release workflow re-runs on the tagged tree:
 
 ```sh
+python3 platform/okf/build_profile_schemas.py --check     # the profile 1.0 schemas are unchanged (frozen)
 python3 platform/okf/validate_okf_schema.py                # every document matches its schema
-python3 platform/supply-chain/validate_okf_bundle.py       # structure, and every policy reference resolves
+python3 platform/okf/generate_index.py --check             # every index.md is up to date
+python3 platform/supply-chain/validate_okf_bundle.py       # structure, references and the profile 1.0 rules
 python3 platform/okf/validate_quota_policy.py
 python3 platform/okf/check_narrowing.py                    # nothing widens the corp policies
 python3 platform/okf/generate_authorization_matrix.py --check --all

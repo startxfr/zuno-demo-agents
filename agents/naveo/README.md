@@ -1,52 +1,26 @@
-# Naveo Agent
+# Naveo
 
-- **Purpose:** Onboarding assistant for new team members (synthetic
-  persona, ADR-0410's sixth-agent template proof)
-- **Primary integrations:** Technical RAG, project memory, Confluence,
-  Drive, web search — existing capabilities only, by construction
-- **Initial tasks:** Onboarding Q&A
+Onboarding assistant for new team members: questions about internal processes, tooling and where to find reference
+material, grounded in the technical documentation corpus, project memory and internal Confluence content, with a web
+search fallback and a look at the user's own Drive. It reuses existing knowledge domains and tool capabilities only
+(zuno-demo ADR-0410).
 
-## Stage (ADR-0502)
+**Status: placeholder.** Declared but not served. Entitlement group: `agent_naveo`; business role: `consultant`.
 
-**Stage 1 — scaffolded (the canonical Stage-1 shape).** Naveo is the
-generator's own output (`platform/templates/agent/scaffold_agent.py`,
-ADR-0307/WP-41), unmodified except for reviewed fixes, and defines what
-Stage 1 means: this lean bundle plus a CR-managed chart — no README-era
-skeleton directories at all until promotion grows them.
-
-- `zuno.status: placeholder` — "coming soon" tile; generic dispatch
-  404s until the flip.
-- **CR-managed from day one**: `gitops/charts/naveo/` renders a single
-  `AIAgent` CR (the first agent never to have a raw-manifest chart);
-  both live CRs (Arkos, Naveo) confirmed all-conditions-`True`
-  in-cluster 2026-08-17.
-- Keycloak identity, Vault seeds, check.yml wiring and policy
-  verification (zero edits needed) all done — see `NEXT_STEPS.md`
-  steps 1–6.
-- Evaluations: `evaluations/naveo/` scaffolded; **human scenario review
-  and the operator deploy + 75 % gate are the open promotion steps**
-  (NEXT_STEPS 7–8, now the PROMOTION.md checklist).
-
-**Next step:** `https://github.com/startxfr/zuno-demo/blob/main/https://github.com/startxfr/zuno-demo/blob/main/platform/templates/agent/PROMOTION.md` step 1 (scenario
-review of `evaluations/naveo/scenarios.yaml`).
-
-## Declarative structure (ADR-0038; Stage-1 lean shape)
+| Task | What it does | Tools | Knowledge |
+|---|---|---|---|
+| `answer-onboarding-question` (primary) | Answer an onboarding question, with citations | `search_confluence` (live read), `web_search`, `list_drive_files` | `knowledge.tech`, `knowledge.project` |
 
 ```text
 naveo/
-├── README.md
-├── agent.okf.md            Agent index bundle (YAML frontmatter + Markdown body)
-├── keycloak-fragment.json  Identity reference copy (merged into realm-zuno.json)
-├── NEXT_STEPS.md           Onboarding checklist (steps 1-6 done; 7 = promotion)
+├── README.md         this file (not published)
+├── VERSION           the agent's version, bumped when a published file changes
+├── index.md          generated, do not edit
+├── agent.okf.md      the agent: identity, status, task list, model, access, tile
 ├── tasks/
-│   └── answer-onboarding-question.md   (primary task)
+│   └── answer-onboarding-question.md    the primary task
 └── prompts/
-    └── answer-onboarding-question.md
+    └── answer-onboarding-question.md    its system prompt
 ```
 
-`deployment/`, `policies/`, `rag/`, `tools/` and `tests/` do not exist
-yet by design (ADR-0502 Stage 1) — they are born at promotion with real
-ADR-0503/ADR-0504 content, never as empty stubs.
-
-The runtime implementation is shared. This directory contains only
-agent-specific declarative behavior, policy and knowledge references.
+See the [OKF field reference](../../docs/okf-reference.md) and [how to add an agent](../../docs/add-an-agent.md).

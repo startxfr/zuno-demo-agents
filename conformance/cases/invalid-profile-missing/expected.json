@@ -1,0 +1,11 @@
+{
+  "description": "okf_version \"0.2\" without zuno.profile: refused with a named error.",
+  "mcp_gateway": {
+    "load_error": "unsupported zuno.profile None",
+    "agents": {}
+  },
+  "admission": {
+    "error": "unsupported zuno.profile None",
+    "agents": null
+  }
+}

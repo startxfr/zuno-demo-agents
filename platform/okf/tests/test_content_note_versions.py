@@ -72,8 +72,9 @@ class NoteVersions(unittest.TestCase):
     def test_another_version_is_refused_by_note_kind(self):
         findings = [f.message for f in self.validate({"rag": "v0.9", "tool": "v0.3", "policy": "v0.1"})]
         self.assertEqual(len(findings), 2, findings)
-        self.assertTrue(any("rag/tech.md: expected okf_version v0.2 or v0.3 and type rag" in m for m in findings))
-        self.assertTrue(any("policies/scope.md: expected okf_version v0.2 or v0.3 and type policy" in m for m in findings))
+        # zuno-demo ADR-0615 clause 5: the refusal names the unsupported version
+        self.assertTrue(any("rag/tech.md: unsupported okf_version 'v0.9'" in m for m in findings), findings)
+        self.assertTrue(any("policies/scope.md: unsupported okf_version 'v0.1'" in m for m in findings), findings)
 
     def test_v03_notes_match_their_v03_schemas(self):
         validators = schema.validators()

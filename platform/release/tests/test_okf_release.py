@@ -101,6 +101,41 @@ class LayerTest(RepoTestCase):
         self.assertEqual(again.annotations()["org.opencontainers.image.version"], "1.0.0")
         self.assertEqual(again.annotations()["zuno.okf.version"], "v0.2")
 
+    def test_unpublished_files_do_not_move_the_annotations(self) -> None:
+        """README, tests, VERSION and notes are not in the artifact: editing them must not change its manifest."""
+        agent = self.root / "agents" / "demo"
+        before = okf_release.build_agent(agent)
+        (agent / "README.md").write_text("a better readme\n")
+        (agent / "tasks" / "README.md").write_text("better notes\n")
+        (agent / "tests" / "test_x.py").write_text("assert True\n")
+        (agent / "NEXT_STEPS.md").write_text("later\n")
+        (agent / "VERSION").write_text("1.0.1\n")
+        self.commit("docs, tests and notes only")
+        after = okf_release.build_agent(agent)
+        annotations = {k: v for k, v in after.annotations().items() if k != "org.opencontainers.image.version"}
+        expected = {k: v for k, v in before.annotations().items() if k != "org.opencontainers.image.version"}
+        self.assertEqual(annotations, expected)
+        self.assertEqual(before.layer, after.layer)
+
+    def test_a_published_file_change_moves_the_annotations(self) -> None:
+        agent = self.root / "agents" / "demo"
+        before = okf_release.build_agent(agent)
+        (agent / "tasks" / "do.md").write_text("---\ntype: task\n---\nchanged\n")
+        self.commit("task changed")
+        after = okf_release.build_agent(agent)
+        self.assertNotEqual(before.annotations()["org.opencontainers.image.revision"],
+                            after.annotations()["org.opencontainers.image.revision"])
+
+    def test_a_deleted_published_file_moves_the_annotations(self) -> None:
+        agent = self.root / "agents" / "demo"
+        (agent / "tasks" / "extra.md").write_text("---\ntype: task\n---\n")
+        self.commit("add a task")
+        before = okf_release.build_agent(agent)
+        (agent / "tasks" / "extra.md").unlink()
+        self.commit("remove it")
+        self.assertNotEqual(before.annotations()["org.opencontainers.image.revision"],
+                            okf_release.build_agent(agent).annotations()["org.opencontainers.image.revision"])
+
     def test_corp_index_lists_agent_references(self) -> None:
         build = okf_release.build_agent(self.root / "agents" / "demo")
         index = json.loads(okf_release.corp_index("0.1.0", "release", {"demo": (build, "r/okf-demo@sha256:1")}))

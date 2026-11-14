@@ -1,15 +1,16 @@
 ---
-okf_version: v0.2
+okf_version: "0.2"
 type: task
 title: Check my Drive and mail
+description: List the user's own Google Drive documents and Gmail messages about an account or opportunity, with the user's delegated access.
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/comage/tasks/check-my-drive-and-mail.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   allowed_tools:
     - list_drive_files
     - read_gmail
-  # ADR-0515: editable starters. Shown in the chat empty state, and in the
-  # composer's slash menu (agent-frontend web/src/chat/TaskPromptMenu.tsx).
-  # UX only - never parsed or enforced server-side, and picking one does NOT
-  # select this task: the chat route always runs primary_task (ADR-0342).
+  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "List my Drive documents and emails about the Startx account."
     - "Which recent emails mention the renewal negotiation?"
@@ -18,14 +19,8 @@ zuno:
 # Check my Drive and mail
 
 List the authenticated sales rep's own Google Drive documents and Gmail
-messages relevant to a given account or opportunity, using delegated
-end-user OAuth2 (ADR-0014, `auth_mode: delegated-user`) so only content
-the user can already see is returned - the same delegated Google
-Workspace pattern Arkos proved for Drive writes, exercised here for reads
-under Comage's own `sales` role.
+messages relevant to a given account or opportunity. Both tools use
+delegated end-user OAuth2 (zuno-demo ADR-0014), so only content the user can
+already see is returned.
 
-Declared for the OKF catalog (ADR-0038); no distinct Agent Runtime route
-exists for it yet in v0 - the single `POST /v1/agents/comage/chat`
-endpoint only executes `check-deal-status`. Wiring a dedicated route for
-this task is v1 scope, matching Tekos's own `find-relevant-docs`/
-`check-my-drive-docs` catalog-only tasks.
+The task only reads: it declares no write tool and no knowledge domain.

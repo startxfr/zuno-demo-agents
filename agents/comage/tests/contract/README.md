@@ -5,5 +5,5 @@ Bundle-level self-consistency suites (`test_*.py`): every
 and every `allowed_knowledge` entry in
 `policies/knowledge/knowledge-policy.yaml`, each with a non-empty
 `allowed_groups` intersection for this agent's intended roles; the
-generated ADR-0503 authorization matrix and deployment snapshot are
-current. Static repository checks only.
+generated ADR-0503 authorization matrix is current. Static repository
+checks only.

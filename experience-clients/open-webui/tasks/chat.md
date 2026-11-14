@@ -1,8 +1,11 @@
 ---
-okf_version: v0.3
+okf_version: "0.2"
 type: task
 title: Chat
+resource: https://github.com/startxfr/zuno-demo-agents/blob/main/experience-clients/open-webui/tasks/chat.md
+stale_after: "2027-05-15T00:00:00Z"
 zuno:
+  profile: "1.0"
   # Read-only. Writes, Git, AAP, Salesforce and web search (switched off in
   # Open WebUI, ADR-0588) are not allowed.
   allowed_tools:
