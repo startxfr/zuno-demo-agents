@@ -261,31 +261,38 @@ preferences:
     task: coming-soon
     preferred: [local-qwen35-maas, local-qwen35, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
 
-  # ADR-0417: coding requests. Arkos's write-code call is a scoped,
-  # early-exit branch of an otherwise C3-seeded agent (evaluated at a
-  # fixed C2 ceiling in code, mirroring reflect_node's ADR-0416 override).
-  # strict: true means mistral-codestral is the ONLY candidate; if it
-  # fails for any reason (including running out of credits), the turn
-  # fails explicitly (RoutingError/502) rather than silently falling back
-  # to a different model the user didn't ask for.
+  # Arkos write-code: sovereign coding on local models, gpt-oss-20b first,
+  # the local quality model as fallback. zuno-demo ADR-0417 pinned this task
+  # to mistral-codestral with strict: true, relying on the agent runtime
+  # evaluating it at a fixed C2 ceiling. That runtime is gone (2026-10-23),
+  # and the platform gives every task its agent's level (zuno-demo
+  # ADR-0565): Arkos is C3 and mistral-codestral is eligible for C1/C2 only,
+  # so every call failed closed. Arkos keeps a C3 chat history, so no turn of
+  # this task leaves the cluster at any level. Coding with Codestral on
+  # C1/C2 data is the tekos write-code task below.
   - agent: arkos
     task: write-code
-    prefer: [mistral-codestral]
-    strict: true
+    preferred: [local-gpt-oss-maas, local-gpt-oss]
+    fallback: [local-maas, local]
+    local_only_for: [C1, C2, C3]
   # Tekos is C1-seeded, so mistral-codestral (eligible_for: [C1, C2]) is
   # already reachable at its natural classification with no override - no
   # strict flag: the existing generic fallback-on-any-exception in
   # app/main.py's _invoke_with_fallback (unchanged) naturally drops to
   # local if Codestral errors, giving "use local also for coding" for
   # free from already-live machinery.
-  # ADR-0526 (WP-087): the variant goes SECOND here too - mistral-codestral
-  # stays at index 0 and this entry stays non-strict. Both are enforced in
-  # CI by evaluations/tekos/gate_checks.py's
+  # ADR-0526 (WP-087) put the wesh variant SECOND here. 2026-11-14 (owner's
+  # decision): the wesh providers (local-wesh-maas, local-wesh) are no longer
+  # preferred for write-code; the first fallback is gpt-oss. They stay eligible
+  # (this entry is not strict), so they still come after the listed names, in
+  # provider-routing.yaml order. mistral-codestral stays at index 0 and this
+  # entry stays non-strict. Both are enforced in CI by
+  # evaluations/tekos/gate_checks.py's
   # tekos_write_code_prefers_mistral_codestral check, which fails the gate
   # outright if either changes.
   - agent: tekos
     task: write-code
-    prefer: [mistral-codestral, local-wesh-maas, local-wesh, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
+    prefer: [mistral-codestral, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
 
 # ADR-0304 (WP-40 Part B): per (agent, task) "task class" quality/cost/
 # latency objectives, consumed by evaluations/routing_report.py alongside
