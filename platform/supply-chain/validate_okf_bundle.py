@@ -19,7 +19,9 @@ Checks per agent bundle (agents/<name>/) and experience client (experience-clien
    - every task has a prompt;
    - the upstream `status` agrees with `zuno.status`;
    - a tool note's `capability` is in the tool policy;
-   - `used_by_tasks` lists every task that declares the item.
+   - `used_by_tasks` lists every task that declares the item;
+   - a prompt or a skill names a tool by its `capability`, the name the model is offered, never by a legacy
+     `tool` name.
 
    A `stale_after` in the past is a warning, never a failure.
 
@@ -89,6 +91,17 @@ def _known_tool_names() -> Set[str]:
         if "capability" in entry:
             names.add(entry["capability"])
     return names
+
+
+def _legacy_tool_names() -> Dict[str, str]:
+    """Legacy `tool` name -> its `capability`, for every entry of the tool policy where the two differ. The runtime
+    offers a tool to the model under its capability, so a prompt that names the legacy name names a tool the
+    model never sees."""
+    if not TOOL_POLICY_PATH.is_file():
+        return {}
+    doc = yaml.safe_load(TOOL_POLICY_PATH.read_text()) or {}
+    return {e["tool"]: e["capability"] for e in doc.get("tools", [])
+            if e.get("tool") and e.get("capability") and e["tool"] != e["capability"]}
 
 
 def tool_policy_findings(path: pathlib.Path = TOOL_POLICY_PATH) -> List["Finding"]:
@@ -269,6 +282,14 @@ def _profile_rules(bundle_dir: pathlib.Path, label: str, agent: Dict,
     for task in declared_tasks:
         if not (bundle_dir / "prompts" / f"{task}.md").is_file():
             findings.append(Finding(label, f"task {task!r} has no prompts/{task}.md (every task has a prompt)"))
+    legacy = _legacy_tool_names()
+    for doc in docs:
+        rel = doc.relative_to(bundle_dir).as_posix()
+        if not rel.startswith(("prompts/", "skills/")):
+            continue
+        for name in sorted(set(re.findall(r"`([A-Za-z0-9_.]+)`", doc.read_text(encoding="utf-8"))) & set(legacy)):
+            findings.append(Finding(label, f"{rel}: names the tool {name!r}; the model is offered it as "
+                                           f"{legacy[name]!r}, write that"))
     # Notes: a known capability, and used_by_tasks lists every task that declares it (both directions).
     for kind, key, field in (("tools", "capability", "tools"), ("rag", "domain", "knowledge")):
         for note in _content_notes(bundle_dir / kind):
