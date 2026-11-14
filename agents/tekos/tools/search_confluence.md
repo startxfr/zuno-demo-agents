@@ -12,24 +12,23 @@ zuno:
     - find-relevant-docs
   live_read: true
   usage_notes: >-
-    Searches internal Confluence spaces for content relevant to the
-    current question or topic. In answer-technical-question it is the
-    live_read_tool (ADR-0342/WP-33): the conditional live-read branch
-    calls it when the indexed knowledge.tech corpus alone does not ground
-    an answer, so results stay current between RAG ingestion runs. In
-    find-relevant-docs it is the primary/only tool - a lookup task that
-    returns matching pages without composing a narrative answer.
+    Takes a text query and returns the matching pages of the internal
+    Confluence spaces. In answer-technical-question it is the
+    live_read_tool: the turn calls it when the indexed knowledge.tech corpus
+    alone does not ground an answer, so the answer can use content newer
+    than the last ingestion. In find-relevant-docs it finds the Confluence
+    pages on the requested topic, returned as a list rather than an answer.
   known_limitations:
-    - "C2 classification (policies/tools/tool-policy.yaml): results must
-      not reach external/SaaS models (external_model_policy.allow_context:
-      false), regardless of the task's own C1 preferred_classification
-      ceiling."
+    - "Data classification C2 (min_classification). Its results must stay on local models (external_model_policy.allow_context: false), even though Tekos's ceiling is C1."
+    - "Allowed groups: consultant, board, cdp, lightspeed_readonly, ocp-ai-ops."
+    - "Access: read. It changes nothing in Confluence."
 ---
 
 # Confluence page search
 
-Legacy pre-ADR-0116 name for the `confluence` MCP server's page-search
-capability (`policies/tools/tool-policy.yaml`). Documentary only - actual
-authorization stays `allowed_tools` (per task) intersected with
-`policies/tools/tool-policy.yaml` and
-`platform/bindings/tools/tool-bindings.yaml`.
+Searches the internal Confluence spaces. `search_confluence` is the legacy
+name of the canonical capability `confluence.page.search`. It is the live
+complement of the Confluence content indexed in `knowledge.tech`.
+
+This note grants nothing: each task's `allowed_tools` and
+`policies/tools/tool-policy.yaml` decide.

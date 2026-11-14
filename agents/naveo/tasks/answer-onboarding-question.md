@@ -2,6 +2,7 @@
 okf_version: "0.2"
 type: task
 title: Answer an onboarding question
+description: Answer a new team member's question about internal processes, tooling and reference material, with citations.
 resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/naveo/tasks/answer-onboarding-question.md
 stale_after: "2027-05-15T00:00:00Z"
 zuno:
@@ -15,10 +16,7 @@ zuno:
   allowed_knowledge:
     - knowledge.tech
     - knowledge.project
-  # ADR-0515: editable starters. Shown in the chat empty state, and in the
-  # composer's slash menu (agent-frontend web/src/chat/TaskPromptMenu.tsx).
-  # UX only - never parsed or enforced server-side, and picking one does NOT
-  # select this task: the chat route always runs primary_task (ADR-0342).
+  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "What do I need to set up on my first day?"
     - "Who should I contact to get access to the internal Confluence?"
@@ -27,14 +25,11 @@ zuno:
 
 # Answer an onboarding question
 
-Answer an onboarding question using Naveo's declared knowledge domains
-and tool capabilities, all reused from the existing platform catalog
-(ADR-0410 - no new knowledge domain or external backend for a
-template-scaffolded agent).
+Answer a new team member's question about internal processes, tooling and where to find reference material, grounded
+in the technical documentation corpus (`knowledge.tech`), project memory (`knowledge.project`) and internal Confluence
+content.
 
-This is the task Agent Runtime's generic chat dispatch (`POST
-/v1/agents/naveo/chat`, ADR-0342) executes once `status: active` -
-see `components/agent-runtime/app/registry.py` (ADR-0039) for how the
-`allowed_tools`/`allowed_knowledge` above and
-`prompts/answer-onboarding-question.md`'s system prompt are resolved into the
-running `retrieve_reason_respond` LangGraph workflow.
+`search_confluence` is the live-read tool: the workflow's live-read branch calls it for current Confluence content.
+`web_search` is the fallback when the internal sources have no grounded answer, and `list_drive_files` finds onboarding
+documents in the user's own Drive. The task reuses existing knowledge domains and tool capabilities only, with no new
+external system (zuno-demo ADR-0410).

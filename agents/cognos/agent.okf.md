@@ -37,25 +37,18 @@ zuno:
 
 # Cognos
 
-ADR-0349 §6: `status` is `placeholder` - this bundle, the
-`cognos-frontend` Keycloak client, the `agent_cognos` entitlement group
-and this portal tile are the only things that exist for Cognos today
-(the original placeholder pattern comage/advantage/finage/arkos each
-started from). No dedicated namespace is reserved (ADR-0329): a future
-active Cognos deployment would run in the shared `zuno-ai-run`
-namespace, CR-managed via the AIAgent operator (ADR-0327/ADR-0308) like
-every agent onboarded since WP-38.
+Board-only financial and strategic assistant, for a Direction-level audience (zuno-demo ADR-0349).
 
-`tasks/coming-soon.md` describes the intended build - Direction-level
-financial and strategic Q&A over RAG/MCP capabilities that explicitly
-exclude the technical tools and technical RAG corpora - kept here so
-onboarding Cognos later is primarily a `status: active` flip plus real
-task implementation through the ADR-0307 template workflow
-(`platform/templates/agent/`), not a redesign.
+`status: placeholder`: the agent is declared but not served, and a portal shows its tile as "coming soon" to members of
+`agent_cognos`. Its single task, `coming-soon`, declares no tool and no knowledge domain, so the agent has no capability
+by construction.
 
-Its first real task, `review-historical-commercial-data`, was removed on 2026-11-02 (WP-185): its only
-knowledge source, the pre-2021 SXA record, is no longer served since the RAG moved to UnifAI (WP-168).
-Cognos is back to the `coming-soon` placeholder until a real task is authored (`NEXT_STEPS.md`).
+The intended build answers financial and strategic questions over a large tool set that explicitly excludes the
+technical tools and the technical knowledge corpora, gated on the `board` business role.
+`preferred_classification: C3` because Direction-level material stays on local models. Building it means authoring
+real tasks with their prompts and policy entries, then setting `status: active`.
+
+The bundle follows the Zuno OKF profile 1.0 (`platform/okf/schema/zuno-okf-profile-1.0-agent.schema.json`).
 
 <!-- BEGIN GENERATED AUTHORIZATION MATRIX (ADR-0503) - do not edit; regenerate with: python3 platform/okf/generate_authorization_matrix.py -->
 
@@ -71,7 +64,7 @@ Effective per-task model chain (ADR-0021/ADR-0303/ADR-0412), resolved from `poli
 
 | Task | Classification ceiling | Reference model | Fallback chain | Adapter | Policy source |
 |---|---|---|---|---|---|
-| `coming-soon` | `C3` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh` | — | `policies/model-routing/model-routing-policy.yaml` |
+| `coming-soon` (prompt: `prompts/coming-soon.md`) | `C3` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh` | — | `policies/model-routing/model-routing-policy.yaml` |
 
 **Available models** (ADR-0419, generated): the union of every model reachable by any task or prompt slot above, at any classification, each with the model id it serves and that model's role - `local-maas` → `qwen3.6-27b-instruct` (quality), `local` → `qwen3.6-27b-instruct` (quality), `local-gpt-oss-maas` → `gpt-oss-20b` (reasoning), `local-gpt-oss` → `gpt-oss-20b` (reasoning), `local-wesh-maas` → `qwen3.5-9b-wesh` (specialized), `local-wesh` → `qwen3.5-9b-wesh` (specialized), `local-qwen35-maas` → `qwen3.5-9b` (default), `local-qwen35` → `qwen3.5-9b` (default).
 

@@ -33,27 +33,20 @@ zuno:
   model:
     preferred_classification: C1
     notes: >-
-      Public vendor/product documentation and general technical Q&A are C1
-      (SaaS model use allowed). Answers that incorporate Confluence content
-      must respect Confluence's C2 classification (policies/data-classification)
-      for the portions of context drawn from it, even though the task's
-      ceiling here is C1. The concrete model catalog lives in
-      platform/ai-gateway/provider-routing.yaml (not a model name here by
-      design); this agent's answer-technical-question preference
-      ([local-gpt-oss, local]) lives in
-      policies/model-routing/model-routing-policy.yaml — the resolved
-      effective chain is generated below in "Model routing".
-  # OKF v0.3 (ADR-0579 clause 3): the corp floor for C1
-  # (policies/guardrails/guardrails-policy.yaml) and what the ai-gateway's
-  # modeByClassification serves today. No `categories`: Tekos cares about
-  # every corp category, which is what the absence means.
+      Public product documentation and general technical Q&A are C1 (SaaS
+      model use allowed). Confluence content is C2, and its tool policy keeps
+      it on local models even though this agent's ceiling is C1. The model
+      catalog and each task's preference live in
+      policies/models/model-catalog.yaml and
+      policies/model-routing/model-routing-policy.yaml; the resolved chain is
+      generated below in "Model routing".
+  # The corp guardrails floor for C1 (policies/guardrails/guardrails-policy.yaml).
+  # No `categories`: Tekos cares about every corp category, which is what the
+  # absence means.
   guardrails:
     mode: observe
-  # OKF v0.3 (ADR-0579 clause 4): the conversation history Tekos carries, the
-  # same window as Arkos. UnifAI bounds both the conversation messages and the
-  # accumulated agent results to token_budget (operator 0.1.47); proven on
-  # demo333 with a 9-turn conversation before this was added. Every model
-  # Tekos reaches serves at least 32768 tokens.
+  # The conversation history Tekos carries: the last 6 turns within 6000
+  # tokens, the same window as Arkos.
   limits:
     memory:
       history:
@@ -78,32 +71,26 @@ zuno:
 
 # Tekos
 
-Technical consultant assistant. Tekos is the only agent with `status:
-active` for v0 (MEMORY.md section 9, docs/agents/tekos.md): it is the
-first vertical slice and validates frontend, BFF, Keycloak, runtime, AI
-gateway, RAG, MCP Confluence, model routing, streaming and citations end
-to end.
+Technical consultant assistant. Tekos answers technical questions about
+OpenShift, Kubernetes and the surrounding Red Hat ecosystem from official
+product documentation and internal Confluence content, with citations. It
+also finds reference material for a topic, lists the consultant's own Drive
+documents, and writes code.
 
-Conforms to `platform/okf/schema/zuno-okf-v0.3.schema.json` (ADR-0005,
-ADR-0006, ADR-0038). Task detail lives in `tasks/*.md`, linked by name from
-`zuno.tasks` above; the system prompt for the primary task lives in
-`prompts/answer-technical-question.md`.
+The bundle follows the Zuno OKF profile 1.0
+(`platform/okf/schema/zuno-okf-profile-1.0-agent.schema.json`). Each task of
+`zuno.tasks` is declared in `tasks/<task>.md` and has its system prompt in
+`prompts/<task>.md`; `answer-technical-question` is the primary task.
 
-`zuno.graph_shape: retrieve_reason_respond` (ADR-0342) names the LangGraph
-workflow module (`components/agent-runtime/app/graph/shapes/`) Agent
-Runtime's `GraphFactory` resolves for Tekos's chat turns - retrieve, an
-optional live tool call, reason, respond. Naming it declaratively here (no
-prior behavior change) is what lets a later agent reuse this exact shape,
-or Arkos declare a materially different one, without any Agent Runtime
-code change.
+`zuno.graph_shape: retrieve_reason_respond` names the workflow of a turn:
+retrieve from the task's knowledge domains, an optional live-read tool call,
+reason, respond.
 
-Tekos has no agent-level `zuno.allowed_knowledge` field (ADR-0203): like its
-tool ceiling, its knowledge-domain ceiling is derived as the union of every
-task's own `zuno.allowed_knowledge`
-(`components/agent-runtime/app/registry.py:AgentDefinition.declared_knowledge()`,
-mirroring `declared_tools()`) rather than declared separately here - today
-that union is `[knowledge.tech]`, from `tasks/answer-technical-question.md`
-and `tasks/find-relevant-docs.md`.
+Tekos declares no agent-level `allowed_tools` or `allowed_knowledge`: its
+ceiling is the union of its tasks' declarations (zuno-demo ADR-0203). That
+union is 13 tools and two knowledge domains, `knowledge.tech` (from
+`answer-technical-question` and `find-relevant-docs`) and
+`knowledge.project` (from `answer-technical-question`).
 
 <!-- BEGIN GENERATED AUTHORIZATION MATRIX (ADR-0503) - do not edit; regenerate with: python3 platform/okf/generate_authorization_matrix.py -->
 
@@ -127,10 +114,10 @@ Generated per ADR-0503 from this bundle's frontmatter, `policies/tools/tool-poli
 | `answer-technical-question` (primary; prompt: `prompts/answer-technical-question.md`) | `metrics.query` | tool | `metrics.query` @ k8s | C2 | ocp-ai-ops | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `metrics.query` |
 | `answer-technical-question` (primary; prompt: `prompts/answer-technical-question.md`) | `knowledge.tech` | knowledge | — | — | consultant, board, cdp | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.tech` |
 | `answer-technical-question` (primary; prompt: `prompts/answer-technical-question.md`) | `knowledge.project` | knowledge | — | — | consultant, board, sales, adv, finance, cdp | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.project` |
-| `find-relevant-docs` | `search_confluence` | tool | `confluence.page.search` @ confluence | C2 | consultant, board, cdp, lightspeed_readonly, ocp-ai-ops | blocked | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `search_confluence` |
-| `find-relevant-docs` | `list_drive_files` | tool | `drive.document.search` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `list_drive_files` |
-| `find-relevant-docs` | `knowledge.tech` | knowledge | — | — | consultant, board, cdp | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.tech` |
-| `check-my-drive-docs` | `list_drive_files` | tool | `drive.document.search` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `list_drive_files` |
+| `find-relevant-docs` (prompt: `prompts/find-relevant-docs.md`) | `search_confluence` | tool | `confluence.page.search` @ confluence | C2 | consultant, board, cdp, lightspeed_readonly, ocp-ai-ops | blocked | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `search_confluence` |
+| `find-relevant-docs` (prompt: `prompts/find-relevant-docs.md`) | `list_drive_files` | tool | `drive.document.search` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `list_drive_files` |
+| `find-relevant-docs` (prompt: `prompts/find-relevant-docs.md`) | `knowledge.tech` | knowledge | — | — | consultant, board, cdp | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.tech` |
+| `check-my-drive-docs` (prompt: `prompts/check-my-drive-docs.md`) | `list_drive_files` | tool | `drive.document.search` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `list_drive_files` |
 
 ### Model routing
 
@@ -139,9 +126,9 @@ Effective per-task model chain (ADR-0021/ADR-0303/ADR-0412), resolved from `poli
 | Task | Classification ceiling | Reference model | Fallback chain | Adapter | Policy source |
 |---|---|---|---|---|---|
 | `answer-technical-question` (primary; prompt: `prompts/answer-technical-question.md`) (in a classified project) | `C1/C2/C3` | `local-gpt-oss-maas` → `gpt-oss-20b` (reasoning) | `local-gpt-oss`, `local-qwen35-maas`, `local-qwen35`, `local-wesh-maas`, `local-wesh`, `local-maas`, `local` | — | `policies/model-routing/model-routing-policy.yaml` |
-| `find-relevant-docs` (in a classified project) | `C1/C2/C3` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-wesh-maas`, `local-wesh`, `local-maas`, `local`, `local-gpt-oss-maas`, `local-gpt-oss` | — | `policies/model-routing/model-routing-policy.yaml` |
-| `check-my-drive-docs` | `C1` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-wesh-maas`, `local-wesh`, `local-maas`, `local`, `local-gpt-oss-maas`, `local-gpt-oss`, `ovhcloud-gpt-oss-120b`, `openai`, `gemini`, `anthropic`, `mistral`, `mistral-codestral` | — | `policies/model-routing/model-routing-policy.yaml` |
-| `write-code` | `C1` | `mistral-codestral` → `codestral-latest` (code) | `local-wesh-maas`, `local-wesh`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-qwen35-maas`, `local-qwen35`, `openai`, `gemini`, `anthropic`, `mistral`, `ovhcloud-gpt-oss-120b` | — | `policies/model-routing/model-routing-policy.yaml` |
+| `find-relevant-docs` (prompt: `prompts/find-relevant-docs.md`) (in a classified project) | `C1/C2/C3` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-wesh-maas`, `local-wesh`, `local-maas`, `local`, `local-gpt-oss-maas`, `local-gpt-oss` | — | `policies/model-routing/model-routing-policy.yaml` |
+| `check-my-drive-docs` (prompt: `prompts/check-my-drive-docs.md`) | `C1` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-wesh-maas`, `local-wesh`, `local-maas`, `local`, `local-gpt-oss-maas`, `local-gpt-oss`, `ovhcloud-gpt-oss-120b`, `openai`, `gemini`, `anthropic`, `mistral`, `mistral-codestral` | — | `policies/model-routing/model-routing-policy.yaml` |
+| `write-code` (prompt: `prompts/write-code.md`) | `C1` | `mistral-codestral` → `codestral-latest` (code) | `local-wesh-maas`, `local-wesh`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-qwen35-maas`, `local-qwen35`, `openai`, `gemini`, `anthropic`, `mistral`, `ovhcloud-gpt-oss-120b` | — | `policies/model-routing/model-routing-policy.yaml` |
 
 **Available models** (ADR-0419, generated): the union of every model reachable by any task or prompt slot above, at any classification, each with the model id it serves and that model's role - `local-maas` → `qwen3.6-27b-instruct` (quality), `local` → `qwen3.6-27b-instruct` (quality), `local-gpt-oss-maas` → `gpt-oss-20b` (reasoning), `local-gpt-oss` → `gpt-oss-20b` (reasoning), `local-wesh-maas` → `qwen3.5-9b-wesh` (specialized), `local-wesh` → `qwen3.5-9b-wesh` (specialized), `local-qwen35-maas` → `qwen3.5-9b` (default), `local-qwen35` → `qwen3.5-9b` (default), `openai` → `gpt-4o-mini` (general-external), `gemini` → `gemini-1.5-pro` (general-external), `anthropic` → `claude-3-5-sonnet-latest` (general-external), `mistral` → `mistral-large-latest` (general-external), `mistral-codestral` → `codestral-latest` (code), `ovhcloud-gpt-oss-120b` → `gpt-oss-120b` (reasoning-external).
 

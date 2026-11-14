@@ -2,6 +2,7 @@
 okf_version: "0.2"
 type: task
 title: Identify new business with a client PO received
+description: List new business whose client purchase order was received in the last three rolling days, from ADV knowledge.
 resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/advantage/tasks/identify-new-business-with-po.md
 stale_after: "2027-05-15T00:00:00Z"
 zuno:
@@ -9,10 +10,7 @@ zuno:
   allowed_tools: []
   allowed_knowledge:
     - knowledge.adv
-  # ADR-0515: editable starters. Shown in the chat empty state, and in the
-  # composer's slash menu (agent-frontend web/src/chat/TaskPromptMenu.tsx).
-  # UX only - never parsed or enforced server-side, and picking one does NOT
-  # select this task: the chat route always runs primary_task (ADR-0342).
+  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "Which new business received a client purchase order in the last three days?"
     - "List the projects whose client PO arrived this week."
@@ -20,15 +18,8 @@ zuno:
 
 # Identify new business with a client PO received
 
-Surface new business whose client purchase order has been received in
-the last rolling window (MEMORY.md section 9: 3 rolling days), drawing on
-`knowledge.adv` project/delivery state.
+Surface new business whose client purchase order was received in the last three rolling days, drawing on the project
+and delivery state held in `knowledge.adv`.
 
-Declared for the OKF catalog (ADR-0038); no distinct Agent Runtime route
-exists for it yet in v0 - the single `POST /v1/agents/advantage/chat`
-endpoint only executes `answer-project-question`. A deterministic
-structured-query capability - an exact PO-received-date filter, not
-something a RAG chunk should approximate - is v1 scope, not built here. It
-would have to be built against a live source: the comparable legacy SXA
-aggregation capability was removed by ADR-0219, since a closed pre-2021
-record has nothing for such a tool to be authoritative about.
+The task declares no tool. Retrieved knowledge cannot apply an exact purchase-order date filter: that would need a
+structured-query capability against a live source, and none exists. `knowledge.adv` has no ingestion source at present.

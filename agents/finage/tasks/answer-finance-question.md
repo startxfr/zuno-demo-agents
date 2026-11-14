@@ -2,6 +2,7 @@
 okf_version: "0.2"
 type: task
 title: Answer a finance or billing question
+description: Answer an invoicing, billing or financial reporting question from project memory, with a web-search fallback.
 resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/finage/tasks/answer-finance-question.md
 stale_after: "2027-05-15T00:00:00Z"
 zuno:
@@ -10,10 +11,7 @@ zuno:
     - web_search
   allowed_knowledge:
     - knowledge.project
-  # ADR-0515: editable starters. Shown in the chat empty state, and in the
-  # composer's slash menu (agent-frontend web/src/chat/TaskPromptMenu.tsx).
-  # UX only - never parsed or enforced server-side, and picking one does NOT
-  # select this task: the chat route always runs primary_task (ADR-0342).
+  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "What is the invoicing status for this engagement?"
     - "How much is still outstanding on this account?"
@@ -21,25 +19,13 @@ zuno:
 
 # Answer a finance or billing question
 
-Answer a free-form question about invoicing, billing status or financial
-reporting, grounded in any durable `knowledge.project` memory for the
-engagement. Falls back to a constrained web search when the internal
-corpus has no grounded answer.
+Answer a free-form question about invoicing, billing status or financial reporting, grounded in the engagement's durable
+`knowledge.project` memory. Fall back to a constrained web search when the internal corpus has no grounded answer.
 
-This is the task Agent Runtime's `retrieve_reason_respond` graph shape
-(`components/agent-runtime/app/graph/shapes/retrieve_reason_respond.py`,
-ADR-0342) executes for Finage - the same shape module Tekos's, Comage's
-and Advantage's primary tasks run, closed over Finage's own agent/task
-data (`app/graph/nodes.py`'s `_make_*` factories). Declares no
-`live_read_tool`: this task's only tool is `web_search`, and Finage's
-other tasks declare no live-read capability either since ADR-0219 removed
-the deterministic `sxa.*` surface. `tool_call_node` cleanly no-ops rather
-than attempting a live call.
+The task declares no `live_read_tool`: its only tool is `web_search`, and no live billing capability exists. There is no
+finance-specific knowledge domain and no billing history, so an answer reports what the project memory holds,
+attributed to its source.
 
-**Documented gap (WP-36's own brief anticipates this)**: no finance-specific RAG knowledge domain exists in
-this repository. `allowed_knowledge` above is `knowledge.project` only - still never `knowledge.sales` or
-`knowledge.adv`. It also held the pre-2021 commercial record (whose reader groups
-ADR-0219 widened to `finance`) until 2026-11-02 (WP-185), when that domain stopped being served. What remains
-genuinely open is the deterministic side: Finage has no exact-figure capability at all, because SXA is a closed
-pre-2021 record with no live billing system behind it. This task still declares no Salesforce capability -
-Finage proves finance-scoped access without inheriting broader Sales/ADV access (ADR-0326).
+`allowed_knowledge` never includes `knowledge.sales` or `knowledge.adv`, and `allowed_tools` never includes a Salesforce
+capability: Finage stays finance-scoped without inheriting broader sales or sales administration access (zuno-demo
+ADR-0326).

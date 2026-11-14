@@ -2,6 +2,7 @@
 okf_version: "0.2"
 type: task
 title: Coming soon
+description: Placeholder task. Soursage is not built yet and declares no capability.
 resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/soursage/tasks/coming-soon.md
 stale_after: "2027-05-15T00:00:00Z"
 zuno:
@@ -11,14 +12,10 @@ zuno:
 
 # Coming soon
 
-Soursage is not yet built. Planned tasks (ADR-0349 §6): source new
-consultant candidates from LinkedIn; find, among existing consultants,
-the best profile for a mission using Workday profile data
-(`workday.profile.any.read` - the read-only ADR-0340 scoped capability
-already registered by WP-32, gated on the `recrut`/`sales` business
-roles once real task declarations exist).
+Soursage is not built yet. Planned tasks (zuno-demo ADR-0349): source new consultant candidates from LinkedIn, and find,
+among existing consultants, the best profile for a mission from Workday profile data, gated on the `recrut` and `sales`
+business roles.
 
-`allowed_tools` stays empty while `status: placeholder` (see
-`agent.okf.md`) - a placeholder agent has zero tool-call capability by
-construction (ADR-0036), matching it having no running Agent Runtime
-workflow at all.
+`allowed_tools` stays empty while the agent is a placeholder: it has no tool-call capability by construction. The corp
+tool policy already registers the read-only `workday.profile.any.read` capability (minimum classification C3, granted
+to `cdp` only today); no LinkedIn capability exists yet.

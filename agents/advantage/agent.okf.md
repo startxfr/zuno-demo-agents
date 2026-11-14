@@ -5,11 +5,9 @@ title: Advantage
 description: >-
   Sales administration assistant. Surfaces new business whose client
   purchase order has just been received and produces monthly in-progress
-  sales reporting, drawing on indexed ADV/project knowledge - never
-  live Salesforce data (ADR-0326: explicit cross-domain boundary, not
-  implicit inheritance from Comage). ADR-0218 removed `knowledge.adv`'s
-  only ingestion adapter; ADR-0532 formally accepts the domain staying
-  sourceless (agent stays `placeholder`) rather than leaving it open.
+  sales reporting, from indexed sales administration (ADV) and project
+  knowledge, never from live Salesforce data. Its ADV knowledge domain
+  has no ingestion source at present, so the agent stays a placeholder.
 resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/advantage/agent.okf.md
 sources:
 - id: knowledge.adv
@@ -35,10 +33,8 @@ zuno:
   model:
     preferred_classification: C2
     notes: >-
-      Placeholder pending the live acceptance gate; C2 matches
-      `knowledge.adv`'s own classification
-      (policies/data-classification/classification.yaml's `sales-data`
-      domain covers ADV business content too, ADR-0034).
+      C2 matches the classification of the ADV business content the agent
+      reads (`knowledge.adv`).
   access:
     # ADR-0040: agent entitlement group, orthogonal to the `adv` business
     # role that governs tool/data permissions inside Advantage.
@@ -53,50 +49,27 @@ zuno:
 
 # Advantage
 
-ADR-0326 (WP-35): Advantage's real OKF task bundle, graph shape and
-deployment surface are now merged - `status` stays `placeholder` until
-the operator confirms the live acceptance gate passes (WP-35's own
-Status-updates section; ADR-0326's "moves placeholder -> active only
-after the full common completion pattern passes"), so the portal keeps
-rendering "coming soon" and Agent Runtime's generic dispatch keeps
-404ing `/v1/agents/advantage/chat` until that flip happens. No dedicated
-namespace is reserved (ADR-0329, supersedes ADR-0023): Advantage's
-frontend/BFF deploy into the shared `zuno-ai-run` namespace, same as
-Tekos/Arkos/Comage.
+Sales administration assistant. Its tasks answer project, delivery and bid questions, surface new business whose
+client purchase order was just received, produce the monthly in-progress sales report, and list the user's own Drive
+documents and Gmail messages about an account or project.
 
-`zuno.graph_shape: retrieve_reason_respond` (ADR-0342) names the exact
-same LangGraph workflow module Tekos's and Comage's chat turns execute -
-proving a THIRD agent reuses this shape with zero code change.
-`answer-project-question` (`tasks/answer-project-question.md`) is the one
-live-routed task: it reads `knowledge.adv` + `knowledge.project`, and
-declares no `live_read_tool` at all, and since ADR-0218 dropped
-`fetch-aramis` there is no batch adapter behind `knowledge.adv` either -
-neither an indexed source nor a live adv capability exists today.
-Advantage's other three declared tasks
-(`identify-new-business-with-po`, `monthly-sales-report`,
-`check-my-drive-and-mail`) are v1-scope catalog entries with no dedicated
-route yet, matching Tekos's/Comage's own catalog-only tasks pattern.
+`status: placeholder`: the agent is declared but not served, and a portal shows its tile as "coming soon". Its main
+knowledge domain, `knowledge.adv`, has no ingestion source at present; zuno-demo ADR-0532 accepts that the domain stays
+sourceless, so the agent stays a placeholder.
 
-**ADR-0326's signature proof for this slice**: no task above ever
-declares Comage's own current-sales knowledge domain in
-`allowed_knowledge`, or any live-CRM/legacy-SXA capability in
-`allowed_tools` - Advantage proves the cross-domain authorization
-boundary by explicit omission from its own OKF declaration (the
-ADR-0011/ADR-0203 agent_declaration factor), never by a runtime filter
-that could silently be widened later. Any cross-domain commercial access
-Advantage might need in a future iteration must be added here explicitly
-and policy-controlled, never inherited from Comage.
+The primary task, `answer-project-question`, reads `knowledge.adv` and `knowledge.project` through the
+`retrieve_reason_respond` workflow and can call web search and image generation. It declares no `live_read_tool`: no
+live ADV capability exists.
 
-Advantage has no agent-level `zuno.allowed_knowledge` field either
-(ADR-0203), for the same reason Tekos/Arkos/Comage don't: its knowledge
-ceiling is the union of every task's own `zuno.allowed_knowledge` -
-today `[knowledge.adv, knowledge.project]`.
+Cross-domain boundary (zuno-demo ADR-0326): no task declares the current-sales domain `knowledge.sales` or a live CRM
+capability. Advantage holds that boundary by explicit omission from its own declaration, not by a runtime filter. Any
+further commercial access must be declared here and stay policy-controlled, never inherited from the sales agent.
 
-Access group is `agent_advantage` (ADR-0040 entitlement dimension,
-orthogonal to the `adv` business role that governs tool/data permissions
-inside Advantage once active - see `policies/tools/tool-policy.yaml`'s
-Drive/Gmail entries and `policies/knowledge/knowledge-policy.yaml`'s
-`knowledge.adv`/`knowledge.project` entries).
+The knowledge ceiling is the union of the tasks' `allowed_knowledge`: `knowledge.adv` and `knowledge.project`. The
+entitlement group is `agent_advantage`; inside the agent, the `adv` business role governs tool and data access through
+`policies/tools/tool-policy.yaml` and `policies/knowledge/knowledge-policy.yaml`.
+
+The bundle follows the Zuno OKF profile 1.0 (`platform/okf/schema/zuno-okf-profile-1.0-agent.schema.json`).
 
 <!-- BEGIN GENERATED AUTHORIZATION MATRIX (ADR-0503) - do not edit; regenerate with: python3 platform/okf/generate_authorization_matrix.py -->
 
@@ -110,10 +83,10 @@ Generated per ADR-0503 from this bundle's frontmatter, `policies/tools/tool-poli
 | `answer-project-question` (primary; prompt: `prompts/answer-project-question.md`) | `image.generation.create` | tool | `image.generation.create` @ image-gen | C2 | consultant, adv, sales, board, cdp | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `generate_image` |
 | `answer-project-question` (primary; prompt: `prompts/answer-project-question.md`) | `knowledge.adv` | knowledge | — | C2 | adv, board, cdp, finance | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.adv` |
 | `answer-project-question` (primary; prompt: `prompts/answer-project-question.md`) | `knowledge.project` | knowledge | — | — | consultant, board, sales, adv, finance, cdp | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.project` |
-| `identify-new-business-with-po` | `knowledge.adv` | knowledge | — | C2 | adv, board, cdp, finance | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.adv` |
-| `monthly-sales-report` | `knowledge.adv` | knowledge | — | C2 | adv, board, cdp, finance | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.adv` |
-| `check-my-drive-and-mail` | `list_drive_files` | tool | `drive.document.search` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `list_drive_files` |
-| `check-my-drive-and-mail` | `read_gmail` | tool | `gmail.message.read` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `read_gmail` |
+| `identify-new-business-with-po` (prompt: `prompts/identify-new-business-with-po.md`) | `knowledge.adv` | knowledge | — | C2 | adv, board, cdp, finance | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.adv` |
+| `monthly-sales-report` (prompt: `prompts/monthly-sales-report.md`) | `knowledge.adv` | knowledge | — | C2 | adv, board, cdp, finance | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.adv` |
+| `check-my-drive-and-mail` (prompt: `prompts/check-my-drive-and-mail.md`) | `list_drive_files` | tool | `drive.document.search` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `list_drive_files` |
+| `check-my-drive-and-mail` (prompt: `prompts/check-my-drive-and-mail.md`) | `read_gmail` | tool | `gmail.message.read` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `read_gmail` |
 
 ### Model routing
 
@@ -122,9 +95,9 @@ Effective per-task model chain (ADR-0021/ADR-0303/ADR-0412), resolved from `poli
 | Task | Classification ceiling | Reference model | Fallback chain | Adapter | Policy source |
 |---|---|---|---|---|---|
 | `answer-project-question` (primary; prompt: `prompts/answer-project-question.md`) | `C2` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh`, `openai`, `anthropic`, `mistral-codestral`, `ovhcloud-gpt-oss-120b` | — | `policies/model-routing/model-routing-policy.yaml` |
-| `identify-new-business-with-po` | `C2` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh`, `openai`, `anthropic`, `mistral-codestral`, `ovhcloud-gpt-oss-120b` | — | `policies/model-routing/model-routing-policy.yaml` |
-| `monthly-sales-report` | `C2` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh`, `openai`, `anthropic`, `mistral-codestral`, `ovhcloud-gpt-oss-120b` | — | `policies/model-routing/model-routing-policy.yaml` |
-| `check-my-drive-and-mail` | `C2` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh`, `openai`, `anthropic`, `mistral-codestral`, `ovhcloud-gpt-oss-120b` | — | `policies/model-routing/model-routing-policy.yaml` |
+| `identify-new-business-with-po` (prompt: `prompts/identify-new-business-with-po.md`) | `C2` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh`, `openai`, `anthropic`, `mistral-codestral`, `ovhcloud-gpt-oss-120b` | — | `policies/model-routing/model-routing-policy.yaml` |
+| `monthly-sales-report` (prompt: `prompts/monthly-sales-report.md`) | `C2` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh`, `openai`, `anthropic`, `mistral-codestral`, `ovhcloud-gpt-oss-120b` | — | `policies/model-routing/model-routing-policy.yaml` |
+| `check-my-drive-and-mail` (prompt: `prompts/check-my-drive-and-mail.md`) | `C2` | `local-qwen35-maas` → `qwen3.5-9b` (default) | `local-qwen35`, `local-gpt-oss-maas`, `local-gpt-oss`, `local-maas`, `local`, `local-wesh-maas`, `local-wesh`, `openai`, `anthropic`, `mistral-codestral`, `ovhcloud-gpt-oss-120b` | — | `policies/model-routing/model-routing-policy.yaml` |
 
 **Available models** (ADR-0419, generated): the union of every model reachable by any task or prompt slot above, at any classification, each with the model id it serves and that model's role - `local-maas` → `qwen3.6-27b-instruct` (quality), `local` → `qwen3.6-27b-instruct` (quality), `local-gpt-oss-maas` → `gpt-oss-20b` (reasoning), `local-gpt-oss` → `gpt-oss-20b` (reasoning), `local-wesh-maas` → `qwen3.5-9b-wesh` (specialized), `local-wesh` → `qwen3.5-9b-wesh` (specialized), `local-qwen35-maas` → `qwen3.5-9b` (default), `local-qwen35` → `qwen3.5-9b` (default), `openai` → `gpt-4o-mini` (general-external), `anthropic` → `claude-3-5-sonnet-latest` (general-external), `mistral-codestral` → `codestral-latest` (code), `ovhcloud-gpt-oss-120b` → `gpt-oss-120b` (reasoning-external).
 

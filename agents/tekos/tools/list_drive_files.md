@@ -8,20 +8,27 @@ zuno:
   profile: "1.0"
   capability: list_drive_files
   used_by_tasks:
+    - find-relevant-docs
     - check-my-drive-docs
   usage_notes: >-
-    Lists the authenticated consultant's own Google Drive documents
-    relevant to a given project or topic, using delegated end-user OAuth2
-    (ADR-0014) so only files the caller can already see are ever listed.
+    Lists the files of the caller's own Google Drive (optionally one
+    folder), each with its name, type, last change and link.
+    check-my-drive-docs keeps the files relevant to the requested project
+    or topic; find-relevant-docs adds them to the material it lists for a
+    topic.
   known_limitations:
-    - "Declared for the OKF catalog only in v0 - no distinct Agent Runtime
-      route exists for check-my-drive-docs yet; the single POST
-      /v1/agents/tekos/chat endpoint only executes
-      answer-technical-question. Wiring a dedicated route is v1 scope."
+    - "Runs with the caller's delegated identity (zuno-demo ADR-0014): it lists only files the user can already see."
+    - "Returns file metadata, not file content."
+    - "Data classification C1 (min_classification); no external_model_policy restriction."
+    - "Allowed groups: consultant, board, cdp, sales, adv, finance."
+    - "Access: read."
 ---
 
 # List Drive files
 
-Documentary only - actual authorization stays `allowed_tools` (per task)
-intersected with `policies/tools/tool-policy.yaml` and
-`platform/bindings/tools/tool-bindings.yaml`.
+Lists the consultant's own Google Drive files. `list_drive_files` is the
+legacy name of the canonical capability `drive.document.search`. Tekos uses
+it read-only, to point the consultant to their own material.
+
+This note grants nothing: each task's `allowed_tools` and
+`policies/tools/tool-policy.yaml` decide.

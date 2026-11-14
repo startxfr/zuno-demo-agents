@@ -2,6 +2,7 @@
 okf_version: "0.2"
 type: task
 title: Check deal status
+description: Answer a question about an opportunity or the pipeline from indexed Salesforce knowledge, with a live Salesforce read for current values.
 resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/comage/tasks/check-deal-status.md
 stale_after: "2027-05-15T00:00:00Z"
 zuno:
@@ -9,31 +10,18 @@ zuno:
   allowed_tools:
     - salesforce.opportunity.read
     - web_search
-    # ADR-0415: stable-diffusion-xl via OVHcloud AI Endpoints. Comage is
-    # the only LIVE-ROUTED agent with this capability (an earlier version
-    # of this comment said "the only agent" - wrong, advantage/
-    # answer-project-question declares it too; Advantage is still
-    # `status: placeholder` with no live route, which is the whole of the
-    # difference). Even here it's scoped to
-    # genuine marketing-visual requests only, never deal-status charts/
-    # mockups - see prompts/check-deal-status.md's system prompt, which is
-    # where that scope is actually enforced (this task has only the one
-    # live-routed primary task, so there's no separate task boundary to
-    # gate on).
+    # Photorealistic image generation (zuno-demo ADR-0415), for genuine
+    # marketing-visual requests only, never for deal or pipeline charts.
+    # The prompt (prompts/check-deal-status.md) enforces that scope.
     - image.generation.create
-    # ADR-0516: Mermaid-to-SVG rendering, for deal-status visuals needing
-    # precise structure (e.g. a real chart from actual figures) - this is
-    # the tool for ordinary deal-status charts/mockups now, not the one
-    # above.
+    # Mermaid-to-SVG diagram rendering (zuno-demo ADR-0516): the tool for
+    # charts and structured visuals built from real deal figures.
     - diagram.generation.create
   live_read_tool: salesforce.opportunity.read
   allowed_knowledge:
     - knowledge.sales
     - knowledge.project
-  # ADR-0515: editable starters. Shown in the chat empty state, and in the
-  # composer's slash menu (agent-frontend web/src/chat/TaskPromptMenu.tsx).
-  # UX only - never parsed or enforced server-side, and picking one does NOT
-  # select this task: the chat route always runs primary_task (ADR-0342).
+  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "What is the current stage of the Startx renewal opportunity?"
     - "Which opportunities are expected to close this quarter?"
@@ -42,21 +30,22 @@ zuno:
 
 # Check deal status
 
-Answer a free-form question about an opportunity or the pipeline, preferring
-`knowledge.sales` (asynchronously ingested, indexed Salesforce content) for
-ordinary semantic reads. A question asking for a mutable field's CURRENT
-value (stage, amount) - or any retrieval that lands on `knowledge.sales`
-itself, which is freshness-sensitive by policy
-(`knowledge/sales/domain.yaml`'s tight `current-state-read` window) -
-triggers a live `salesforce.opportunity.read` call instead of trusting the
-index alone (ADR-0205).
+Answer a free-form question about an opportunity or the pipeline. Ordinary
+semantic reads come from `knowledge.sales`, the indexed Salesforce content,
+and from `knowledge.project`, the durable memory of the user's project.
 
-This is the task Agent Runtime's `retrieve_reason_respond` graph shape
-(`components/agent-runtime/app/graph/shapes/retrieve_reason_respond.py`,
-ADR-0342) executes for Comage - the same shape module Tekos's
-`answer-technical-question` runs, closed over Comage's own agent/task data
-instead (`app/graph/nodes.py`'s `_make_*` factories). Proves the shape
-genuinely generalizes past one hardcoded agent (ADR-0326), not just its
-topology: Comage's live-read tool is Salesforce, not Confluence
-(`zuno.live_read_tool` above), and its freshness-sensitive domain is
-`knowledge.sales`, not a stale-document check.
+Indexed Salesforce content can lag behind the live records. A question that
+asks for the current value of a mutable field (stage, amount), or any answer
+that relies on `knowledge.sales`, therefore also triggers a live
+`salesforce.opportunity.read` call (`zuno.live_read_tool`) instead of trusting
+the index alone. zuno-demo ADR-0205: prefer indexed knowledge for reads, live
+tools for current values and writes.
+
+Two visual tools are declared and they are not interchangeable:
+`diagram.generation.create` renders charts and structured visuals from real
+figures, and `image.generation.create` is reserved for marketing visuals a
+user explicitly asks for. `web_search` is also declared, for public
+information outside the Salesforce data.
+
+The task never writes to Salesforce: a change to an opportunity is the
+`update-opportunity-status` task.

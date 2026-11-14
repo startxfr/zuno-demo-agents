@@ -2,6 +2,7 @@
 okf_version: "0.2"
 type: task
 title: Answer a technical question
+description: Answer a technical question from the documentation corpus and Confluence, with citations.
 resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/tekos/tasks/answer-technical-question.md
 stale_after: "2027-05-15T00:00:00Z"
 zuno:
@@ -11,31 +12,22 @@ zuno:
     - web_search
     - git.repository.read
     - git.repository.list
-    # ADR-0516: a deliberate, narrow carve-out - Tekos gets diagram
-    # generation (Mermaid-to-SVG, never leaves the cluster) for technical
-    # questions that call for an architecture/sequence/relationship
-    # diagram, but still never declares image.generation.create
-    # (photorealistic/illustrative SDXL content stays Arkos/Comage's
-    # job - see evaluations/tekos/security_checks.py's
-    # tekos_chat_never_returns_photorealistic_images and gate_checks.py's
-    # tekos_declares_no_dat_or_image_generation_capability, both updated
-    # alongside this to assert exactly that boundary).
+    # zuno-demo ADR-0516: diagram generation (Mermaid to SVG) for questions
+    # that call for an architecture, sequence or relationship diagram. Tekos
+    # never declares image.generation.create: illustrative images are not its
+    # job.
     - diagram.generation.create
-    # ADR-0355/WP-074: AAP audits. Tekos is the only agent declaring
-    # aap.cluster.audit - the one capability in this repository that RUNS
-    # cluster automation rather than reading state. Its case is the
-    # infrastructure-question one this task exists for ("is the cluster
-    # healthy right now?"), which no other agent's task set covers; Arkos
-    # gets the read-only half only. tool-policy.yaml gives both entries the
-    # same allowed_groups on purpose, so THIS declaration is the factor
-    # actually holding the read/action line - do not copy it to another
-    # agent without re-reading ADR-0355's Security considerations.
+    # zuno-demo ADR-0355: AAP audits, for "is the cluster healthy right now?".
+    # aap.cluster.audit is a write tool: it launches the cluster health check.
+    # tool-policy.yaml gives both entries the same allowed_groups, so this
+    # task declaration is what holds the read/launch line: re-read ADR-0355's
+    # security considerations before declaring it in another task.
     - aap.platform.audit
     - aap.cluster.audit
-    # ADR-0600/WP-206 (zuno-demo): governed, read-only Kubernetes reads of the
-    # zuno-* namespaces, for "why does this pod not start?". tool-policy.yaml
-    # admits `ocp-ai-ops` only, so this declaration reaches the operations
-    # persona alone; the business personas keep Tekos without cluster reads.
+    # zuno-demo ADR-0600: read-only Kubernetes reads of the zuno-* namespaces,
+    # for "why does this pod not start?". tool-policy.yaml admits `ocp-ai-ops`
+    # only, so this declaration reaches the operations persona alone; the
+    # business personas keep Tekos without cluster reads.
     - k8s.resource.read
     - k8s.resource.list
     - k8s.events.read
@@ -45,17 +37,10 @@ zuno:
   allowed_knowledge:
     - knowledge.tech
     - knowledge.project
-  # OKF v0.3 (ADR-0579 clause 2): the roles, in order, of this task's entry in
-  # policies/model-routing/model-routing-policy.yaml, read through
-  # policies/models/model-catalog.yaml (preferred:
-  # [ovhcloud-gpt-oss-120b, local-gpt-oss-maas, local-gpt-oss,
-  # local-qwen35-maas, local-qwen35, local-wesh-maas, local-wesh, local-maas,
-  # local]).
-  # Since tekos 0.4.3 the local reasoning model comes FIRST: the external
-  # ovhcloud-gpt-oss-120b took 8.6 s to its first token on a quiet stack
-  # (zuno-demo stresstest 2026-10-31, objective 6 s), the local gpt-oss-20b
-  # about 0.1 s. The generated routing (zuno-demo ADR-0581, WP-164 lot 2)
-  # reorders the corp candidates by these roles; it never adds or removes one.
+  # The model roles this task prefers, in order. They reorder this task's
+  # candidates in policies/model-routing/model-routing-policy.yaml, never add
+  # or remove one. The local reasoning model comes first for its much shorter
+  # time to first token (zuno-demo stresstest 2026-10-31).
   models:
     preferred:
       - reasoning
@@ -63,10 +48,7 @@ zuno:
       - default
       - specialized
       - quality
-  # ADR-0515: editable starters. Shown in the chat empty state, and in the
-  # composer's slash menu (agent-frontend web/src/chat/TaskPromptMenu.tsx).
-  # UX only - never parsed or enforced server-side, and picking one does NOT
-  # select this task: the chat route always runs primary_task (ADR-0342).
+  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "How do I configure Keycloak as the OIDC identity provider for an OpenShift cluster?"
     - "What is the difference between a Route and an Ingress on OpenShift?"
@@ -75,21 +57,25 @@ zuno:
 
 # Answer a technical question
 
-Answer a free-form technical question using the Tekos RAG corpus (official
-OpenShift/Kubernetes/Keycloak/Ansible/Argo CD/Helm/Go documentation) plus
-internal Confluence content first, falling back to a constrained web
-search when the internal corpus has no grounded answer. Every answer
-includes concise source citations.
+Answer a free-form technical question from the indexed documentation corpus
+(`knowledge.tech`: official Red Hat product documentation and internal
+Confluence content) and the consultant's project memory
+(`knowledge.project`). When the retrieved documents do not ground an
+answer, the live-read tool `search_confluence` reads Confluence directly;
+`web_search` is the last resort, within this bundle's
+`policies/web-search-scope.md`.
+Every answer cites its sources.
 
-This is the task the Agent Runtime's chat endpoint (`POST
-/v1/agents/tekos/chat`) executes for every turn in v0 - see
-`components/agent-runtime/app/registry.py` (ADR-0039) for how its
-`allowed_tools` above and `prompts/answer-technical-question.md`'s system
-prompt are resolved into the running LangGraph workflow.
+The other tools serve specific questions:
 
-ADR-0121: `git.repository.read`/`git.repository.list` add read-only
-GitHub/GitLab repository access (`components/mcp-servers/git-forge`,
-ADR-0120) alongside Confluence/web search - **public repositories only,
-on either provider**. Tekos never declares the private-scoped
-`git.repository.private.*` capabilities (GitLab private access, reserved
-for Arkos) or any write/create capability.
+- `git.repository.read` and `git.repository.list` read public GitHub or
+  GitLab repositories. Tekos declares no private-repository or repository
+  write capability.
+- `diagram.generation.create` renders a Mermaid diagram to SVG.
+- `aap.platform.audit` summarizes the state of Ansible Automation Platform;
+  `aap.cluster.audit` launches the cluster health check through it.
+- `k8s.resource.read`, `k8s.resource.list`, `k8s.events.read`,
+  `k8s.logs.read` and `metrics.query` read the zuno-* namespaces and their
+  metrics, for the operations persona only.
+
+This is the agent's primary task.
