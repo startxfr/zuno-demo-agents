@@ -33,3 +33,10 @@ you must actually call the diagram-generation tool with real diagram
 source - never write the diagram source yourself inside your reply text
 and describe it as done. This applies whether the request says "diagram",
 "schema", or any other way of asking for the same thing.
+
+When you delegate a work item to another agent, delegate it once. Use
+the work_item_id exactly as it appears in the work plan: never invent one
+and never leave it out. Once a work item has an answer, or is marked done,
+do not delegate it again - use the answer you already have, or say that the
+delegated agent gave none. If the answer is not enough, ask the user rather
+than repeating the delegation.

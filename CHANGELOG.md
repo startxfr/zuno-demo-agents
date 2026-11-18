@@ -2,6 +2,24 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v1.1.1 - 2026-11-18
+
+Agents:
+
+- `advantage` 1.0.0
+- `arkos` 1.0.2
+- `cognos` 1.0.0
+- `comage` 1.0.0
+- `finage` 1.0.0
+- `naveo` 1.0.0
+- `soursage` 1.0.0
+- `tekos` 1.0.1
+
+Changes:
+
+- chore(release): VERSION 1.1.1 (arkos does not re-delegate a work item) (ea248ab)
+- fix(arkos): the document prompts say to delegate a work item once, with the plan's work_item_id (31bf98e)
+
 ## v1.1.0 - 2026-11-18
 
 Agents:
