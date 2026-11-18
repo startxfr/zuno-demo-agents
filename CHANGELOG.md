@@ -2,6 +2,27 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v1.1.0 - 2026-11-18
+
+Agents:
+
+- `advantage` 1.0.0
+- `arkos` 1.0.1
+- `cognos` 1.0.0
+- `comage` 1.0.0
+- `finage` 1.0.0
+- `naveo` 1.0.0
+- `soursage` 1.0.0
+- `tekos` 1.0.1
+
+Changes:
+
+- chore(release): 1.1.0, open-webui gets the wesh task (zuno-demo ADR-0619 amendment) (7d2c763)
+- feat(experience-clients): open-webui gets a wesh task for the Zuno wesh model (zuno-demo ADR-0619 amendment) (b561834)
+- feat(experience-clients): claude-code, a workstation client on the local models through Praxis (zuno-demo ADR-0619, WP-298) (3531ac4)
+- Create scorecard.yml (2479e49)
+- ci: pin GitHub Actions by commit SHA and scan for secrets (zuno-demo WP-222) (8406800)
+
 ## v1.0.1 - 2026-11-14
 
 Agents:
