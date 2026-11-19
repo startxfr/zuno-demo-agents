@@ -10,6 +10,7 @@ How to author, release, verify and consume agent bundles with this repository.
 | [OKF field reference](okf-reference.md) | know the Zuno OKF profile 1.0: its link to upstream OKF 0.2, every field of every document, the narrowing rules and the deviations from upstream |
 | [What travels in a release](bundle-files.md) | know which files an agent artifact and the corp artifact contain |
 | [Publish, verify and roll back](publish-and-verify.md) | verify a release with cosign, check its attestations, go back to the previous release, and adapt the trust settings |
+| [The agent bundle report](agent-report.md) | get one HTML page of what every agent declares, and keep its hand-written rules in step with the prompts |
 | [The `UnifaiAgentBundle` resource](unifaiagentbundle.md) | turn a released bundle into running agents on UnifAI: every field, condition and the revocation list |
 
 Related, at the repository root: [README.md](../README.md) (what the repository is) and [RELEASING.md](../RELEASING.md)

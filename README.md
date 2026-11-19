@@ -38,7 +38,7 @@ type in [docs/publish-and-verify.md](docs/publish-and-verify.md). Start with the
 | `platform/supply-chain/validate_okf_bundle.py` | Bundle structure, corp policy references and the profile 1.0 rules |
 | `conformance/` | Cases every reader of the format must parse to the same result; shipped in the corp artifact |
 | `platform/release/` | Release tooling: build, version gate, publish, changelog, dev-run rendering |
-| `docs/` | Documentation: the [architecture](docs/architecture.md), [the lifecycle of a bundle](docs/bundle-lifecycle.md), how to [add an agent](docs/add-an-agent.md), the [OKF field reference](docs/okf-reference.md), [what travels in a release](docs/bundle-files.md), how to [publish, verify and roll back a release](docs/publish-and-verify.md), and [the `UnifaiAgentBundle` resource](docs/unifaiagentbundle.md) that turns a released bundle into running agents |
+| `docs/` | Documentation: the [architecture](docs/architecture.md), [the lifecycle of a bundle](docs/bundle-lifecycle.md), how to [add an agent](docs/add-an-agent.md), the [OKF field reference](docs/okf-reference.md), [what travels in a release](docs/bundle-files.md), how to [publish, verify and roll back a release](docs/publish-and-verify.md), the [agent bundle report](docs/agent-report.md), and [the `UnifaiAgentBundle` resource](docs/unifaiagentbundle.md) that turns a released bundle into running agents |
 | `VERSION` | The release version |
 | `CHANGELOG.md` | Written by the release chain on `stable` |
 
