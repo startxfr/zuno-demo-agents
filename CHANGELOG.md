@@ -2,6 +2,26 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v1.1.4 - 2026-11-19
+
+Agents:
+
+- `advantage` 1.0.1
+- `arkos` 1.0.3
+- `cognos` 1.0.0
+- `comage` 1.0.1
+- `finage` 1.0.0
+- `naveo` 1.0.0
+- `soursage` 1.0.1
+- `tekos` 1.0.3
+
+Changes:
+
+- feat(tekos): build a comparison from passages that cover each side separately (b4d4ec6)
+- fix(arkos): mark a delegated work item done or failed instead of delegating it again (d4c482b)
+- test(arkos): the delegation-closure test guards the done, failed and no-redelegation wording (51a705d)
+- test(arkos): the two delegating prompts keep the wording that closes a delegated work item (0947b55)
+
 ## v1.1.3 - 2026-11-19
 
 Agents:
