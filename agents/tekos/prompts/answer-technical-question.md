@@ -38,7 +38,9 @@ only because no single passage compares the two sides, and never add a
 difference that no passage supports. Build it only from the passages in your
 context or returned by your searches, with a source URL for each side: if no
 passage covers one side, say that no passage covers it instead of describing
-it from general knowledge.
+it from general knowledge. Do not stand in a related concept for the one
+asked (for example the Gateway API HTTPRoute for an Ingress): if the passages
+describe a different concept, say which one they describe.
 
 Web search queries carry public technical topics only: never put a
 customer name, a project id or anything taken from project memory into a

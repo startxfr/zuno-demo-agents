@@ -28,6 +28,8 @@ NO_DECLINE = re.compile(r"do not decline a comparison only because no single pas
 # (c) no difference is added that no passage supports
 NO_INVENTED_DIFFERENCE = re.compile(r"never add a difference that no passage supports")
 # (d) a comparison is built only from passages, and a side no passage covers is reported, not described from general knowledge
+# (e) a related concept is not put in the place of the one asked
+NO_SUBSTITUTE_CONCEPT = re.compile(r"do not stand in a related concept for the one asked")
 ONLY_FROM_PASSAGES = re.compile(r"only from the passages in your context or returned by your searches.{0,120}no passage covers one side, say that no passage covers it")
 
 
@@ -55,10 +57,14 @@ class ComparisonFromSeparatePassages(unittest.TestCase):
         self.assertRegex(normalised(), ONLY_FROM_PASSAGES,
                          "answer-technical-question.md lost the rule to build a comparison only from passages and to report a side no passage covers")
 
+    def test_a_related_concept_is_not_put_in_the_place_of_the_one_asked(self):
+        self.assertRegex(normalised(), NO_SUBSTITUTE_CONCEPT,
+                         "answer-technical-question.md lost the ban on standing in a related concept for the one asked")
+
     def test_the_patterns_do_not_match_a_bare_prompt(self):
         bare = ("answer the technical question from the passages you are given and cite their source urls. if no passage states the "
                 "answer explicitly, say so and give what the closest passages do say.")
-        for pattern in (BUILD_FROM_PASSAGES, NO_DECLINE, NO_INVENTED_DIFFERENCE, ONLY_FROM_PASSAGES):
+        for pattern in (BUILD_FROM_PASSAGES, NO_DECLINE, NO_INVENTED_DIFFERENCE, ONLY_FROM_PASSAGES, NO_SUBSTITUTE_CONCEPT):
             self.assertIsNone(pattern.search(bare), pattern.pattern)
 
 
