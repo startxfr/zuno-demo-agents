@@ -21,10 +21,12 @@ import unittest
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[4]
 PROMPTS = ("draft-architecture-testimonial.md", "workshop-presentation.md")
 
-# (a) when the answer covers the request, the next action is to mark the work item done
-MARK_DONE = re.compile(r"answer[^.]{0,80}covers[^.]{0,200}mark (?:that|the) work item (?:as )?done")
-# (b) a work item that already has an answer, or is marked done, is never delegated again
-NO_REDELEGATION = re.compile(r"never delegate a work item that already has an answer[^.]{0,40}or that is marked done")
+# (a) when the answer covers everything asked, the work item is marked done
+MARK_DONE = re.compile(r"covers everything you asked, mark that work item done")
+# (b) when no usable answer arrives, the work item is marked failed
+MARK_FAILED = re.compile(r"no usable answer arrives, mark the work item failed")
+# (c) apart from the one follow-up, a work item that already has an answer is never delegated again
+NO_REDELEGATION = re.compile(r"apart from that one follow-up, never delegate a work item that already has an answer")
 
 
 def normalised(name: str) -> str:
@@ -37,19 +39,25 @@ class DelegationClosure(unittest.TestCase):
         for name in PROMPTS:
             self.assertTrue((REPO_ROOT / "agents" / "arkos" / "prompts" / name).is_file(), name)
 
-    def test_the_answer_that_covers_the_request_closes_the_work_item(self):
+    def test_an_answer_that_covers_the_request_closes_the_work_item_as_done(self):
         for name in PROMPTS:
             self.assertRegex(normalised(name), MARK_DONE,
-                             f"{name} lost the instruction to mark the work item done once the delegated agent's answer covers the request")
+                             f"{name} lost the instruction to mark the work item done once the answer covers everything asked")
 
-    def test_an_item_with_an_answer_or_marked_done_is_never_delegated_again(self):
+    def test_no_usable_answer_closes_the_work_item_as_failed(self):
+        for name in PROMPTS:
+            self.assertRegex(normalised(name), MARK_FAILED,
+                             f"{name} lost the instruction to mark the work item failed when no usable answer arrives")
+
+    def test_an_item_with_an_answer_is_never_delegated_again_apart_from_one_follow_up(self):
         for name in PROMPTS:
             self.assertRegex(normalised(name), NO_REDELEGATION,
-                             f"{name} lost the ban on delegating a work item that already has an answer or is marked done")
+                             f"{name} lost the ban on delegating a work item that already has an answer (apart from one follow-up)")
 
     def test_the_patterns_do_not_match_a_prompt_without_the_paragraph(self):
         bare = "when you delegate a work item to another agent, delegate it once. use the work_item_id exactly as it appears."
         self.assertIsNone(MARK_DONE.search(bare))
+        self.assertIsNone(MARK_FAILED.search(bare))
         self.assertIsNone(NO_REDELEGATION.search(bare))
 
 
