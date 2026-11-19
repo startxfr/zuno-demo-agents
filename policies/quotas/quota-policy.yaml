@@ -158,6 +158,23 @@ classes:
       group:   { budget: 8000,  window: 5m }
       project: { budget: 4000,  window: 5m }
 
+  loadtest:
+    description: >-
+      Load, saturation and soak campaigns of the stress runner (ADR-0624): the stress-load-NN personas, which the
+      ai-gateway places here through the /zuno-loadtest group. Its own budget, on its own MaaS ServiceAccount
+      (ai-gateway-stress, subscribed per model route by the models chart), so a campaign never spends the ai-gateway
+      ServiceAccount's budget that Open WebUI, Dify, kagent and OpenClaw share. fail_mode closed: the class is served
+      only through MaaS, where that dedicated identity and its limit apply; a SaaS or unmetered candidate is skipped.
+    fail_mode: closed
+    requests:
+      user:    { limit: 120,  window: 5m }
+      group:   { limit: 600,  window: 5m }
+      project: { limit: 300,  window: 5m }
+    tokens:
+      user:    { budget: 250000,  window: 1h }
+      group:   { budget: 1000000, window: 1h }
+      project: { budget: 500000,  window: 1h }
+
 precedence:
   in_project_context: [project, user, group]
   default: [user, group]
