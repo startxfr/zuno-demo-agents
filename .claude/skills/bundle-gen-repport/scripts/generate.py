@@ -10,6 +10,8 @@ the prompts. Documentation is never read.
 """
 import hashlib, json, pathlib, re, sys
 
+sys.dont_write_bytecode = True  # rules.py is rewritten by --rehash; a stale .pyc would hide it
+
 import yaml
 
 SKILL = pathlib.Path(__file__).resolve().parent.parent

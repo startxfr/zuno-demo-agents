@@ -16,6 +16,7 @@ R['tekos/answer-technical-question'] = [
  ('do', 'Answer only from the provided context. If it does not hold the answer, say so instead of inventing details.'),
  ('do', 'Cite the sources and end every answer with a final line that reads only "— Tekos".'),
  ('limit', 'Search budget: at most three search calls per question, and never repeat a search with a reworded query.'),
+ ('do', 'For a comparison, when the passages describe each side separately, build it from them: each side with its source URL, then the differences those passages support, and say which part no passage states. Never add a difference no passage supports (added in 1.0.3).'),
  ('limit', 'Order of grounding: indexed documents first, then live Confluence search, web search last.'),
  ('dont', 'Never put a customer name, a project id or anything from project memory in a web search query. The bundle records that no code enforces this yet.'),
  ('limit', 'Cluster reads (events, logs, resources, metrics) are for the ocp-ai-ops group only, in zuno-* namespaces only, and never return Secrets or ConfigMaps.'),
@@ -44,7 +45,9 @@ R['arkos/draft-architecture-testimonial'] = [
  ('do', 'A plain factual question gets a direct, short answer, not the document structure.'),
  ('must', 'A diagram request must call the diagram tool with real source. Diagram source is never pasted into the reply as if it were done.'),
  ('limit', 'Repository tools have no default owner: if the message names no GitHub org, GitLab group or user, ask before guessing.'),
- ('limit', 'Delegate a work item once, with the plan\'s exact work_item_id, never invented or omitted, and never again once it has an answer (added in 1.0.2).'),
+ ('limit', 'Delegate each work item once, with the plan\'s exact work_item_id, never invented or omitted, plus at most one precise follow-up when the answer is incomplete (reworded in 1.0.3).'),
+ ('must', 'When the delegated answer covers everything asked, mark the work item done first, then write the reply from it. When no usable answer arrives, mark it failed and say the delegated agent gave none.'),
+ ('dont', 'Apart from that one follow-up, never delegate a work item that already has an answer or is marked done or failed. After the follow-up, ask the user instead of delegating again.'),
  ('limit', 'Writes are explicit: a file commit lands only in public repositories, and a new repository is private unless the call says otherwise.'),
 ]
 R['arkos/workshop-presentation'] = [
@@ -53,7 +56,9 @@ R['arkos/workshop-presentation'] = [
  ('do', 'Stay grounded in documentation, Confluence and project memory, and say when the context does not support a claim.'),
  ('must', 'A diagram request must call the diagram tool with real source, never describe it as done in the reply.'),
  ('limit', 'Ask which GitHub org, GitLab group or user to check when the message does not name one.'),
- ('limit', 'Delegate a work item once, with the plan\'s exact work_item_id, and never again once answered (added in 1.0.2).'),
+ ('limit', 'Delegate each work item once, with the plan\'s exact work_item_id, plus at most one precise follow-up when the answer is incomplete (reworded in 1.0.3).'),
+ ('must', 'When the delegated answer covers everything asked, mark the work item done first; when no usable answer arrives, mark it failed and say so.'),
+ ('dont', 'Apart from that one follow-up, never delegate a work item that already has an answer or is marked done or failed.'),
 ]
 R['arkos/structure-demo'] = [
  ('do', 'Reply with an opening, an ordered list of sections with a one-line purpose each, 2 to 4 talking points per section, and a closing takeaway.'),
@@ -186,9 +191,9 @@ PROMPT_SHA = {
  "advantage/check-my-drive-and-mail": "a31df7c0e52a",
  "advantage/identify-new-business-with-po": "517265cf809d",
  "advantage/monthly-sales-report": "8f9bd97640b8",
- "arkos/draft-architecture-testimonial": "eda86b6f41e5",
+ "arkos/draft-architecture-testimonial": "5c685a3cfbb9",
  "arkos/structure-demo": "215eaa1a60dd",
- "arkos/workshop-presentation": "2ee7af05ef43",
+ "arkos/workshop-presentation": "86d7f16ccded",
  "arkos/write-code": "38b1c3e49735",
  "cognos/coming-soon": "ccbe5b38a4fb",
  "comage/check-deal-status": "421fe3cdf744",
@@ -200,7 +205,7 @@ PROMPT_SHA = {
  "finage/monthly-invoice-report": "d84a2e564256",
  "naveo/answer-onboarding-question": "fc5efa8dc4c8",
  "soursage/coming-soon": "0114bc203303",
- "tekos/answer-technical-question": "885b25d5eec8",
+ "tekos/answer-technical-question": "c3514e61b2d6",
  "tekos/check-my-drive-docs": "6daac0c384c3",
  "tekos/find-relevant-docs": "6913cf88b4e1",
  "tekos/write-code": "affa4b40e04b"
