@@ -1,0 +1,426 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Zuno Agent Bundles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: an index of eight agents on top, one agent's bundle opened below it, task by task, then a cross-agent matrix. */
+:root{
+  --bg:#F2F4F8; --surface:#FFFFFF; --surface2:#F7F8FB; --ink:#131A26; --ink2:#4B5669; --ink3:#7A8499;
+  --line:#DCE1EA; --soft:#E8ECF3; --focus:#1F5FD6;
+  --active:#13783C; --active-bg:#DDF3E5; --hold:#946200; --hold-bg:#FBEFCB;
+  --read:#0B6E67; --read-bg:#D9F1EE; --write:#B4410B; --write-bg:#FBE3D3;
+  --local:#2C4FB8; --local-bg:#E0E7FB;
+  --do:#13783C; --dont:#B4261F; --must:#2C4FB8; --limit:#7A8499;
+  --f-display:"Space Grotesk","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --ag:#0066CC;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1219; --surface:#161C26; --surface2:#1B2230; --ink:#E7ECF4; --ink2:#A2AEC2; --ink3:#78859B;
+    --line:#2A3345; --soft:#212A3A; --focus:#7DA8FF;
+    --active:#6FD79A; --active-bg:#173A27; --hold:#F2C75C; --hold-bg:#3A2F10;
+    --read:#6FD9CE; --read-bg:#12332F; --write:#FF9A63; --write-bg:#41230F;
+    --local:#9DB6FF; --local-bg:#1B2A55;
+    --do:#6FD79A; --dont:#FF8A82; --must:#9DB6FF; --limit:#8793A8;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1219; --surface:#161C26; --surface2:#1B2230; --ink:#E7ECF4; --ink2:#A2AEC2; --ink3:#78859B;
+  --line:#2A3345; --soft:#212A3A; --focus:#7DA8FF;
+  --active:#6FD79A; --active-bg:#173A27; --hold:#F2C75C; --hold-bg:#3A2F10;
+  --read:#6FD9CE; --read-bg:#12332F; --write:#FF9A63; --write-bg:#41230F;
+  --local:#9DB6FF; --local-bg:#1B2A55;
+  --do:#6FD79A; --dont:#FF8A82; --must:#9DB6FF; --limit:#8793A8;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.55 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));}
+.wrap{max-width:1180px;margin:0 auto;padding-block:28px 56px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:6px}
+.mono{font-family:var(--f-mono);font-size:.86em}
+.eyebrow{font:500 11px/1 var(--f-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink3)}
+
+/* masthead */
+.mast{display:grid;gap:10px;margin-bottom:22px}
+.mast h1{font-size:clamp(26px,4.2vw,38px);font-weight:700}
+.mast p{margin:0;color:var(--ink2);max-width:68ch}
+.mast .src{font:400 12.5px/1.5 var(--f-mono);color:var(--ink3)}
+
+/* agent index */
+.index{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:10px;margin-bottom:26px}
+.tile{--ag:#0066CC;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;
+  padding:12px 12px 10px;display:grid;gap:8px;position:relative;overflow:hidden}
+.tile::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--ag)}
+.tile:hover{border-color:var(--ink3)}
+.tile[aria-selected="true"]{border-color:var(--ag);box-shadow:0 0 0 2px color-mix(in srgb,var(--ag) 35%,transparent)}
+.tile .nm{font:600 17px/1 var(--f-display);margin-top:4px}
+.tile .meta{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.tile .cnt{font:400 12px/1.3 var(--f-mono);color:var(--ink2)}
+.tile.is-hold .nm{color:var(--ink2)}
+
+.pill{display:inline-flex;align-items:center;gap:5px;font:500 11px/1 var(--f-mono);padding:4px 7px;border-radius:5px;
+  background:var(--soft);color:var(--ink2);white-space:nowrap}
+.pill.active{background:var(--active-bg);color:var(--active)}
+.pill.hold{background:var(--hold-bg);color:var(--hold)}
+.pill.local{background:var(--local-bg);color:var(--local)}
+.pill.read{background:var(--read-bg);color:var(--read)}
+.pill.write{background:var(--write-bg);color:var(--write)}
+.cls{font:600 11px/1 var(--f-mono);padding:4px 6px;border-radius:5px;border:1px solid var(--line);color:var(--ink)}
+.cls[data-c="C1"]{background:color-mix(in srgb,#2E9E6B 16%,var(--surface))}
+.cls[data-c="C2"]{background:color-mix(in srgb,#D9A21B 20%,var(--surface))}
+.cls[data-c="C3"]{background:color-mix(in srgb,#C2410C 18%,var(--surface))}
+
+/* view switch */
+.views{display:flex;gap:6px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.views button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;font:600 14px/1 var(--f-display);color:var(--ink2)}
+.views button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+
+/* agent panel */
+.panel{--ag:#0066CC;display:grid;gap:18px}
+.head{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:grid;gap:14px;
+  border-top:5px solid var(--ag)}
+.head h2{font-size:clamp(24px,3.6vw,32px);color:color-mix(in srgb,var(--ag) 62%,var(--ink))}
+.head .lede{margin:0;color:var(--ink2);max-width:72ch}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.fact{background:var(--surface);padding:10px 12px;display:grid;gap:4px;align-content:start}
+.fact b{font:400 13.5px/1.35 var(--f-body);font-weight:500}
+.fact small{color:var(--ink2);font-size:12px;line-height:1.4}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+
+.cols{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:900px){.cols{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;gap:14px;align-content:start}
+.card h3{font-size:17px}
+.sub{color:var(--ink2);font-size:13.5px;margin:0}
+
+/* task selector */
+.tasks{display:flex;flex-wrap:wrap;gap:8px}
+.task{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:8px 11px;text-align:left;display:grid;gap:3px;min-width:0;max-width:100%}
+.task .tn{font:500 13px/1.2 var(--f-mono)}
+.task .tk{font-size:11.5px;color:var(--ink3);display:flex;gap:8px;flex-wrap:wrap}
+.task:hover{border-color:var(--ink3)}
+.task[aria-selected="true"]{background:color-mix(in srgb,var(--ag) 13%,var(--surface));border-color:var(--ag)}
+.star{color:color-mix(in srgb,var(--ag) 70%,var(--ink));font-weight:600}
+
+/* flow */
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:0;margin:2px 0}
+.step{position:relative;flex:1 1 118px;min-width:108px;padding:10px 12px 10px 16px;border:1px solid var(--line);background:var(--surface2);
+  display:grid;gap:4px;align-content:start;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 50%,calc(100% - 12px) 100%,0 100%,12px 50%);margin-right:-4px}
+.step:first-child{clip-path:polygon(0 0,calc(100% - 12px) 0,100% 50%,calc(100% - 12px) 100%,0 100%)}
+.step .sn{font:600 13px/1.2 var(--f-display)}
+.step .sd{font:400 11.5px/1.35 var(--f-body);color:var(--ink2)}
+.step.on{background:color-mix(in srgb,var(--ag) 17%,var(--surface));}
+.step.off{opacity:.45;background:var(--soft)}
+.step.off .sn{text-decoration:line-through;text-decoration-thickness:1px}
+.flow-note{font-size:12.5px;color:var(--ink3);margin:0}
+.fork{display:grid;gap:6px;margin:2px 0}
+.fork .lane{display:flex;gap:10px;align-items:baseline;font-size:12.5px;color:var(--ink2)}
+.fork .lane .mono{min-width:96px;color:var(--ink3)}
+
+/* capability groups */
+.group{display:grid;gap:8px}
+.group>.eyebrow{display:flex;gap:8px;align-items:center}
+.cap{display:inline-flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;border:1px solid var(--line);background:var(--surface2);
+  font:500 12.5px/1.2 var(--f-mono);text-align:left;max-width:100%}
+.cap .dot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--read)}
+.cap[data-a="write"]{border-color:color-mix(in srgb,var(--write) 55%,var(--line));background:var(--write-bg)}
+.cap[data-a="write"] .dot{background:var(--write);border-radius:2px}
+.cap[data-a="unknown"] .dot{background:transparent;border:2px solid var(--ink3)}
+.cap[aria-expanded="true"]{outline:2px solid var(--ag)}
+.cap .alias{color:var(--ink3);font-weight:400}
+.cap.live::after{content:"live read";font:500 10px/1 var(--f-mono);padding:3px 5px;border-radius:4px;background:var(--read-bg);color:var(--read)}
+.dom{border:1px solid var(--line);border-radius:8px;padding:9px 11px;background:var(--surface2);display:grid;gap:3px}
+.dom b{font:500 13px/1.2 var(--f-mono)}
+.dom span{font-size:12.5px;color:var(--ink2)}
+.detail{border:1px solid var(--ag);border-radius:10px;padding:14px;background:color-mix(in srgb,var(--ag) 7%,var(--surface));display:grid;gap:10px}
+.detail h4{margin:0;font:600 15px/1.2 var(--f-mono)}
+.detail p{margin:0;font-size:13.5px}
+.detail ul{margin:0;padding-left:18px;font-size:13px;color:var(--ink2);display:grid;gap:3px}
+.kv{display:flex;flex-wrap:wrap;gap:6px}
+.chain{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chain .m{font:500 12px/1 var(--f-mono);padding:6px 8px;border-radius:6px;background:var(--surface2);border:1px solid var(--line)}
+.chain .m:first-child{border-color:var(--ag);background:color-mix(in srgb,var(--ag) 13%,var(--surface))}
+.chain .ar{color:var(--ink3);font-size:12px}
+
+/* rules */
+.rules{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.rules li{display:grid;grid-template-columns:68px 1fr;gap:10px;align-items:start;font-size:14px}
+.tag{font:600 10.5px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;padding:5px 0;border-radius:4px;text-align:center;border:1px solid currentColor;margin-top:2px}
+.tag.do{color:var(--do)} .tag.dont{color:var(--dont)} .tag.must{color:var(--must)} .tag.limit{color:var(--limit)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--ink3)}
+.q{margin:0;padding:8px 11px;border-left:3px solid color-mix(in srgb,var(--ag) 60%,var(--line));background:var(--surface2);border-radius:0 6px 6px 0;font-size:13.5px;color:var(--ink2)}
+.stack{display:grid;gap:12px}
+
+/* matrix */
+.mx-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table.mx{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
+.mx th,.mx td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:center;vertical-align:middle}
+.mx thead th{position:sticky;top:0;background:var(--surface);font:600 12.5px/1.2 var(--f-display);border-bottom:2px solid var(--line)}
+.mx th.rowh,.mx td.rowh{text-align:left;font:500 12.5px/1.3 var(--f-mono);position:sticky;left:0;background:var(--surface);z-index:1;min-width:210px}
+.mx thead th .bar{display:block;height:4px;border-radius:2px;margin-bottom:6px}
+.mx tbody tr:hover td,.mx tbody tr:hover th{background:var(--surface2)}
+.mx .grp td{background:var(--soft);font:500 11px/1 var(--f-mono);text-transform:uppercase;letter-spacing:.08em;text-align:left;color:var(--ink2)}
+.mark{display:inline-block;width:13px;height:13px;border-radius:50%;background:var(--read)}
+.mark.write{background:var(--write);border-radius:3px}
+.mark.ring{background:transparent;border:2px solid var(--ink3)}
+.mark.ring.write{border-color:var(--write)}
+.mx td small{display:block;color:var(--ink3);font:400 10.5px/1.3 var(--f-mono);margin-top:3px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.tb{background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:7px 11px;font:500 12.5px/1 var(--f-body)}
+.tb[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.ladder{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px}
+@media (max-width:760px){.ladder{grid-template-columns:1fr}}
+.rung{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:10px;align-content:start}
+.rung p{margin:0;font-size:13px;color:var(--ink2)}
+.mini{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:6px;font:500 12.5px/1 var(--f-display);border:1px solid var(--line);background:var(--surface2)}
+.mini i{width:9px;height:9px;border-radius:50%;background:var(--ag)}
+.foot{margin-top:28px;color:var(--ink3);font-size:12.5px;max-width:80ch}
+.themebtn{float:right;background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:6px 10px;font:500 12px/1 var(--f-mono);color:var(--ink2)}
+@media (prefers-reduced-motion:no-preference){.panel{animation:fade .18s ease-out}@keyframes fade{from{opacity:.4}to{opacity:1}}}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="eyebrow">zuno-demo-agents · read from the bundles only · <span id="ver"></span></div>
+    <h1>What each agent does, and what holds it back</h1>
+    <p>Eight agents, read straight from their OKF bundles: the agent file, every task, every prompt, every tool and knowledge note. Pick an agent, then a task, to see how a turn runs, what it may call and the rules its prompt sets.</p>
+    <div class="src">Documentation was not used. Rules are paraphrased from the prompts and bundle notes.</div>
+  </header>
+
+  <nav class="index" id="index" role="tablist" aria-label="Agents"></nav>
+
+  <div class="views" role="tablist" aria-label="View">
+    <button role="tab" id="v-agent" aria-selected="true">One agent</button>
+    <button role="tab" id="v-compare" aria-selected="false">Compare all</button>
+  </div>
+
+  <main id="main"></main>
+  <p class="foot">Names are shown as each bundle declares them. A few capabilities appear under two names (for example search_confluence and confluence.page.search), which the prompts themselves use interchangeably, so the comparison groups them. A hollow marker means a task declares the tool but the bundle holds no note describing it.</p>
+</div>
+
+<script>
+const DATA = /*DATA*/null;
+const A = DATA.agents, DOM = DATA.domains;
+const CLS = {C1:'SaaS models allowed', C2:'Context-filtered: restricted SaaS allowlist, local models for protected content', C3:'Local models only'};
+const SHAPE = {
+  retrieve_reason_respond:'Retrieve, optional live read, reason, respond',
+  plan_draft_write:'Plan, then draft a document or answer directly'
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const st = {agent:'tekos', task:null, view:'agent', open:null, writeOnly:false};
+const byId = id => A.find(a => a.id === id);
+const clsPill = c => `<span class="cls" data-c="${c}" title="${esc(CLS[c])}">${c}</span>`;
+const statusPill = a => a.status === 'active' ? '<span class="pill active">active</span>' : '<span class="pill hold">placeholder</span>';
+document.getElementById('ver').textContent = 'release ' + (DATA.release || 'v1.1.1');
+
+function renderIndex(){
+  document.getElementById('index').innerHTML = A.map(a => {
+    const nt = a.tasks.length, tl = Object.keys(a.tools).length;
+    return `<button class="tile ${a.status==='active'?'':'is-hold'}" style="--ag:${a.color}" role="tab" aria-selected="${st.view==='agent'&&st.agent===a.id}" data-agent="${a.id}">
+      <span class="nm">${esc(a.name)}</span>
+      <span class="meta">${statusPill(a)}${clsPill(a.cls)}${a.localOnly?'<span class="pill local">local only</span>':''}</span>
+      <span class="cnt">${a.status==='active' ? nt+' tasks · '+tl+' tools' : (a.tasks[0].id==='coming-soon' ? 'no capability yet' : nt+' task'+(nt>1?'s':'')+' declared')}</span>
+    </button>`;
+  }).join('');
+}
+
+function flowFor(a, t){
+  const hasK = t.knowledge.length>0, hasT = t.tools.length>0, hasLive = !!t.live;
+  const on = (c) => c ? 'on' : 'off';
+  const mem = a.memory ? `Keeps the last ${a.memory.max_turns} turns in context` : 'No conversation history in the bundle';
+  if(!a.shape){
+    return `<div class="flow"><div class="step on"><div class="sn">Any request</div><div class="sd">Nothing is read or called</div></div>
+      <div class="step on"><div class="sn">Fixed reply</div><div class="sd">"Coming soon", and nothing more</div></div></div>`;
+  }
+  if(a.shape==='plan_draft_write'){
+    const doc = hasK;
+    return `<div class="flow">
+      <div class="step ${on(true)}"><div class="sn">Plan</div><div class="sd">Reads the request and the deliverable</div></div>
+      <div class="step ${on(doc)}"><div class="sn">Retrieve</div><div class="sd">${hasK? t.knowledge.join(' and '):'Skipped on this path'}</div></div>
+      <div class="step ${on(hasT)}"><div class="sn">Call tools</div><div class="sd">${hasT? t.tools.length+' declared':'None on this path'}</div></div>
+      <div class="step on"><div class="sn">${doc?'Draft':'Answer'}</div><div class="sd">${doc?'Writes the document':'From the message alone'}</div></div>
+      <div class="step ${on(!!t.reflect)}"><div class="sn">Reflect</div><div class="sd">${t.reflect? 'Self-review, ceiling '+t.reflect:'No review pass'}</div></div>
+      <div class="step on"><div class="sn">Reply</div><div class="sd">${doc?'Document in the reply':'Text in the reply'}</div></div></div>
+      <p class="flow-note">${mem}.</p>`;
+  }
+  return `<div class="flow">
+      <div class="step ${on(hasK)}"><div class="sn">Retrieve</div><div class="sd">${hasK? t.knowledge.join(' and ')+(a.topK?', top '+a.topK:''):'No retrieval'}</div></div>
+      <div class="step ${on(hasLive)}"><div class="sn">Live read</div><div class="sd">${hasLive? esc(t.live):'No live source'}</div></div>
+      <div class="step ${on(hasT)}"><div class="sn">Call tools</div><div class="sd">${hasT? t.tools.length+' declared':'No tools'}</div></div>
+      <div class="step on"><div class="sn">Reason</div><div class="sd">${t.models.length? 'Model preference below':'Platform default routing'}</div></div>
+      <div class="step on"><div class="sn">Respond</div><div class="sd">Reply to the user</div></div></div>
+      <p class="flow-note">${mem}.</p>`;
+}
+
+function capHTML(a, c, t){
+  const n = a.tools[c.name];
+  const acc = n ? n.access : (globalAccess(c.name) || 'unknown');
+  const alias = c.canon !== c.name ? `<span class="alias">${esc(c.canon)}</span>` : '';
+  const live = (t.live === c.name) ? ' live' : '';
+  return `<button class="cap${live}" data-a="${acc}" data-tool="${esc(c.name)}" aria-expanded="${st.open===c.name}">
+    <span class="dot"></span><span>${esc(c.name)}</span>${alias}</button>`;
+}
+function globalAccess(name){
+  for(const a of A){ if(a.tools[name]) return a.tools[name].access; }
+  return null;
+}
+function toolDetail(a, name){
+  const n = a.tools[name];
+  if(!n){
+    return `<div class="detail"><h4>${esc(name)}</h4><p>This task declares the tool, but ${esc(a.name)}'s bundle holds no note describing it. What it does here comes from the task description and prompt only.</p></div>`;
+  }
+  const g = n.groups.length ? n.groups.map(x=>`<span class="pill">${esc(x)}</span>`).join('') : '<span class="pill">not stated</span>';
+  return `<div class="detail"><h4>${esc(n.name)}</h4>
+    <div class="kv"><span class="pill ${n.access}">${n.access} access</span>${n.cls?clsPill(n.cls):''}${n.local?'<span class="pill local">local models only</span>':''}</div>
+    <p>${esc(n.usage)}</p>
+    <div class="eyebrow">Who can use it</div><div class="kv">${g}</div>
+    <div class="eyebrow">Limits written in the bundle</div><ul>${n.limits.map(l=>`<li>${esc(l)}</li>`).join('')}</ul></div>`;
+}
+
+function renderAgent(){
+  const a = byId(st.agent);
+  if(!st.task || !a.tasks.find(t=>t.id===st.task)) st.task = a.tasks[0].id;
+  const t = a.tasks.find(x=>x.id===st.task);
+  const deleg = a.delegation.length ? a.delegation.map(d=>`<button class="pill local" data-agent="${esc(d.agent)}" title="Open ${esc(d.agent)}">${esc(d.agent)} / ${esc(d.task)} →</button>`).join('') : '';
+  const facts = [
+    ['Entitlement', a.groups.map(g=>`<span class="pill">${esc(g)}</span>`).join(' '), 'Who may use the agent at all'],
+    ['Data ceiling', clsPill(a.cls)+(a.localOnly?' <span class="pill local">local only</span>':''), CLS[a.cls]],
+    ['Workflow', `<span class="mono">${esc(a.shape||'none')}</span>`, SHAPE[a.shape]||'Fixed reply'],
+    ['Version', `<span class="mono">${esc(a.version)}</span>`, a.status==='active'?'Served to users':'Declared, not served'],
+  ];
+  if(a.delegation.length) facts.push(['Delegates to', `<div class="chips">${deleg}</div>`, 'One read-only hop, depth 1']);
+  if(a.guardrails) facts.push(['Guardrails', `<span class="mono">${esc(a.guardrails)}</span>`, 'Corp floor for C1, observed not blocked']);
+  const tools = t.tools, writes = tools.filter(c=>{const n=a.tools[c.name]; return n? n.access==='write' : false});
+  const reads = tools.filter(c=>!writes.includes(c));
+  const models = t.models.length ? `<div class="group"><div class="eyebrow">Model preference, first wins</div><div class="chain">${t.models.map((m,i)=>(i?'<span class="ar">then</span>':'')+`<span class="m">${esc(m)}</span>`).join('')}</div></div>` : '';
+  const limits = [];
+  if(t.maxTokens) limits.push(`<span class="pill">max ${t.maxTokens.toLocaleString('en')} tokens</span>`);
+  if(t.projectRequired) limits.push('<span class="pill hold">needs a verified project</span>');
+  if(t.reflect) limits.push(`<span class="pill">reflect pass at ${t.reflect}</span>`);
+  const ruleHTML = t.rules.length ? `<ul class="rules">${t.rules.map(r=>`<li><span class="tag ${r[0]}">${{do:'does',dont:'never',must:'must',limit:'limit'}[r[0]]}</span><span>${esc(r[1])}</span></li>`).join('')}</ul>` : '<p class="sub">The bundle states no rule for this task.</p>';
+  const agRules = a.rules.length ? `<ul class="rules">${a.rules.map(r=>`<li><span class="tag ${r[0]}">${{do:'does',dont:'never',must:'must',limit:'limit'}[r[0]]}</span><span>${esc(r[1])}</span></li>`).join('')}</ul>` : '';
+  const forkNote = a.shape==='plan_draft_write' ? `<div class="fork"><div class="lane"><span class="mono">document path</span><span>draft-architecture-testimonial, workshop-presentation: retrieve, draft, reflect</span></div><div class="lane"><span class="mono">direct path</span><span>structure-demo, write-code: answer from the message alone</span></div></div>` : '';
+
+  return `<section class="panel" style="--ag:${a.color}">
+    <div class="head">
+      <div class="chips">${statusPill(a)}<span class="pill">${esc(a.icon)}</span><span class="pill">${esc(a.tile)}</span></div>
+      <h2>${esc(a.name)}</h2>
+      <p class="lede">${esc(a.desc)}</p>
+      <div class="facts">${facts.map(f=>`<div class="fact"><span class="eyebrow">${f[0]}</span><b>${f[1]}</b><small>${esc(f[2])}</small></div>`).join('')}</div>
+    </div>
+
+    <div class="cols">
+      <div class="stack">
+        <div class="card">
+          <h3>Tasks <span class="sub">(${a.tasks.length})</span></h3>
+          <div class="tasks" role="tablist" aria-label="Tasks of ${esc(a.name)}">
+            ${a.tasks.map(x=>`<button class="task" role="tab" data-task="${x.id}" aria-selected="${x.id===st.task}">
+              <span class="tn">${x.primary?'<span class="star">★</span> ':''}${esc(x.id)}</span>
+              <span class="tk"><span>${x.tools.length} tool${x.tools.length===1?'':'s'}</span><span>${x.knowledge.length} domain${x.knowledge.length===1?'':'s'}</span></span></button>`).join('')}
+          </div>
+          <p class="sub">★ marks the primary task.</p>
+        </div>
+
+        <div class="card">
+          <h3>${esc(t.title)}</h3>
+          <p class="sub" style="font-size:14.5px;color:var(--ink)">${esc(t.desc)}</p>
+          <div class="eyebrow">How a turn runs</div>
+          ${flowFor(a,t)}
+          ${forkNote}
+          ${limits.length?`<div class="chips">${limits.join('')}</div>`:''}
+          ${models}
+          <div class="group"><div class="eyebrow">Knowledge it may retrieve</div>
+            ${t.knowledge.length ? t.knowledge.map(k=>`<div class="dom"><b>${esc(k)}</b><span>${esc(DOM[k]||'')}</span></div>`).join('') : '<p class="sub">None. It answers from the conversation and its prompt.</p>'}
+          </div>
+          <div class="group"><div class="eyebrow">Tools it may call <span class="legend"><span><span class="mark" style="width:9px;height:9px"></span> read</span><span><span class="mark write" style="width:9px;height:9px"></span> write</span><span><span class="mark ring" style="width:9px;height:9px"></span> no note in bundle</span></span></div>
+            ${tools.length ? `<div class="chips">${[...reads,...writes].map(c=>capHTML(a,c,t)).join('')}</div>` : '<p class="sub">No tools.</p>'}
+            ${st.open && tools.find(c=>c.name===st.open) ? toolDetail(a, st.open) : (tools.length? '<p class="sub">Select a tool to see what it does, who may use it and its limits.</p>':'')}
+          </div>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="card">
+          <h3>Rules for this task</h3>
+          <div class="legend"><span><b style="color:var(--do)">does</b> expected behaviour</span><span><b style="color:var(--must)">must</b> required</span><span><b style="color:var(--dont)">never</b> forbidden</span><span><b>limit</b> boundary</span></div>
+          ${ruleHTML}
+        </div>
+        ${agRules?`<div class="card"><h3>Rules for the whole agent</h3>${agRules}</div>`:''}
+        ${t.examples.length?`<div class="card"><h3>What users ask it</h3>${t.examples.map(e=>`<p class="q">${esc(e)}</p>`).join('')}</div>`:''}
+        <div class="card"><h3>Why this data ceiling</h3><p class="sub" style="font-size:14px;color:var(--ink)">${esc(a.modelNote)}</p></div>
+      </div>
+    </div>
+  </section>`;
+}
+
+function renderCompare(){
+  const rows = {};
+  A.forEach(a => a.tasks.forEach(t => t.tools.forEach(c => {
+    const k = c.canon;
+    rows[k] = rows[k] || {name:k, names:new Set(), cells:{}};
+    rows[k].names.add(c.name);
+    const n = a.tools[c.name];
+    const cell = rows[k].cells[a.id] = rows[k].cells[a.id] || {tasks:[], noted:false, access:'read'};
+    cell.tasks.push(t.id);
+    if(n){cell.noted = true; cell.access = n.access;}
+  })));
+  Object.values(rows).forEach(r => { r.access = globalAccessRow(r) });
+  function globalAccessRow(r){
+    for(const n of r.names){ const g = globalAccess(n); if(g==='write') return 'write'; }
+    return 'read';
+  }
+  let list = Object.values(rows).sort((x,y)=>Object.keys(y.cells).length-Object.keys(x.cells).length || x.name.localeCompare(y.name));
+  if(st.writeOnly) list = list.filter(r=>r.access==='write');
+  const head = `<tr><th class="rowh" style="text-align:left">Capability</th>${A.map(a=>`<th style="--ag:${a.color}"><span class="bar" style="background:${a.color}"></span>${esc(a.name)}<div class="pill ${a.status==='active'?'active':'hold'}" style="margin-top:5px">${a.status==='active'?'active':'placeholder'}</div></th>`).join('')}</tr>`;
+  const body = list.map(r=>`<tr><th class="rowh" scope="row">${esc(r.name)}${r.names.size>1||[...r.names][0]!==r.name?`<small style="display:block;color:var(--ink3)">also ${[...r.names].filter(n=>n!==r.name).map(esc).join(', ')}</small>`:''}</th>${A.map(a=>{
+    const c = r.cells[a.id]; if(!c) return '<td></td>';
+    const acc = r.access;
+    return `<td title="${esc(c.tasks.join(', '))}"><span class="mark ${acc==='write'?'write':''} ${c.noted?'':'ring'}"></span><small>${c.tasks.length} task${c.tasks.length>1?'s':''}</small></td>`;
+  }).join('')}</tr>`).join('');
+
+  const doms = Object.keys(DOM);
+  const dbody = doms.map(k=>`<tr><th class="rowh" scope="row">${k}</th>${A.map(a=>{
+    const ts = a.tasks.filter(t=>t.knowledge.includes(k)).map(t=>t.id);
+    return ts.length ? `<td title="${esc(ts.join(', '))}"><span class="mark"></span><small>${ts.length} task${ts.length>1?'s':''}</small></td>` : '<td></td>';
+  }).join('')}</tr>`).join('');
+
+  const ladder = ['C1','C2','C3'].map(c=>`<div class="rung"><div class="chips">${clsPill(c)}</div><h3>${c}</h3><p>${esc(CLS[c])}.</p>
+    <div class="chips">${A.filter(a=>a.cls===c).map(a=>`<button class="mini" style="--ag:${a.color}" data-agent="${a.id}"><i></i>${esc(a.name)}${a.localOnly?' · local only':''}</button>`).join('')}</div></div>`).join('');
+
+  return `<section class="panel" style="--ag:#5C6BC0">
+    <div class="toolbar"><button class="tb" id="tb-all" aria-pressed="${!st.writeOnly}">All capabilities</button><button class="tb" id="tb-write" aria-pressed="${st.writeOnly}">Write tools only</button>
+      <span class="sub">Rows are what tasks declare. ${list.length} shown.</span></div>
+    <div class="mx-wrap"><table class="mx"><thead>${head}</thead><tbody>
+      <tr class="grp"><td colspan="${A.length+1}">Tools</td></tr>${body}
+      <tr class="grp"><td colspan="${A.length+1}">Knowledge domains</td></tr>${dbody}
+    </tbody></table></div>
+    <h3 style="margin-top:24px">Where each agent sits on the data ceiling</h3>
+    <div class="ladder">${ladder}</div>
+  </section>`;
+}
+
+function render(){
+  renderIndex();
+  document.getElementById('v-agent').setAttribute('aria-selected', st.view==='agent');
+  document.getElementById('v-compare').setAttribute('aria-selected', st.view==='compare');
+  document.getElementById('main').innerHTML = st.view==='agent' ? renderAgent() : renderCompare();
+}
+document.addEventListener('click', e => {
+  const ag = e.target.closest('[data-agent]'); if(ag){ st.agent = ag.dataset.agent; st.task = null; st.open = null; st.view='agent'; render(); window.scrollTo({top:0}); return; }
+  const tk = e.target.closest('[data-task]'); if(tk){ st.task = tk.dataset.task; st.open = null; render(); return; }
+  const cp = e.target.closest('[data-tool]'); if(cp){ st.open = st.open===cp.dataset.tool ? null : cp.dataset.tool; render(); return; }
+  if(e.target.id==='v-agent'){ st.view='agent'; render(); }
+  if(e.target.id==='v-compare'){ st.view='compare'; render(); }
+  if(e.target.id==='tb-all'){ st.writeOnly=false; render(); }
+  if(e.target.id==='tb-write'){ st.writeOnly=true; render(); }
+});
+render();
+</script>
