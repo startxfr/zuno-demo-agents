@@ -153,7 +153,7 @@ AGENT_RULES = {
  ],
  'arkos': [
   ('limit','Local models only: the agent is C3 because sovereign-marked architecture documents must never leave the cluster.'),
-  ('limit','May delegate one read-only hop to tekos / answer-technical-question. Maximum delegation depth is 1.'),
+  ('limit','May delegate one hop to tekos / answer-technical-question, depth 1. A write the target asks for (its cluster audit) waits for the approval of the initiating user.'),
   ('limit','Conversation memory keeps the last 6 turns within a 6,000 token budget.'),
   ('limit','The only agent here with write tools: commit one file to a public repository, create a repository (private by default).'),
  ],
