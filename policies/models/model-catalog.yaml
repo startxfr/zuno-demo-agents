@@ -72,7 +72,7 @@ models:
   eligible_for: [C1]
 - name: anthropic
   kind: saas
-  model: claude-3-5-sonnet-latest
+  model: claude-sonnet-5-5
   role: general-external
   eligible_for: [C1, C2]
 - name: mistral
