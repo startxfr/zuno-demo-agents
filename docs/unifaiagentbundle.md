@@ -109,8 +109,10 @@ default, set it explicitly on the stack and on every bundle.
 
 ### Delegation: `delegation`
 
-Without this block, a bundle that declares `zuno.delegation.targets` is refused (`DelegationUnsupported`). Delegation is
-read-only, through the A2A gateway.
+Without this block, a bundle that declares `zuno.delegation.targets` is refused (`DelegationUnsupported`). Delegation goes
+through the A2A gateway. It is not read-only by construction: a write on the target happens only after the initiating
+user approves it (it is refused when no human is present), and only for a target that `delegation.write_allowed` in
+`policies/limits/limits-policy.yaml` lists.
 
 | Field | Meaning |
 |---|---|

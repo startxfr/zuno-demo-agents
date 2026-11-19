@@ -93,8 +93,12 @@ jobs:
     steps:
       - name: Only devel is merged into main
         if: github.head_ref != 'devel'
+        env:
+          # A branch name is chosen by whoever opens the pull request: it goes
+          # through the environment, never into the script text.
+          HEAD_REF: ${{ github.head_ref }}
         run: |
-          echo "::error::main only accepts pull requests from devel (got ${{ github.head_ref }})"
+          echo "::error::main only accepts pull requests from devel (got ${HEAD_REF})"
           exit 1
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:

@@ -7,8 +7,8 @@ repository access and Mermaid diagrams. It also structures customer demos and
 writes code.
 
 **Status:** active. Graph shape `plan_draft_write`, primary task
-`draft-architecture-testimonial`. It may delegate one read-only hop to
-`tekos` / `answer-technical-question`.
+`draft-architecture-testimonial`. It may delegate one hop to
+`tekos` / `answer-technical-question`; a write the target asks for needs the user's approval.
 
 | Task | What it does | Tools | Knowledge |
 |---|---|---|---|
