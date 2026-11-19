@@ -2,6 +2,24 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v1.1.5 - 2026-11-19
+
+Agents:
+
+- `advantage` 1.0.1
+- `arkos` 1.0.4
+- `cognos` 1.0.0
+- `comage` 1.0.1
+- `finage` 1.0.0
+- `naveo` 1.0.0
+- `soursage` 1.0.1
+- `tekos` 1.0.3
+
+Changes:
+
+- ci: pass the pull request branch name through the environment (aae115c)
+- docs(arkos): delegation is not read-only by construction (b355d7a)
+
 ## v1.1.4 - 2026-11-19
 
 Agents:

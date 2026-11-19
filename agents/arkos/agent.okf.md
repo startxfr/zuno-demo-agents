@@ -39,9 +39,11 @@ zuno:
     notes: >-
       C3 because sovereign-marked DAT workflows must run on local models
       only.
-  # Arkos may ask Tekos for a technical answer while it drafts: read-only
-  # delegation, one hop (zuno-demo ADR-0401). Arkos is already C3, so the C3
-  # raise of a delegating task changes nothing.
+  # Arkos may ask Tekos for a technical answer while it drafts: one hop
+  # (zuno-demo ADR-0401). A write the target asks for (only the cluster audit
+  # of Tekos is listed in delegation.write_allowed) is held until the
+  # initiating user approves it. Arkos is already C3, so the C3 raise of a
+  # delegating task changes nothing.
   delegation:
     targets:
       - agent: tekos
@@ -89,7 +91,9 @@ search, six Git repository capabilities, diagram generation and the
 read-only AAP platform audit, and the domains `knowledge.tech` and
 `knowledge.project`. `structure-demo` and `write-code` declare none.
 
-Arkos may delegate one read-only hop to `tekos` / `answer-technical-question`.
+Arkos may delegate one hop to `tekos` / `answer-technical-question`. The delegation is not read-only by
+construction: a write the target asks for happens only after the initiating user approves it, and only for a target
+that `delegation.write_allowed` in `policies/limits/limits-policy.yaml` lists (Tekos's cluster audit).
 
 The entitlement group is `agent_arkos`. Inside Arkos, the `consultant`
 business role gates tools and knowledge (`policies/tools/tool-policy.yaml`,
