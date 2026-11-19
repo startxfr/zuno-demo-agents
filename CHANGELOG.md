@@ -2,6 +2,27 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v1.1.6 - 2026-11-19
+
+Agents:
+
+- `advantage` 1.0.1
+- `arkos` 1.0.4
+- `cognos` 1.0.0
+- `comage` 1.0.1
+- `finage` 1.0.0
+- `naveo` 1.0.0
+- `soursage` 1.0.1
+- `tekos` 1.0.4
+
+Changes:
+
+- fix(tekos): do not stand in a related concept for the one asked (50f8ce4)
+- fix(tekos): a comparison is built only from retrieved passages (845b1c4)
+- chore(skills): bundle-gen-repport no longer calls the Arkos delegation read-only (0ebd9cf)
+- test(tekos): the Tekos prompt keeps its rule for a comparison built from passages that describe each side separately (b15a9ff)
+- chore(skills): bundle-gen-repport rules follow the v1.1.4 prompts (1a6d3ce)
+
 ## v1.1.5 - 2026-11-19
 
 Agents:
