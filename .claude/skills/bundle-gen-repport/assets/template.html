@@ -296,7 +296,7 @@ function renderAgent(){
     ['Workflow', `<span class="mono">${esc(a.shape||'none')}</span>`, SHAPE[a.shape]||'Fixed reply'],
     ['Version', `<span class="mono">${esc(a.version)}</span>`, a.status==='active'?'Served to users':'Declared, not served'],
   ];
-  if(a.delegation.length) facts.push(['Delegates to', `<div class="chips">${deleg}</div>`, 'One read-only hop, depth 1']);
+  if(a.delegation.length) facts.push(['Delegates to', `<div class="chips">${deleg}</div>`, 'One hop, depth 1; a write waits for user approval']);
   if(a.guardrails) facts.push(['Guardrails', `<span class="mono">${esc(a.guardrails)}</span>`, 'Corp floor for C1, observed not blocked']);
   const tools = t.tools, writes = tools.filter(c=>{const n=a.tools[c.name]; return n? n.access==='write' : false});
   const reads = tools.filter(c=>!writes.includes(c));
