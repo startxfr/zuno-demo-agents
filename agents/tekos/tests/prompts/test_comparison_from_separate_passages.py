@@ -27,6 +27,8 @@ BUILD_FROM_PASSAGES = re.compile(
 NO_DECLINE = re.compile(r"do not decline a comparison only because no single passage compares the two sides")
 # (c) no difference is added that no passage supports
 NO_INVENTED_DIFFERENCE = re.compile(r"never add a difference that no passage supports")
+# (d) a comparison is built only from passages, and a side no passage covers is reported, not described from general knowledge
+ONLY_FROM_PASSAGES = re.compile(r"only from the passages in your context or returned by your searches.{0,120}no passage covers one side, say that no passage covers it")
 
 
 def normalised() -> str:
@@ -49,10 +51,14 @@ class ComparisonFromSeparatePassages(unittest.TestCase):
         self.assertRegex(normalised(), NO_INVENTED_DIFFERENCE,
                          "answer-technical-question.md lost the ban on adding a difference that no passage supports")
 
+    def test_a_side_without_a_passage_is_reported_not_described_from_general_knowledge(self):
+        self.assertRegex(normalised(), ONLY_FROM_PASSAGES,
+                         "answer-technical-question.md lost the rule to build a comparison only from passages and to report a side no passage covers")
+
     def test_the_patterns_do_not_match_a_bare_prompt(self):
         bare = ("answer the technical question from the passages you are given and cite their source urls. if no passage states the "
                 "answer explicitly, say so and give what the closest passages do say.")
-        for pattern in (BUILD_FROM_PASSAGES, NO_DECLINE, NO_INVENTED_DIFFERENCE):
+        for pattern in (BUILD_FROM_PASSAGES, NO_DECLINE, NO_INVENTED_DIFFERENCE, ONLY_FROM_PASSAGES):
             self.assertIsNone(pattern.search(bare), pattern.pattern)
 
 
