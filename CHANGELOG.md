@@ -2,6 +2,26 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v1.1.3 - 2026-11-19
+
+Agents:
+
+- `advantage` 1.0.1
+- `arkos` 1.0.2
+- `cognos` 1.0.0
+- `comage` 1.0.1
+- `finage` 1.0.0
+- `naveo` 1.0.0
+- `soursage` 1.0.1
+- `tekos` 1.0.2
+
+Changes:
+
+- feat(quotas): loadtest quota class for the stress runner (ADR-0624, WP-306) (5a3f052)
+- docs: describe the agent bundle report and its bundle-gen-repport skill (61ae625)
+- ignore worktrees (01f7ddb)
+- feat(skills): bundle-gen-repport builds the interactive HTML report of the agent bundles (2339664)
+
 ## v1.1.2 - 2026-11-19
 
 Agents:
