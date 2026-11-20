@@ -30,6 +30,3 @@ Reads the current state of Salesforce opportunities, live. In Comage it
 checks the index: when `check-deal-status` answers about a stage or an
 amount, this call supplies the current value, and the prompt forbids
 stating such a value with confidence without it.
-
-Documentary only: authorization stays each task's `zuno.allowed_tools`
-intersected with `policies/tools/tool-policy.yaml`.

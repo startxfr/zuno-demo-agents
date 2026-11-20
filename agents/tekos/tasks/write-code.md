@@ -9,17 +9,12 @@ zuno:
   profile: "1.0"
   allowed_tools: []
   allowed_knowledge: []
-  # The model roles this task prefers, in order, matching its entry in
-  # policies/model-routing/model-routing-policy.yaml (a code-specialized
-  # model first, local models as fallbacks); the routing policy stays the
-  # authority.
   models:
     preferred:
       - code
       - specialized
       - reasoning
       - quality
-  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "Write an Ansible task that waits for a Deployment to finish rolling out."
     - "Generate a Kubernetes NetworkPolicy allowing ingress only from the istio-system namespace."

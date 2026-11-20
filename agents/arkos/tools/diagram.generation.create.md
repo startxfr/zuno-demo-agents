@@ -27,6 +27,3 @@ zuno:
 Draws the architecture overview of a DAT or a workshop presentation, or a
 standalone diagram the user asks for. Photorealistic image generation is not
 declared.
-
-Documentary only: authorization is each task's allowed_tools intersected with
-policies/tools/tool-policy.yaml.

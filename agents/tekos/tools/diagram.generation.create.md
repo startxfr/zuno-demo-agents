@@ -25,6 +25,3 @@ zuno:
 Renders a Mermaid diagram to SVG (zuno-demo ADR-0516). `generate_diagram`
 is its legacy tool name. The rendering does not send the diagram source to
 an external service.
-
-This note grants nothing: the task's `allowed_tools` and
-`policies/tools/tool-policy.yaml` decide.

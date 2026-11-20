@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """ADR-0503 (roadmap WP-44) per-agent authorization matrix generator.
 
-Renders, into each agents/<name>/agent.okf.md body, a generated
-`## Authorization matrix` section stating the complete
+Renders, into docs/authorization-matrix/<name>.md (review only, never published
+in the bundle: the section used to sit in agents/<name>/agent.okf.md and weighed
+about 47 KB over the eight agents), a generated `## Authorization matrix` section stating the complete
 who x what x for-what x policy intersection for that agent - one row per
 (task x tool) and (task x knowledge domain) pair, derived from the
 bundle frontmatter plus policies/tools/tool-policy.yaml and
@@ -15,10 +16,8 @@ The matrix is documentation of the intersection, never an input to it
 portal keep reading the YAML sources; nothing at runtime reads this
 section.
 
-The section lives between HTML comment markers in the Markdown body
-(after the closing `---` of the frontmatter), so the three independent
-frontmatter parsers (agent-frontend/mcp-gateway/agent-runtime) are
-untouched by regeneration. Frontmatter parsing here deliberately
+The agent.okf.md file is never written; --check fails when it carries the
+section again. Frontmatter parsing here deliberately
 duplicates platform/supply-chain/validate_okf_bundle.py's
 _split_frontmatter, per this repo's convention of duplicating small
 well-specified parsing code rather than sharing a module.
@@ -51,6 +50,7 @@ QUOTA_POLICY_PATH = REPO_ROOT / "policies" / "quotas" / "quota-policy.yaml"
 MODEL_CATALOG_PATH = REPO_ROOT / "policies" / "models" / "model-catalog.yaml"
 MODEL_ROUTING_POLICY_PATH = REPO_ROOT / "policies" / "model-routing" / "model-routing-policy.yaml"
 
+MATRIX_DIR = REPO_ROOT / "docs" / "authorization-matrix"
 BEGIN_MARKER = ("<!-- BEGIN GENERATED AUTHORIZATION MATRIX (ADR-0503) - do not edit; "
                 "regenerate with: python3 platform/okf/generate_authorization_matrix.py -->")
 END_MARKER = "<!-- END GENERATED AUTHORIZATION MATRIX -->"
@@ -481,29 +481,28 @@ def main() -> int:
     failures: List[str] = []
     written: List[str] = []
     for agent_dir in _agent_dirs(args.agents):
-        index_path = agent_dir / "agent.okf.md"
-        _, frontmatter_text, body = _split_document(index_path)
+        _, _, body = _split_document(agent_dir / "agent.okf.md")
+        out_path = MATRIX_DIR / f"{agent_dir.name}.md"
         expected = _render_section(agent_dir, tool_policy, knowledge_policy, quota_classes,
                                    providers, model_preferences, model_adapters, model_strict,
-                                   model_local_only_for)
-        current = _current_section(body)
+                                   model_local_only_for) + "\n"
+        current = out_path.read_text(encoding="utf-8") if out_path.is_file() else None
 
         if args.check:
+            if _current_section(body) is not None:
+                failures.append(f"{agent_dir.name}: agent.okf.md still carries the matrix; it lives in "
+                                f"docs/authorization-matrix/{agent_dir.name}.md and is not published")
             if current is None:
                 if args.all:
-                    failures.append(f"{agent_dir.name}: no authorization matrix section (run the generator)")
-                continue
-            if current != expected:
+                    failures.append(f"{agent_dir.name}: no authorization matrix file (run the generator)")
+            elif current != expected:
                 failures.append(f"{agent_dir.name}: committed matrix differs from regeneration (run the generator)")
             continue
 
-        if current is None:
-            new_body = body.rstrip() + "\n\n" + expected + "\n"
-        elif current == expected:
+        if current == expected:
             continue
-        else:
-            new_body = body.replace(current, expected)
-        index_path.write_text(f"---{frontmatter_text}---{new_body}", encoding="utf-8")
+        MATRIX_DIR.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(expected, encoding="utf-8")
         written.append(agent_dir.name)
 
     if args.check:

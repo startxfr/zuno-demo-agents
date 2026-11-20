@@ -10,7 +10,6 @@ zuno:
   allowed_tools: []
   allowed_knowledge:
     - knowledge.adv
-  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "Produce the monthly in-progress sales report."
     - "Break down margin by customer and technology for this month."

@@ -29,6 +29,3 @@ The last-resort source of `answer-technical-question`, after the indexed
 documentation, project memory and the live Confluence read. This bundle
 narrows it further in `policies/web-search-scope.md`: no customer name,
 `project_id` or project-memory content in a query.
-
-This note grants nothing: the task's `allowed_tools` and
-`policies/tools/tool-policy.yaml` decide.

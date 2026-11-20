@@ -26,6 +26,3 @@ zuno:
 Finds the internal Confluence pages that describe the architecture being
 written up, so a document can cite real internal content alongside the
 documentation corpus.
-
-Documentary only: authorization is each task's allowed_tools intersected with
-policies/tools/tool-policy.yaml.

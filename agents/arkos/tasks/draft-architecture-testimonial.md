@@ -7,9 +7,6 @@ resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/arkos/ta
 stale_after: "2027-05-15T00:00:00Z"
 zuno:
   profile: "1.0"
-  # Reply cap (zuno-demo ADR-0544): without one, a reply once ran to about
-  # 40k tokens. A DAT is about 4k tokens; 8192 is the schema ceiling and
-  # leaves room for a long one.
   max_tokens: 8192
   allowed_tools:
     - confluence.page.read
@@ -20,27 +17,14 @@ zuno:
     - git.repository.private.list
     - git.file.write
     - git.repository.create
-    # Mermaid-to-SVG rendering for architecture, sequence and relationship
-    # diagrams (zuno-demo ADR-0516). Photorealistic image generation is not
-    # declared: the visuals a DAT needs are diagrams.
     - diagram.generation.create
-    # The read-only AAP audit only (zuno-demo ADR-0355): live platform state
-    # is useful context for an architecture narrative, but a drafting task
-    # has no reason to launch automation, so aap.cluster.audit is not
-    # declared.
     - aap.platform.audit
   allowed_knowledge:
     - knowledge.tech
     - knowledge.project
-  # `reflect`: a self-review pass over the draft, with its own prompt
-  # (prompts/draft-architecture-testimonial--reflect.md). zuno-demo
-  # ADR-0550 decision 4: for this task the review follows the turn's
-  # classification, like the draft, rather than the C2 ceiling below; the
-  # slot stays declared because it carries the review prompt.
   prompts:
     reflect:
       classification_ceiling: C2
-  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "Draft an architecture testimonial for a customer running OpenShift with Keycloak-backed SSO."
     - "Write a Design and Architecture Testimonial covering a GitOps delivery chain based on Argo CD."

@@ -27,6 +27,3 @@ zuno:
 Reads public GitHub or GitLab repositories, so Tekos can answer from real
 code and configuration. Tekos declares no private-repository capability
 (`git.repository.private.*`) and no repository write.
-
-This note grants nothing: the task's `allowed_tools` and
-`policies/tools/tool-policy.yaml` decide.
