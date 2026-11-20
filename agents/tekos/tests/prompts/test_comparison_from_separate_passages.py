@@ -30,6 +30,10 @@ NO_INVENTED_DIFFERENCE = re.compile(r"never add a difference that no passage sup
 # (d) a comparison is built only from passages, and a side no passage covers is reported, not described from general knowledge
 # (e) a related concept is not put in the place of the one asked
 NO_SUBSTITUTE_CONCEPT = re.compile(r"do not stand in a related concept for the one asked")
+# (f) the comparison skeleton: one block per side with a source line that is copied or "none retrieved"
+SKELETON = re.compile(r"write every comparison in this skeleton, one block per side.{0,400}source: <one url copied from the passage, or \"none retrieved\">")
+# (g) a URL is copied, never built, and a placeholder is not a source
+COPY_URL = re.compile(r"copy each url character for character from the passage, never build one.{0,320}a placeholder in a command .{0,40}is not a source")
 ONLY_FROM_PASSAGES = re.compile(r"only from the passages in your context or returned by your searches.{0,120}no passage covers one side, say that no passage covers it")
 
 
@@ -61,10 +65,18 @@ class ComparisonFromSeparatePassages(unittest.TestCase):
         self.assertRegex(normalised(), NO_SUBSTITUTE_CONCEPT,
                          "answer-technical-question.md lost the ban on standing in a related concept for the one asked")
 
+    def test_a_comparison_is_written_in_a_skeleton_with_a_source_line_per_side(self):
+        self.assertRegex(normalised(), SKELETON,
+                         "answer-technical-question.md lost the comparison skeleton (one block per side with a source line)")
+
+    def test_a_url_is_copied_never_built_and_a_placeholder_is_not_a_source(self):
+        self.assertRegex(normalised(), COPY_URL,
+                         "answer-technical-question.md lost the rule to copy URLs verbatim and not to count placeholders as sources")
+
     def test_the_patterns_do_not_match_a_bare_prompt(self):
         bare = ("answer the technical question from the passages you are given and cite their source urls. if no passage states the "
                 "answer explicitly, say so and give what the closest passages do say.")
-        for pattern in (BUILD_FROM_PASSAGES, NO_DECLINE, NO_INVENTED_DIFFERENCE, ONLY_FROM_PASSAGES, NO_SUBSTITUTE_CONCEPT):
+        for pattern in (BUILD_FROM_PASSAGES, NO_DECLINE, NO_INVENTED_DIFFERENCE, ONLY_FROM_PASSAGES, NO_SUBSTITUTE_CONCEPT, SKELETON, COPY_URL):
             self.assertIsNone(pattern.search(bare), pattern.pattern)
 
 
