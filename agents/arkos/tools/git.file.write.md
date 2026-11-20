@@ -24,6 +24,3 @@ zuno:
 
 Used only on an explicit request to publish material. A drafted document is
 returned in the reply, not committed.
-
-Documentary only: authorization is each task's allowed_tools intersected with
-policies/tools/tool-policy.yaml.

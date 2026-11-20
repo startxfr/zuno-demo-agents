@@ -54,7 +54,7 @@ jobs:
         with:
           python-version: "3.11"
       - if: steps.gate.outputs.run == 'true'
-        run: pip install pyyaml==6.0.2
+        run: pip install --require-hashes --no-deps -r platform/requirements-ci.txt
       - uses: oras-project/setup-oras@22ce207df3b08e061f537244349aac6ae1d214f6 # v1
         if: steps.gate.outputs.run == 'true'
         with:

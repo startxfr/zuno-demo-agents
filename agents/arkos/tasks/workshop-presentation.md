@@ -7,9 +7,6 @@ resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/arkos/ta
 stale_after: "2027-05-15T00:00:00Z"
 zuno:
   profile: "1.0"
-  # Reply cap (zuno-demo ADR-0544): without one, a reply once ran to about
-  # 40k tokens. 8192 is the schema ceiling and leaves room for a long
-  # presentation.
   max_tokens: 8192
   allowed_tools:
     - confluence.page.read
@@ -20,24 +17,14 @@ zuno:
     - git.repository.private.list
     - git.file.write
     - git.repository.create
-    # Mermaid-to-SVG rendering for architecture diagrams (zuno-demo
-    # ADR-0516). Photorealistic image generation is not declared.
     - diagram.generation.create
-    # The read-only AAP audit only (zuno-demo ADR-0355): live platform state
-    # is useful context for an architecture narrative, but a drafting task
-    # has no reason to launch automation, so aap.cluster.audit is not
-    # declared.
     - aap.platform.audit
   allowed_knowledge:
     - knowledge.tech
     - knowledge.project
-  # `reflect`: a self-review pass over the draft, with its own prompt
-  # (prompts/workshop-presentation--reflect.md) and a C2 classification
-  # ceiling.
   prompts:
     reflect:
       classification_ceiling: C2
-  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "Prepare an Odyssey workshop presentation on OpenShift AI model serving."
     - "Draft the workshop agenda for an architecture review of a Keycloak-based SSO."

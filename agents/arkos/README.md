@@ -25,7 +25,7 @@ arkos/
 ├── README.md       this file (not published)
 ├── VERSION         the agent's version, bumped when a published file changes
 ├── index.md        generated, do not edit
-├── agent.okf.md    agent declaration, with the generated authorization matrix
+├── agent.okf.md    agent declaration
 ├── tasks/          one file per task: scope, tools, knowledge, reply cap
 ├── prompts/        one system prompt per task, plus the reflect-slot prompts
 ├── tools/          one usage note per declared tool, named after the capability

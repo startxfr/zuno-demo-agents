@@ -9,13 +9,10 @@ zuno:
   profile: "1.0"
   allowed_tools:
     - web_search
-    # zuno-demo ADR-0415: image generation, offered as a callable tool for
-    # project or bid questions that call for a visual (mockup, diagram).
     - image.generation.create
   allowed_knowledge:
     - knowledge.adv
     - knowledge.project
-  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "What is the current delivery status of this project?"
     - "Who owns this bid, and which business unit is it attached to?"

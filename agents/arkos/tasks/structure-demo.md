@@ -9,11 +9,7 @@ zuno:
   profile: "1.0"
   allowed_tools: []
   allowed_knowledge: []
-  # Reply cap (zuno-demo ADR-0544): enough for a 5-7 section demo narrative
-  # with talking points, and bounded so that its preferred model (about 18
-  # tokens/s, measured) finishes in about 85 seconds.
   max_tokens: 1536
-  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "Structure a 30-minute platform demo for a technical audience."
     - "How should I sequence a demo showing GitOps from commit to running pod?"

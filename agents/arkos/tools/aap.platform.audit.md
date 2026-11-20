@@ -26,6 +26,3 @@ zuno:
 
 Gives a document current facts about the automation platform. Share the run
 links it returns, and the output lines when a run failed.
-
-Documentary only: authorization is each task's allowed_tools intersected with
-policies/tools/tool-policy.yaml.

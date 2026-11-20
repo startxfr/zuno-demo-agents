@@ -27,6 +27,3 @@ zuno:
 Creates a photorealistic image from a text prompt. In Comage it serves
 genuine marketing-visual requests only; every structured or numeric visual
 uses diagram generation.
-
-Documentary only: authorization stays each task's `zuno.allowed_tools`
-intersected with `policies/tools/tool-policy.yaml`.

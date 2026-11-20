@@ -28,6 +28,3 @@ zuno:
 The read-only half of Tekos's Ansible Automation Platform audits (zuno-demo
 ADR-0355): a quick status summary. To start a fresh health check, the task
 uses `aap.cluster.audit`.
-
-This note grants nothing: the task's `allowed_tools` and
-`policies/tools/tool-policy.yaml` decide.

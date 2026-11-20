@@ -26,6 +26,3 @@ zuno:
 
 Lists an owner's public GitHub or GitLab repositories, the first step
 before `git.repository.read`.
-
-This note grants nothing: the task's `allowed_tools` and
-`policies/tools/tool-policy.yaml` decide.

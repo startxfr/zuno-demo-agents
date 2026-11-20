@@ -9,7 +9,6 @@ zuno:
   profile: "1.0"
   allowed_tools:
     - salesforce.opportunity.update
-  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "Move the Startx renewal opportunity to Negotiation."
     - "Update the close date on this opportunity to the end of next month."

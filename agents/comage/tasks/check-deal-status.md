@@ -10,18 +10,12 @@ zuno:
   allowed_tools:
     - salesforce.opportunity.read
     - web_search
-    # Photorealistic image generation (zuno-demo ADR-0415), for genuine
-    # marketing-visual requests only, never for deal or pipeline charts.
-    # The prompt (prompts/check-deal-status.md) enforces that scope.
     - image.generation.create
-    # Mermaid-to-SVG diagram rendering (zuno-demo ADR-0516): the tool for
-    # charts and structured visuals built from real deal figures.
     - diagram.generation.create
   live_read_tool: salesforce.opportunity.read
   allowed_knowledge:
     - knowledge.sales
     - knowledge.project
-  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "What is the current stage of the Startx renewal opportunity?"
     - "Which opportunities are expected to close this quarter?"

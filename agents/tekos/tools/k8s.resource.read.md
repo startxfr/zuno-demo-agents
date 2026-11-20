@@ -25,6 +25,3 @@ zuno:
 
 One of Tekos's read-only cluster reads (zuno-demo ADR-0600), for the
 operations persona.
-
-This note grants nothing: the task's `allowed_tools` and
-`policies/tools/tool-policy.yaml` decide.

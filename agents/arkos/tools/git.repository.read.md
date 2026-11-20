@@ -26,6 +26,3 @@ zuno:
 
 Lets Arkos ground a statement about a repository in its actual content instead
 of guessing.
-
-Documentary only: authorization is each task's allowed_tools intersected with
-policies/tools/tool-policy.yaml.

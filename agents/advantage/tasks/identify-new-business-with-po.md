@@ -10,7 +10,6 @@ zuno:
   allowed_tools: []
   allowed_knowledge:
     - knowledge.adv
-  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "Which new business received a client purchase order in the last three days?"
     - "List the projects whose client PO arrived this week."
