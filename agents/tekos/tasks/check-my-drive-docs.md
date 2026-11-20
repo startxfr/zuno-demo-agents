@@ -9,9 +9,6 @@ zuno:
   profile: "1.0"
   allowed_tools:
     - list_drive_files
-  # The model roles this task prefers, in order, matching its entry in
-  # policies/model-routing/model-routing-policy.yaml; the routing policy
-  # stays the authority.
   models:
     preferred:
       - default
@@ -19,7 +16,6 @@ zuno:
       - quality
       - reasoning
       - reasoning-external
-  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "List my Drive documents about the satellite run architecture."
     - "Which of my documents mention the Keycloak migration?"

@@ -11,7 +11,6 @@ zuno:
     - web_search
   allowed_knowledge:
     - knowledge.project
-  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "What is the invoicing status for this engagement?"
     - "How much is still outstanding on this account?"

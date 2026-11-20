@@ -25,6 +25,3 @@ zuno:
 Searches the public web. In Comage it is a complement to the Salesforce
 data, never a source for an opportunity's own fields: those come from
 `knowledge.sales` and the live Salesforce read.
-
-Documentary only: authorization stays each task's `zuno.allowed_tools`
-intersected with `policies/tools/tool-policy.yaml`.

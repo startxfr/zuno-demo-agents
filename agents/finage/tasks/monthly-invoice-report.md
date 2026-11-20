@@ -12,7 +12,6 @@ zuno:
   allowed_knowledge:
     - knowledge.project
   project_required: true
-  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "Produce the monthly invoicing report for this engagement."
     - "Summarise revenue, outstanding amounts and forecast for this project's last month."

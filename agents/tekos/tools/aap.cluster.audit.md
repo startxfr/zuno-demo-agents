@@ -27,6 +27,3 @@ zuno:
 The action half of Tekos's Ansible Automation Platform audits (zuno-demo
 ADR-0355): it starts a run instead of reading state. The playbook it
 launches is always the same read-mostly check, and it takes a few minutes.
-
-This note grants nothing: the task's `allowed_tools` and
-`policies/tools/tool-policy.yaml` decide.

@@ -24,6 +24,3 @@ zuno:
 # Git repository list (private, GitLab)
 
 The private counterpart of git.repository.list.
-
-Documentary only: authorization is each task's allowed_tools intersected with
-policies/tools/tool-policy.yaml.

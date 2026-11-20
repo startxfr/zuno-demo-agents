@@ -28,7 +28,3 @@ The knowledge policy records a C2 classification floor for it and allows the `sa
 `board`, `cdp` and `finance` business roles. The domain is read-only: a
 change to an opportunity goes through `update-opportunity-status` and its
 live tool, never through retrieval.
-
-Documentary only: this note grants nothing. Retrieval is authorized by the
-task's `zuno.allowed_knowledge` intersected with
-`policies/knowledge/knowledge-policy.yaml`.

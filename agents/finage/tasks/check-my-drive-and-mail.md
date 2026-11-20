@@ -10,7 +10,6 @@ zuno:
   allowed_tools:
     - list_drive_files
     - read_gmail
-  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "List my Drive documents and emails about this customer's invoices."
     - "Which emails mention an unpaid invoice for this account?"

@@ -29,6 +29,3 @@ zuno:
 Searches the internal Confluence spaces. `search_confluence` is the legacy
 name of the canonical capability `confluence.page.search`. It is the live
 complement of the Confluence content indexed in `knowledge.tech`.
-
-This note grants nothing: each task's `allowed_tools` and
-`policies/tools/tool-policy.yaml` decide.

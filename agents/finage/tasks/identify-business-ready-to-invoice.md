@@ -12,7 +12,6 @@ zuno:
   allowed_knowledge:
     - knowledge.project
   project_required: true
-  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "Which business on this project has reached the billable state?"
     - "List the quotes for this engagement that are ready to invoice."

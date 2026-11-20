@@ -89,8 +89,8 @@ All timestamps are ISO 8601 with an offset, quoted so YAML keeps them as strings
 
 ## Agent: `agent.okf.md` (`type: agent`)
 
-The envelope above, with `description` required. The body is free Markdown for readers, plus the authorization
-matrix that `generate_authorization_matrix.py` writes between its markers. The matrix restates the enforced
+The envelope above, with `description` required. The body is free Markdown for readers. The authorization
+matrix that `generate_authorization_matrix.py` writes to `docs/authorization-matrix/<agent>.md` (outside the bundle) restates the enforced
 intersection for review; nothing reads it at runtime.
 
 ### Zuno extension: `zuno`

@@ -24,6 +24,3 @@ zuno:
 
 Used only on an explicit request. Arkos declares no repository fork or delete
 capability.
-
-Documentary only: authorization is each task's allowed_tools intersected with
-policies/tools/tool-policy.yaml.

@@ -26,7 +26,3 @@ earlier conversations rather than ingested from a source system.
 The knowledge policy lists every business role for this domain on purpose:
 the real gate is the user's membership of the project, checked at query
 time and failing closed.
-
-Documentary only: this note grants nothing. Retrieval is authorized by the
-task's `zuno.allowed_knowledge` intersected with
-`policies/knowledge/knowledge-policy.yaml`.
