@@ -24,6 +24,3 @@ zuno:
 
 The private counterpart of git.repository.read, for internal repositories a
 DAT or a workshop presentation must reference.
-
-Documentary only: authorization is each task's allowed_tools intersected with
-policies/tools/tool-policy.yaml.

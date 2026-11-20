@@ -9,15 +9,9 @@ zuno:
   profile: "1.0"
   allowed_tools:
     - search_confluence
-    # The consultant's own Drive files are part of the material to scan
-    # before a customer call (read only; already allowed to Tekos through
-    # check-my-drive-docs, so the agent's tool union is unchanged).
     - list_drive_files
   allowed_knowledge:
     - knowledge.tech
-  # The model roles this task prefers, in order, matching its entry in
-  # policies/model-routing/model-routing-policy.yaml; the routing policy
-  # stays the authority.
   models:
     preferred:
       - default
@@ -25,7 +19,6 @@ zuno:
       - quality
       - reasoning
       - reasoning-external
-  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "Find the Confluence pages describing the satellite build architecture."
     - "Which documentation covers OpenShift AI model serving?"

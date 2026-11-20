@@ -25,6 +25,3 @@ zuno:
 Renders a Mermaid diagram to SVG. In Comage it is the tool for every chart,
 mockup or structured visual of deal or pipeline data, because it draws
 exact figures and legible text.
-
-Documentary only: authorization stays each task's `zuno.allowed_tools`
-intersected with `policies/tools/tool-policy.yaml`.

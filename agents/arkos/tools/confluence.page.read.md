@@ -23,6 +23,3 @@ zuno:
 
 Opens a Confluence page in full when a search hit is relevant enough to ground
 part of the document. Arkos declares no Confluence write capability.
-
-Documentary only: authorization is each task's allowed_tools intersected with
-policies/tools/tool-policy.yaml.

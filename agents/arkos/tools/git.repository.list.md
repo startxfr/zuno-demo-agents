@@ -26,6 +26,3 @@ zuno:
 
 Finds the repository to read next and gives an overview of an owner's most
 visible projects.
-
-Documentary only: authorization is each task's allowed_tools intersected with
-policies/tools/tool-policy.yaml.

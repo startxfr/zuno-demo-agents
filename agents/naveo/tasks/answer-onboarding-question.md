@@ -16,7 +16,6 @@ zuno:
   allowed_knowledge:
     - knowledge.tech
     - knowledge.project
-  # Example prompts a user interface can offer for this task. Display only: choosing one does not select the task.
   prompt_examples:
     - "What do I need to set up on my first day?"
     - "Who should I contact to get access to the internal Confluence?"

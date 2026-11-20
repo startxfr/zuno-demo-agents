@@ -28,6 +28,3 @@ zuno:
 Writes a stage, amount or close-date change to an existing Salesforce
 opportunity. Indexed knowledge never records a change (zuno-demo
 ADR-0205): this live call is the only write path of Comage.
-
-Documentary only: authorization stays each task's `zuno.allowed_tools`
-intersected with `policies/tools/tool-policy.yaml`.

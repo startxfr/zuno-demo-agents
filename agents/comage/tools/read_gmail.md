@@ -25,6 +25,3 @@ zuno:
 Reads Gmail messages with the user's own delegated access. In Comage it
 finds account correspondence in the sales rep's mailbox for
 `check-my-drive-and-mail`.
-
-Documentary only: authorization stays each task's `zuno.allowed_tools`
-intersected with `policies/tools/tool-policy.yaml`.

@@ -29,6 +29,3 @@ zuno:
 Lists the consultant's own Google Drive files. `list_drive_files` is the
 legacy name of the canonical capability `drive.document.search`. Tekos uses
 it read-only, to point the consultant to their own material.
-
-This note grants nothing: each task's `allowed_tools` and
-`policies/tools/tool-policy.yaml` decide.

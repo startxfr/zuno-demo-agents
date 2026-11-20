@@ -37,7 +37,7 @@ The files and every field are in the [field reference](okf-reference.md); a step
 
 | File | Holds |
 |---|---|
-| `agent.okf.md` | The agent: envelope, `zuno` block (name, status, tasks, model, access groups, display, limits) and a readable body with the generated authorization matrix |
+| `agent.okf.md` | The agent: envelope, `zuno` block (name, status, tasks, model, access groups, display, limits) and a short readable body (the generated authorization matrix is in `docs/authorization-matrix/`, not in the bundle) |
 | `tasks/<task>.md` | What one task may use: `allowed_tools`, `allowed_knowledge`, model roles, limits |
 | `prompts/<task>.md` | The system prompt of the task (the body). Every task has one |
 | `tools/`, `rag/`, `policies/` | Notes: how the tasks use a tool, why they read a domain, a narrowing-only constraint. Documentation, never a grant |

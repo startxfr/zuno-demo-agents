@@ -55,7 +55,7 @@ python3 platform/templates/agent/scaffold_agent.py --name <name> --title <Title>
 
 ## 3. Generate the authorization matrix and the index
 
-Each `agent.okf.md` body carries a generated section that restates who may use which tool for which task, and each
+Each agent has a generated file `docs/authorization-matrix/<agent>.md` (not published with the bundle) that restates who may use which tool for which task, and each
 bundle has a generated `index.md` that lists its documents (upstream OKF §8). A release refuses a bundle where either
 is missing or stale:
 
