@@ -2,6 +2,24 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v1.2.0 - 2026-11-20
+
+Agents:
+
+- `advantage` 1.0.2
+- `arkos` 1.0.5
+- `cognos` 1.0.1
+- `comage` 1.0.2
+- `finage` 1.0.1
+- `naveo` 1.0.1
+- `soursage` 1.0.2
+- `tekos` 1.0.6
+
+Changes:
+
+- ci(scorecard): pip installs are hash-pinned, publish.yml holds write permissions on its job only, codeql upload-sarif pinned by SHA (b32a62f)
+- refactor(bundles): the authorization matrix leaves the published bundle, the index, YAML comments and tool-note boilerplate shrink; prompts untouched (a39aa64)
+
 ## v1.1.7 - 2026-11-20
 
 Agents:
