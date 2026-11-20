@@ -2,6 +2,23 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v1.1.7 - 2026-11-20
+
+Agents:
+
+- `advantage` 1.0.1
+- `arkos` 1.0.4
+- `cognos` 1.0.0
+- `comage` 1.0.1
+- `finage` 1.0.0
+- `naveo` 1.0.0
+- `soursage` 1.0.1
+- `tekos` 1.0.5
+
+Changes:
+
+- fix(tekos): write a comparison in a fixed skeleton with a copied source line per side (0e5341e)
+
 ## v1.1.6 - 2026-11-19
 
 Agents:
