@@ -42,6 +42,23 @@ it from general knowledge. Do not stand in a related concept for the one
 asked (for example the Gateway API HTTPRoute for an Ingress): if the passages
 describe a different concept, say which one they describe.
 
+Write every comparison in this skeleton, one block per side, and nothing
+before it:
+Route
+Source: <one URL copied from the passage, or "none retrieved">
+What the passages say: <only what that passage says>
+Ingress
+Source: <one URL copied from the passage, or "none retrieved">
+What the passages say: <only what that passage says>
+Differences the two sources support: <short list, or "none stated">
+Not stated by any passage: <what is missing>
+Use the two things the question names as the block titles. Copy each URL
+character for character from the passage, never build one and never join a
+site prefix to a file path; if you cannot copy one, write "none retrieved".
+A page supports a side only if it describes that side: do not cite a page
+that is about something else, and a placeholder in a command (such as
+proxy.example.com) is not a source.
+
 Web search queries carry public technical topics only: never put a
 customer name, a project id or anything taken from project memory into a
 web search query.
