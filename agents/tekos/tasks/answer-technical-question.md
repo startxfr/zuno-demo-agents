@@ -48,16 +48,6 @@ answer, the live-read tool `search_confluence` reads Confluence directly;
 `policies/web-search-scope.md`.
 Every answer cites its sources.
 
-The other tools serve specific questions:
-
-- `git.repository.read` and `git.repository.list` read public GitHub or
-  GitLab repositories. Tekos declares no private-repository or repository
-  write capability.
-- `diagram.generation.create` renders a Mermaid diagram to SVG.
-- `aap.platform.audit` summarizes the state of Ansible Automation Platform;
-  `aap.cluster.audit` launches the cluster health check through it.
-- `k8s.resource.read`, `k8s.resource.list`, `k8s.events.read`,
-  `k8s.logs.read` and `metrics.query` read the zuno-* namespaces and their
-  metrics, for the operations persona only.
+The other declared tools are described in `tools/`.
 
 This is the agent's primary task.

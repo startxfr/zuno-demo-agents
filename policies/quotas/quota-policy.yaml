@@ -97,6 +97,21 @@ classes:
       group:   { budget: 100000000, window: 24h }
       project: { budget: 50000000,  window: 24h }
 
+  light:
+    description: >-
+      Cheap tasks that read a list or answer a placeholder (Drive and mail listings, document finders, the
+      coming-soon agents): standard request rates, a fifth of the standard token budgets. fail_mode open like
+      standard, so a Limitador outage does not stop interactive chat.
+    fail_mode: open
+    requests:
+      user:    { limit: 60,   window: 5m }
+      group:   { limit: 600,  window: 5m }
+      project: { limit: 300,  window: 5m }
+    tokens:
+      user:    { budget: 2000000,  window: 24h }
+      group:   { budget: 20000000, window: 24h }
+      project: { budget: 10000000, window: 24h }
+
   intensive:
     description: >-
       Long-running / batch-shaped tasks (report generation, multi-document
