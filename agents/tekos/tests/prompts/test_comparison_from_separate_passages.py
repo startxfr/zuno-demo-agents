@@ -34,6 +34,10 @@ NO_SUBSTITUTE_CONCEPT = re.compile(r"do not stand in a related concept for the o
 SKELETON = re.compile(r"write every comparison in this skeleton, one block per side.{0,400}source: <one url copied from the passage, or \"none retrieved\">")
 # (g) a URL is copied, never built, and a placeholder is not a source
 COPY_URL = re.compile(r"copy each url character for character from the passage, never build one.{0,320}a placeholder in a command .{0,40}is not a source")
+# (h) v1.2.2: a page about HTTPRoute or the Gateway API describes HTTPRoute, never Ingress (the replay of 2026-11-20 labelled it Ingress)
+HTTPROUTE_NOT_INGRESS = re.compile(
+    r"a page about httproute or the gateway api describes httproute, never ingress.{0,200}write \"none retrieved\" for it.{0,200}"
+    r"never put httproute facts under the ingress block")
 ONLY_FROM_PASSAGES = re.compile(r"only from the passages in your context or returned by your searches.{0,120}no passage covers one side, say that no passage covers it")
 
 
@@ -73,10 +77,15 @@ class ComparisonFromSeparatePassages(unittest.TestCase):
         self.assertRegex(normalised(), COPY_URL,
                          "answer-technical-question.md lost the rule to copy URLs verbatim and not to count placeholders as sources")
 
+    def test_an_httproute_page_is_never_the_ingress_side(self):
+        self.assertRegex(normalised(), HTTPROUTE_NOT_INGRESS,
+                         "answer-technical-question.md lost the rule that a page about HTTPRoute or the Gateway API never describes Ingress")
+
     def test_the_patterns_do_not_match_a_bare_prompt(self):
         bare = ("answer the technical question from the passages you are given and cite their source urls. if no passage states the "
                 "answer explicitly, say so and give what the closest passages do say.")
-        for pattern in (BUILD_FROM_PASSAGES, NO_DECLINE, NO_INVENTED_DIFFERENCE, ONLY_FROM_PASSAGES, NO_SUBSTITUTE_CONCEPT, SKELETON, COPY_URL):
+        for pattern in (BUILD_FROM_PASSAGES, NO_DECLINE, NO_INVENTED_DIFFERENCE, ONLY_FROM_PASSAGES, NO_SUBSTITUTE_CONCEPT, SKELETON, COPY_URL,
+                        HTTPROUTE_NOT_INGRESS):
             self.assertIsNone(pattern.search(bare), pattern.pattern)
 
 
