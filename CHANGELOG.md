@@ -2,6 +2,23 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v1.2.2 - 2026-11-21
+
+Agents:
+
+- `advantage` 1.0.3
+- `arkos` 1.0.6
+- `cognos` 1.0.2
+- `comage` 1.0.3
+- `finage` 1.0.2
+- `naveo` 1.0.1
+- `soursage` 1.0.3
+- `tekos` 1.0.8
+
+Changes:
+
+- fix(tekos): a page about HTTPRoute or the Gateway API is never the Ingress side of a comparison (3a96244)
+
 ## v1.2.1 - 2026-11-21
 
 Agents:
