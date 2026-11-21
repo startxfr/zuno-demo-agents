@@ -63,6 +63,10 @@ Ingress: when the only page for the Ingress side is of that kind, write
 "none retrieved" for it and say in "Not stated by any passage" that no
 passage describes Ingress. Never write Ingress and HTTPRoute as the same
 thing, and never put HTTPRoute facts under the Ingress block.
+When a side is "none retrieved", write "none stated" for the differences.
+Under "Not stated by any passage" write only the names of the missing topics
+(for example purpose, scope, typical use cases), never a sentence that says
+what the missing side is or does, not even in brackets.
 
 Web search queries carry public technical topics only: never put a
 customer name, a project id or anything taken from project memory into a

@@ -38,6 +38,11 @@ COPY_URL = re.compile(r"copy each url character for character from the passage, 
 HTTPROUTE_NOT_INGRESS = re.compile(
     r"a page about httproute or the gateway api describes httproute, never ingress.{0,200}write \"none retrieved\" for it.{0,200}"
     r"never put httproute facts under the ingress block")
+# (i) v1.2.3: a missing side gives "none stated" differences and only topic names under "Not stated by any passage" (replay of 2026-11-21: run 3
+# wrote differences from general knowledge, runs 2 and 4 described Ingress under "Not stated")
+MISSING_SIDE_NO_CLAIMS = re.compile(
+    r"when a side is \"none retrieved\", write \"none stated\" for the differences.{0,40}under \"not stated by any passage\" write only the names of the missing topics"
+    r".{0,160}never a sentence that says what the missing side is or does")
 ONLY_FROM_PASSAGES = re.compile(r"only from the passages in your context or returned by your searches.{0,120}no passage covers one side, say that no passage covers it")
 
 
@@ -81,11 +86,15 @@ class ComparisonFromSeparatePassages(unittest.TestCase):
         self.assertRegex(normalised(), HTTPROUTE_NOT_INGRESS,
                          "answer-technical-question.md lost the rule that a page about HTTPRoute or the Gateway API never describes Ingress")
 
+    def test_a_missing_side_gets_no_differences_and_no_description(self):
+        self.assertRegex(normalised(), MISSING_SIDE_NO_CLAIMS,
+                         "answer-technical-question.md lost the rule that a side with no passage gets 'none stated' differences and only topic names under 'Not stated by any passage'")
+
     def test_the_patterns_do_not_match_a_bare_prompt(self):
         bare = ("answer the technical question from the passages you are given and cite their source urls. if no passage states the "
                 "answer explicitly, say so and give what the closest passages do say.")
         for pattern in (BUILD_FROM_PASSAGES, NO_DECLINE, NO_INVENTED_DIFFERENCE, ONLY_FROM_PASSAGES, NO_SUBSTITUTE_CONCEPT, SKELETON, COPY_URL,
-                        HTTPROUTE_NOT_INGRESS):
+                        HTTPROUTE_NOT_INGRESS, MISSING_SIDE_NO_CLAIMS):
             self.assertIsNone(pattern.search(bare), pattern.pattern)
 
 
