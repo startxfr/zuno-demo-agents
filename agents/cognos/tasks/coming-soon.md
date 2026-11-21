@@ -7,6 +7,7 @@ resource: https://github.com/startxfr/zuno-demo-agents/blob/main/agents/cognos/t
 stale_after: "2027-05-15T00:00:00Z"
 zuno:
   profile: "1.0"
+  quota_class: light
   allowed_tools: []
 ---
 

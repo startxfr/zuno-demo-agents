@@ -1,326 +1,117 @@
-# ADR-0303 (WP-39): per-agent/task adapter declarations for the AI
-# Gateway's per-request dynamic adapter selection
-# (components/ai-gateway/app/model_routing_policy.py). Mechanism only -
-# WHICH requests get an approved adapter, never WHICH adapter is best
-# (ADR-0304/WP-40's job, which extends this same file with objectives
-# blocks rather than a second file - see that WP's own brief).
+# Model routing policy (ADR-0303 adapters, ADR-0304 objectives, ADR-0412 preferences).
+# Read by the AI Gateway (components/ai-gateway/app/model_routing_policy.py), baked into its image.
 #
-# An `adapter:` name here must already be a real
-# gitops/charts/models/values.yaml `loraAdapters[].name` entry (WP-34B) -
-# this file references, never invents, adapter names. Empty by default,
-# same as `loraAdapters: []` itself: WP-34's GPU training run hasn't
-# produced a real registered adapter yet (cluster GPU capacity is fully
-# committed - see MEMORY.md), so activating an entry here before one
-# exists would route real requests to a model vLLM doesn't actually serve.
-# Uncomment/adapt the example below once a real adapter is registered.
+# How a chain is resolved for an (agent, task):
+#   1. provider-routing.yaml gives the candidates eligible for the turn's classification (ADR-0021);
+#      `local_only_for` drops every non-local candidate at the listed levels (WP-187).
+#   2. `preferred`/`prefer` moves the names it lists to the front, in that order (ADR-0412). It only reorders
+#      the survivors and never brings back a removed provider. Unlisted survivors follow in provider-routing
+#      order; unknown names are ignored with a warning. `fallback` lists the names tried after them.
+#   3. Always list a `-maas` name right before its direct twin (ADR-0521): MaaS first, same model direct as fallback.
+# The task's own `models.preferred` roles (task frontmatter) only reorder the same candidates.
 #
-# classification is documentation/review metadata, not an enforcement
-# input: the AI Gateway's actual security guard (a C2/C3 adapter must
-# never reach an externally-eligible serving path) is structural -
-# app/providers.py only ever applies an adapter to a `candidate.kind ==
-# "local"` candidate, regardless of what this field says, since vLLM
-# multi-LoRA request-level selection is a local-runtime-only mechanism to
-# begin with (no SaaS provider has any concept of "our" adapter module).
+# Three families:
+#   reasoning  gpt-oss first (ovhcloud-gpt-oss-120b ahead of it when C1/C2 may leave the cluster): tekos
+#              answer-technical-question, arkos documents (ADR-0416, ADR-0550).
+#   general    qwen3.5-9b first, gpt-oss second (ADR-0531): advantage, finage, naveo, soursage, cognos, tekos lookups.
+#              Comage leads with the qwen3.5-9b-wesh fine-tune (ADR-0526 decision 7).
+#   code       write-code: tekos prefers mistral-codestral (checked by evaluations/tekos/gate_checks.py, keep it
+#              first and non-strict), arkos stays on local gpt-oss.
+#
+# Adapters are empty until a real LoRA module is registered (ADR-0303): an entry here must name an existing one.
 adapters: []
-# - agent: comage
-#   task: check-deal-status
-#   adapter: comage-lora
-#   classification: C2
 
-# ADR-0412: per-(agent,task) PROVIDER PREFERENCE - an ordered list of
-# provider-routing.yaml provider names moved to the FRONT of the
-# candidate chain for that agent/task pair. Semantics (enforced by
-# components/ai-gateway/app/routing.py's _apply_preference):
-#   - applied AFTER classification eligibility + local-only filtering
-#     (ADR-0021/0035): a pure reorder of the surviving candidates, it can
-#     never resurrect a provider those hard constraints removed;
-#   - unlisted survivors follow in provider-routing.yaml order;
-#   - unknown provider names are warned about and ignored (the two files
-#     have independent lifecycles - this one is baked into the gateway
-#     image, provider-routing.yaml is a ConfigMap);
-#   - no entry for an (agent, task) = today's order, unchanged;
-#   - never auto-tunable (ADR-0309: `prefer` is on the optimizer's
-#     code-level denylist).
-#
-# The entries below implement the decision that reasoning-heavy
-# ("reflexional") tasks prefer the local gpt-oss-20b over qwen - it leads
-# the WHOLE chain (also ahead of SaaS on C1/C2 turns, consistent with the
-# platform's local-first doctrine), and on C3/local-only turns it makes
-# gpt-oss the primary with qwen as fallback. Task-content rationale lives
-# in the per-row comments; simple lookup/listing/transactional tasks are
-# deliberately absent (qwen stays their first candidate).
-#
-# ADR-0531: qwen3.5-9b(-maas) (ADR-0526/WP-087's training base, live per
-# WP-092) is now the fleet-wide default candidate - every (agent, task)
-# below is explicit, no more implicit provider-routing.yaml file-order
-# default. Reasoning-heavy/reflexional entries (Tekos's
-# answer-technical-question and both of
-# Arkos's document-workflow tasks) keep gpt-oss-20b's existing rank ahead
-# of qwen3.5-9b - this decision does not touch that doctrine, only extends
-# who gets ovhcloud-gpt-oss-120b ahead of it (see those entries' own
-# comments). Tekos/Comage additionally pair qwen3.5-9b with its own
-# fine-tune (Tekos: qwen3.5-9b primary / qwen3.5-9b-wesh fallback; Comage:
-# the reverse) since Comage is the fine-tune's own target agent (ADR-0526
-# decision 1).
-#
-# ADR-0521 (WP-076): every entry naming `local-gpt-oss` lists
-# `local-gpt-oss-maas` immediately before it, and every entry naming
-# `local` lists `local-maas` immediately before it - NOT optional styling.
-# _apply_preference's "unlisted survivors follow in provider-routing.yaml
-# order" rule means an unlisted -maas sibling would land wherever the
-# reordered tail happens to fall, not necessarily right after its direct
-# peer - breaking "MaaS-preferred, same-model-direct-fallback" for
-# exactly the tasks this file exists to reorder. (qwen's `local-maas` was
-# held back a day by the MaaS empty-body bug, root-caused and fixed
-# 2026-08-26 - see docs/roadmap/evidence/adr-0521-maas-local-traffic.md.)
-# Note adapter-declared (agent, task) pairs never reach a -maas candidate
-# regardless of this ordering: app/main.py skips via_maas candidates when
-# an adapter declaration resolved (adapter ids can't traverse MaaS auth).
 preferences:
-  # Multi-doc synthesis with citations (tekos's primary task, reflexional).
-  # ADR-0419: reasoning-heavy answer-technical-question keeps gpt-oss first
-  # per this file's own header comment, then OVHcloud ahead of
-  # openai/gemini/anthropic (their own relative order unchanged), then
-  # mistral. mistral-codestral is deliberately left unlisted - a
-  # code-specialized model has no place being preferred for general Q&A/
-  # lookup, but stays reachable at the very end rather than excluded.
-  #
-  # ADR-0531: qwen3.5-9b(-maas) is inserted right after gpt-oss (the
-  # reasoning doctrine's own leader is unchanged), ahead of the
-  # qwen3.5-9b-wesh pair Tekos already carried second (ADR-0526/WP-087
-  # decision 7) - Tekos's own default is the base model, wesh is its
-  # fallback, both still trailing OVH/gpt-oss on this specific reflexional
-  # task.
+  # Multi-doc synthesis with citations. Reads Confluence and the docs: never leaves the cluster (WP-187).
   - agent: tekos
     task: answer-technical-question
     preferred: [ovhcloud-gpt-oss-120b, local-gpt-oss-maas, local-gpt-oss, local-qwen35-maas, local-qwen35, local-wesh-maas, local-wesh, local-maas, local]
-    fallback: [openai, gemini, anthropic, mistral]
-    # WP-187: reads Confluence or the technical docs and the turn's level is only what the task declares,
-    # so no external provider at any level; a local failure fails the task instead of sending the context out.
-    local_only_for: [C1, C2, C3]
-  # Simple lookup/listing tasks - no reflexional override, so ADR-0531's
-  # fleet default applies directly: qwen3.5-9b primary, qwen3.5-9b-wesh
-  # fallback (Tekos's own pairing, ADR-0526 decision 7's insertion kept
-  # right behind it), everything else unchanged further down the chain.
+    fallback: &saas [openai, gemini, anthropic, mistral]
+    local_only_for: &all_levels [C1, C2, C3]
+  # Lookups: qwen3.5-9b first, its wesh fine-tune right behind (ADR-0526).
   - agent: tekos
     task: find-relevant-docs
-    preferred: [local-qwen35-maas, local-qwen35, local-wesh-maas, local-wesh, local-maas, local, local-gpt-oss-maas, local-gpt-oss, ovhcloud-gpt-oss-120b]
-    fallback: [openai, gemini, anthropic, mistral]
-    # WP-187: reads Confluence or the technical docs and the turn's level is only what the task declares,
-    # so no external provider at any level; a local failure fails the task instead of sending the context out.
-    local_only_for: [C1, C2, C3]
+    preferred: &tekos_lookup [local-qwen35-maas, local-qwen35, local-wesh-maas, local-wesh, local-maas, local, local-gpt-oss-maas, local-gpt-oss, ovhcloud-gpt-oss-120b]
+    fallback: *saas
+    local_only_for: *all_levels
   - agent: tekos
     task: check-my-drive-docs
-    preferred: [local-qwen35-maas, local-qwen35, local-wesh-maas, local-wesh, local-maas, local, local-gpt-oss-maas, local-gpt-oss, ovhcloud-gpt-oss-120b]
-    fallback: [openai, gemini, anthropic, mistral]
-  # ADR-0550 decisions 2-4: plan->draft->reflect->write document workflow,
-  # classification now derived from the selected project (C1 with no
-  # project) rather than a fixed agent seed - draft_node's and
-  # reflect_node's calls both follow that same effective_classification
-  # (app/graph/arkos_nodes.py). ovhcloud-gpt-oss-120b is globally eligible
-  # for C1 AND C2 (provider-routing.yaml), which would otherwise let a
-  # C2/C3 DAT turn still reach it here - `local_only_for` closes that gap
-  # for this task specifically (ADR-0550 decision 3: C2/C3 DAT must never
-  # externalize, even though other agents/tasks legitimately reach
-  # ovhcloud-gpt-oss-120b at C2). See model_routing_policy.py's
-  # local_only_for_classification docstring for the mechanism.
+    preferred: *tekos_lookup
+    fallback: *saas
+  # Arkos document workflow (plan, draft, reflect, write): C2/C3 never externalised (ADR-0550 decision 3, WP-187).
   - agent: arkos
     task: draft-architecture-testimonial
-    prefer: [ovhcloud-gpt-oss-120b, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
-    # WP-187 (supersedes the C1 external reach described above): reads Confluence or the technical docs and the turn's level is only what the task declares,
-    # so no external provider at any level; a local failure fails the task instead of sending the context out.
-    local_only_for: [C1, C2, C3]
-  # ADR-0514: workshop-presentation is NOT in ADR-0550's scope and keeps
-  # its original C3 agent seed and fixed reflect-slot C2 ceiling unchanged
-  # (app/graph/arkos_nodes.py) - that's what actually makes
-  # ovhcloud-gpt-oss-120b reachable at this preference for THIS task; no
-  # `local_only_for` here.
+    prefer: &arkos_docs [ovhcloud-gpt-oss-120b, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
+    local_only_for: *all_levels
   - agent: arkos
     task: workshop-presentation
-    prefer: [ovhcloud-gpt-oss-120b, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
-    # WP-187: reads Confluence or the technical docs and the turn's level is only what the task declares,
-    # so no external provider at any level; a local failure fails the task instead of sending the context out.
-    local_only_for: [C1, C2, C3]
-  # 2026-09-03 correction to ADR-0531. Decision 1 states that every
-  # declared (agent, task) pair carries an explicit entry - "no more
-  # implicit provider-routing.yaml file-order default for any task" - but
-  # decision 7 counted "all three of Arkos's declared tasks" where
-  # agents/arkos/agent.okf.md declares FOUR. structure-demo was neither in
-  # the ADR-0417 write-code carve-out nor the ADR-0416 reflexional one, so
-  # it was the single task still falling through to file order, and two
-  # other documents (agents/arkos/README.md, wp-31-arkos-slice.md) claimed
-  # it rode the qwen3.5-9b fleet default instead. Only the generated
-  # authorization matrix was right: it resolved to local-maas/local.
-  #
-  # This entry pins that resolved order EXACTLY as file order already
-  # produces it, so live behaviour does not change - structure-demo keeps
-  # answering on qwen3.6-27b-instruct. It is written rather than left
-  # implicit for two reasons: it makes decision 1's invariant true (and
-  # check_docs.py's model_roles check now enforces it), and it gives the
-  # `quality` role its first explicit reference in this file, so "higher-
-  # quality local model" names a routing fact rather than a label.
-  #
-  # Arkos is C3-seeded and ADR-0034's effective classification only ever
-  # escalates, so this chain is always evaluated local-only; the SaaS
-  # entries provider-routing.yaml declares after these are filtered out by
-  # ADR-0021 before any preference is applied. Deliberately NOT migrated
-  # to the qwen3.5-9b fleet default: that would be a behaviour change on a
-  # task carrying a known unresolved 30s streaming timeout (WP-31), which
-  # is its own investigation, not a side effect of a documentation fix.
+    prefer: *arkos_docs
+    local_only_for: *all_levels
+  # Not moved to the qwen3.5 default on purpose: a known 30 s streaming timeout (WP-31) is its own investigation.
   - agent: arkos
     task: structure-demo
     preferred: [local-maas, local]
     fallback: [local-gpt-oss-maas, local-gpt-oss, local-wesh-maas, local-wesh, local-qwen35-maas, local-qwen35]
-  # ADR-0526 (WP-087) decision 7: Comage is the candidate agent, so the
-  # qwen3.5-9b-wesh pair leads the chain on ALL THREE of its declared
-  # tasks. A preference is keyed by the (agent, task) tuple and an entry
-  # without `task` is rejected outright (app/model_routing_policy.py's
-  # own validation), so "the default for Comage" is expressible only as
-  # one entry per task - there is no agent-level default to write.
-  # Opportunity lookup by name/stage - a simple transactional read, and a
-  # tool-calling turn: the variant's serving runtime must therefore keep
-  # a tool-call parser configured (gitops/charts/models), or tool use
-  # breaks silently for this task. ADR-0531: qwen3.5-9b inserted right
-  # after the wesh pair (Comage's declared default: wesh primary,
-  # qwen3.5-9b fallback), no reflexional override on this task.
+  # Comage: wesh fine-tune first on all three tasks (one entry per task, there is no agent-level default).
+  # Tool-calling tasks: the serving runtime must keep a tool-call parser (gitops/charts/models).
   - agent: comage
     task: check-deal-status
-    preferred: [local-wesh-maas, local-wesh, local-qwen35-maas, local-qwen35, local-maas, local, local-gpt-oss-maas, local-gpt-oss]
-  # Opportunity stage write-back.
+    preferred: &wesh_first [local-wesh-maas, local-wesh, local-qwen35-maas, local-qwen35, local-maas, local, local-gpt-oss-maas, local-gpt-oss]
   - agent: comage
     task: update-opportunity-status
-    preferred: [local-wesh-maas, local-wesh, local-qwen35-maas, local-qwen35, local-maas, local, local-gpt-oss-maas, local-gpt-oss]
-  # Drive/mail lookup over the user's own material - also tool-calling.
+    preferred: *wesh_first
   - agent: comage
     task: check-my-drive-and-mail
-    preferred: [local-wesh-maas, local-wesh, local-qwen35-maas, local-qwen35, local-maas, local, local-gpt-oss-maas, local-gpt-oss]
-  # ADR-0531: Advantage/Finage's tasks are analysis/judgment work, but the
-  # user confirmed these are NOT protected reflexional overrides the way
-  # Arkos/Tekos/Comage's reflect-slot tasks are - qwen3.5-9b becomes the
-  # new lead, gpt-oss-20b is demoted to a fallback rather than removed.
-  # Project/bid synthesis.
+    preferred: *wesh_first
+  # General family (ADR-0531): qwen3.5-9b leads, gpt-oss is a fallback and not a protected reasoning override.
   - agent: advantage
     task: answer-project-question
-    preferred: [local-qwen35-maas, local-qwen35, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
-  # Detection + judgment over adv knowledge (PO within 3 rolling days).
+    preferred: &general [local-qwen35-maas, local-qwen35, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
   - agent: advantage
     task: identify-new-business-with-po
-    preferred: [local-qwen35-maas, local-qwen35, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
-  # Margin analysis by state/customer/technology.
+    preferred: *general
   - agent: advantage
     task: monthly-sales-report
-    preferred: [local-qwen35-maas, local-qwen35, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
-  # ADR-0531: no prior entry (rode provider-routing.yaml's implicit file
-  # order) - now explicit, same fleet default as this agent's other tasks.
+    preferred: *general
   - agent: advantage
     task: check-my-drive-and-mail
-    preferred: [local-qwen35-maas, local-qwen35, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
-  # Invoice-readiness evaluation over sxa financial data (C2-intended -
-  # reclassified C3 -> C2 by ADR-0206's 2026-08-30 Status update; this
-  # preference list deliberately stays local/OVH-only, no SaaS entry added).
+    preferred: *general
   - agent: finage
     task: identify-business-ready-to-invoice
-    preferred: [local-qwen35-maas, local-qwen35, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
-  # Aggregation report over sxa financial data (C2-intended, same
-  # reclassification as above).
+    preferred: *general
   - agent: finage
     task: monthly-invoice-report
-    preferred: [local-qwen35-maas, local-qwen35, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
-  # ADR-0531: no prior entry - now explicit, same fleet default.
+    preferred: *general
   - agent: finage
     task: answer-finance-question
-    preferred: [local-qwen35-maas, local-qwen35, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
+    preferred: *general
   - agent: finage
     task: check-my-drive-and-mail
-    preferred: [local-qwen35-maas, local-qwen35, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
-  # Board-level strategic/financial work, C3 agent seed - forward-declared
-  # (cognos is a placeholder with no runtime route yet; inert until then).
-  # ADR-0416: ovhcloud-gpt-oss-120b leads the chain for turns that compute
-  # at C1/C2 (reflection-heavy board Q&A that doesn't touch C3 material) -
-  # eligible_for: [C1, C2] on that provider means a turn that escalates to
-  # C3 excludes it automatically (ADR-0021/0035, no extra logic needed
-  # here) and falls through to local-gpt-oss (via MaaS, then direct) then
-  # local exactly as before. Pre-dates and is unrelated to ADR-0531's
-  # Arkos/Tekos/Comage-scoped OVH extension (this is Cognos's own,
-  # earlier, board-level-reasoning grant). ADR-0531 inserts qwen3.5-9b
-  # right behind it, same fleet default as every other agent.
+    preferred: *general
+  # Placeholder agents: cognos may reach OVHcloud first, soursage is general.
   - agent: cognos
     task: coming-soon
     preferred: [ovhcloud-gpt-oss-120b, local-qwen35-maas, local-qwen35, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
-  # ADR-0531: Naveo/Soursage are pre-live agents (see their own
-  # NEXT_STEPS.md) - these entries are pure forward-declaration, identical
-  # in spirit to cognos/coming-soon above, zero live-routing effect until
-  # either agent is actually deployed.
   - agent: naveo
     task: answer-onboarding-question
-    preferred: [local-qwen35-maas, local-qwen35, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
-    # WP-187: reads Confluence or the technical docs and the turn's level is only what the task declares,
-    # so no external provider at any level; a local failure fails the task instead of sending the context out.
-    local_only_for: [C1, C2, C3]
+    preferred: *general
+    local_only_for: *all_levels
   - agent: soursage
     task: coming-soon
-    preferred: [local-qwen35-maas, local-qwen35, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
-
-  # Arkos write-code: sovereign coding on local models, gpt-oss-20b first,
-  # the local quality model as fallback. zuno-demo ADR-0417 pinned this task
-  # to mistral-codestral with strict: true, relying on the agent runtime
-  # evaluating it at a fixed C2 ceiling. That runtime is gone (2026-10-23),
-  # and the platform gives every task its agent's level (zuno-demo
-  # ADR-0565): Arkos is C3 and mistral-codestral is eligible for C1/C2 only,
-  # so every call failed closed. Arkos keeps a C3 chat history, so no turn of
-  # this task leaves the cluster at any level. Coding with Codestral on
-  # C1/C2 data is the tekos write-code task below.
+    preferred: *general
+  # Code: arkos is local only (C3 agent); tekos prefers mistral-codestral, wesh no longer preferred (2026-11-14).
   - agent: arkos
     task: write-code
     preferred: [local-gpt-oss-maas, local-gpt-oss]
     fallback: [local-maas, local]
-    local_only_for: [C1, C2, C3]
-  # Tekos is C1-seeded, so mistral-codestral (eligible_for: [C1, C2]) is
-  # already reachable at its natural classification with no override - no
-  # strict flag: the existing generic fallback-on-any-exception in
-  # app/main.py's _invoke_with_fallback (unchanged) naturally drops to
-  # local if Codestral errors, giving "use local also for coding" for
-  # free from already-live machinery.
-  # ADR-0526 (WP-087) put the wesh variant SECOND here. 2026-11-14 (owner's
-  # decision): the wesh providers (local-wesh-maas, local-wesh) are no longer
-  # preferred for write-code; the first fallback is gpt-oss. They stay eligible
-  # (this entry is not strict), so they still come after the listed names, in
-  # provider-routing.yaml order. mistral-codestral stays at index 0 and this
-  # entry stays non-strict. Both are enforced in CI by
-  # evaluations/tekos/gate_checks.py's
-  # tekos_write_code_prefers_mistral_codestral check, which fails the gate
-  # outright if either changes.
+    local_only_for: *all_levels
   - agent: tekos
     task: write-code
     prefer: [mistral-codestral, local-gpt-oss-maas, local-gpt-oss, local-maas, local]
 
-# ADR-0304 (WP-40 Part B): per (agent, task) "task class" quality/cost/
-# latency objectives, consumed by evaluations/routing_report.py alongside
-# live ai-gateway metrics (ADR-0029) and evaluations/benchmarks/*.json
-# artifacts (ADR-0305) to emit a RECOMMENDED policy diff - a report file,
-# never a write to this policy. Applying a recommendation is a normal
-# reviewed GitOps change to the `adapters:` list above; nothing in this
-# repo writes here automatically (that is ADR-0309/WP-42's separately
-# governed, explicitly-enabled scope, not this WP's).
-#
-# quality_floor: minimum acceptable quality signal in [0, 1] - the same
-#   scale evaluations/quality_gate.py's own scenario_rate already uses,
-#   so a benchmark artifact's agent_gates[task].scenario_rate is directly
-#   comparable without a unit conversion.
-# cost_ceiling_usd_per_1k: maximum acceptable USD per 1,000 total tokens
-#   (matches components/ai-gateway/app/telemetry.py's own
-#   zuno.model_cost_usd metric convention).
-# latency_target_ms_p95: maximum acceptable P95 latency in milliseconds
-#   (matches components/ai-gateway/app/telemetry.py's own zuno.latency_ms
-#   span attribute).
-#
-# cost_ceiling_usd_per_1k/latency_target_ms_p95 are deliberately omitted
-# below: this repo's OTel Collector has no queryable long-term metrics
-# store wired in (evaluations/routing_report.py's own D13 note), so there
-# is no live PromQL result to source a real ceiling/target from - setting
-# one anyway would be an invented number, not an objective. quality_floor
-# alone is sourced from evaluations/comage/gate_config.yaml's own
-# scenario_threshold, so it is comparable rather than arbitrary.
+# ADR-0304 objectives, read by evaluations/routing_report.py. quality_floor comes from
+# evaluations/comage/gate_config.yaml (scenario_threshold); cost and latency targets stay omitted until the OTel
+# collector has a queryable metrics store.
 objectives:
   - agent: comage
     task: check-deal-status
