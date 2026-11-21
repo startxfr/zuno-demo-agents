@@ -58,6 +58,11 @@ site prefix to a file path; if you cannot copy one, write "none retrieved".
 A page supports a side only if it describes that side: do not cite a page
 that is about something else, and a placeholder in a command (such as
 proxy.example.com) is not a source.
+A page about HTTPRoute or the Gateway API describes HTTPRoute, never
+Ingress: when the only page for the Ingress side is of that kind, write
+"none retrieved" for it and say in "Not stated by any passage" that no
+passage describes Ingress. Never write Ingress and HTTPRoute as the same
+thing, and never put HTTPRoute facts under the Ingress block.
 
 Web search queries carry public technical topics only: never put a
 customer name, a project id or anything taken from project memory into a
