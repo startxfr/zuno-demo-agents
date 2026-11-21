@@ -20,10 +20,10 @@ Generated per ADR-0503 from this bundle's frontmatter, `policies/tools/tool-poli
 | `answer-technical-question` (primary; prompt: `prompts/answer-technical-question.md`) | `metrics.query` | tool | `metrics.query` @ k8s | C2 | ocp-ai-ops | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `metrics.query` |
 | `answer-technical-question` (primary; prompt: `prompts/answer-technical-question.md`) | `knowledge.tech` | knowledge | — | — | consultant, board, cdp | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.tech` |
 | `answer-technical-question` (primary; prompt: `prompts/answer-technical-question.md`) | `knowledge.project` | knowledge | — | — | consultant, board, sales, adv, finance, cdp | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.project` |
-| `find-relevant-docs` (prompt: `prompts/find-relevant-docs.md`) | `search_confluence` | tool | `confluence.page.search` @ confluence | C2 | consultant, board, cdp, lightspeed_readonly, ocp-ai-ops | blocked | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `search_confluence` |
-| `find-relevant-docs` (prompt: `prompts/find-relevant-docs.md`) | `list_drive_files` | tool | `drive.document.search` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `list_drive_files` |
-| `find-relevant-docs` (prompt: `prompts/find-relevant-docs.md`) | `knowledge.tech` | knowledge | — | — | consultant, board, cdp | — | `standard` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.tech` |
-| `check-my-drive-docs` (prompt: `prompts/check-my-drive-docs.md`) | `list_drive_files` | tool | `drive.document.search` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `standard` (user 60 req/5m) | `tools/tool-policy.yaml` `list_drive_files` |
+| `find-relevant-docs` (prompt: `prompts/find-relevant-docs.md`) | `search_confluence` | tool | `confluence.page.search` @ confluence | C2 | consultant, board, cdp, lightspeed_readonly, ocp-ai-ops | blocked | `light` (user 60 req/5m) | `tools/tool-policy.yaml` `search_confluence` |
+| `find-relevant-docs` (prompt: `prompts/find-relevant-docs.md`) | `list_drive_files` | tool | `drive.document.search` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `light` (user 60 req/5m) | `tools/tool-policy.yaml` `list_drive_files` |
+| `find-relevant-docs` (prompt: `prompts/find-relevant-docs.md`) | `knowledge.tech` | knowledge | — | — | consultant, board, cdp | — | `light` (user 60 req/5m) | `knowledge/knowledge-policy.yaml` `knowledge.tech` |
+| `check-my-drive-docs` (prompt: `prompts/check-my-drive-docs.md`) | `list_drive_files` | tool | `drive.document.search` @ google-workspace | C1 | consultant, board, cdp, sales, adv, finance | allowed | `light` (user 60 req/5m) | `tools/tool-policy.yaml` `list_drive_files` |
 
 ### Model routing
 

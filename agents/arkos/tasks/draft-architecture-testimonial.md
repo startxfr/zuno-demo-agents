@@ -46,21 +46,7 @@ The `plan_draft_write` steps:
 4. Reflect: review and improve the draft with the `reflect` prompt.
 5. Write: return the document in the reply.
 
-Tools:
-
-- `confluence.page.search`, `confluence.page.read`: internal Confluence
-  pages. Their content is processed by local models only.
-- `git.repository.read`, `git.repository.list`: public repositories, on
-  GitHub and GitLab.
-- `git.repository.private.read`, `git.repository.private.list`: private and
-  internal repositories, GitLab only.
-- `git.file.write`: commits land only in public repositories, whatever the
-  request. `git.repository.create`: creates a repository, public or
-  private. Both are write tools.
-- `diagram.generation.create`: renders Mermaid source into a diagram. Any
-  request for a diagram or schema goes through it.
-- `aap.platform.audit`: a read-only summary of the Ansible Automation
-  Platform's state.
+Tools: see `allowed_tools` and the notes in `tools/`.
 
 Not declared: writing to Google Drive or Docs, so the document comes back
 in the reply and is not saved; Jira; repository fork and delete; image
