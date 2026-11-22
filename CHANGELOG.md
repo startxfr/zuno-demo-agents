@@ -2,6 +2,23 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v1.2.4 - 2026-11-22
+
+Agents:
+
+- `advantage` 1.0.3
+- `arkos` 1.0.6
+- `cognos` 1.0.2
+- `comage` 1.0.3
+- `finage` 1.0.2
+- `naveo` 1.0.1
+- `soursage` 1.0.3
+- `tekos` 1.0.9
+
+Changes:
+
+- feat(quotas): loadtest ceilings for the stress runner, group 5,000,000 and user 500,000 tokens per hour (d118121)
+
 ## v1.2.3 - 2026-11-21
 
 Agents:
