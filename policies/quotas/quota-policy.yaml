@@ -186,8 +186,8 @@ classes:
       group:   { limit: 600,  window: 5m }
       project: { limit: 300,  window: 5m }
     tokens:
-      user:    { budget: 250000,  window: 1h }
-      group:   { budget: 1000000, window: 1h }
+      user:    { budget: 500000,  window: 1h }
+      group:   { budget: 5000000, window: 1h }
       project: { budget: 500000,  window: 1h }
 
 precedence:
