@@ -2,6 +2,23 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v1.2.7 - 2026-11-23
+
+Agents:
+
+- `advantage` 1.0.3
+- `arkos` 1.1.0
+- `cognos` 1.0.2
+- `comage` 1.0.3
+- `finage` 1.1.0
+- `naveo` 1.0.1
+- `soursage` 1.0.4
+- `tekos` 1.1.2
+
+Changes:
+
+- fix(tekos): a passage that describes the thing answers, no formal definition needed; the figure rule covers dates, versions and numeric limits only (f4bc088)
+
 ## v1.2.6 - 2026-11-23
 
 Agents:
