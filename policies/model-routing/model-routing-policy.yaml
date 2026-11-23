@@ -52,6 +52,8 @@ preferences:
     task: structure-demo
     preferred: [local-maas, local]
     fallback: [local-gpt-oss-maas, local-gpt-oss, local-wesh-maas, local-wesh, local-qwen35-maas, local-qwen35]
+    # Arkos moved from C3 to C2 in v1.2.5: the ceiling no longer keeps this task local, so say it here.
+    local_only_for: *all_levels
   # Comage: wesh fine-tune first on all three tasks (one entry per task, there is no agent-level default).
   # Tool-calling tasks: the serving runtime must keep a tool-call parser (gitops/charts/models).
   - agent: comage
@@ -99,7 +101,7 @@ preferences:
   - agent: soursage
     task: coming-soon
     preferred: *general
-  # Code: arkos is local only (C3 agent); tekos prefers mistral-codestral, wesh no longer preferred (2026-11-14).
+  # Code: arkos is local only (local_only_for, whatever its C2 ceiling); tekos prefers mistral-codestral, wesh no longer preferred (2026-11-14).
   - agent: arkos
     task: write-code
     preferred: [local-gpt-oss-maas, local-gpt-oss]
