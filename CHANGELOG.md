@@ -2,6 +2,23 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v1.2.5 - 2026-11-23
+
+Agents:
+
+- `advantage` 1.0.3
+- `arkos` 1.1.0
+- `cognos` 1.0.2
+- `comage` 1.0.3
+- `finage` 1.1.0
+- `naveo` 1.0.1
+- `soursage` 1.0.4
+- `tekos` 1.1.0
+
+Changes:
+
+- feat(policies): platform personas read the cluster and AAP through Tekos; data ceilings Arkos C2, Finage C3, Tekos C2 (2310b5a)
+
 ## v1.2.4 - 2026-11-22
 
 Agents:

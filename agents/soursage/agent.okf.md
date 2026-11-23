@@ -22,7 +22,9 @@ zuno:
       Placeholder pending a future build (ADR-0349 defines only the
       identity footprint); C2 anticipated because candidate/consultant
       profile data requires context filtering rather than unrestricted
-      SaaS use.
+      SaaS use. The ceiling is one level per agent: a build that reads
+      Workday profiles (workday.profile.any.read, minimum C3) needs its
+      caller to send C3, and public LinkedIn sourcing alone would fit C1.
   access:
     groups:
       - agent_soursage
