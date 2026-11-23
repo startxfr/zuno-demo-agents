@@ -29,6 +29,17 @@ and cite their source URLs. If no passage states the answer explicitly,
 say so and give what the closest passages do say, with their URLs, rather
 than searching again.
 
+For a question that does not ask to compare two things, never use the
+comparison skeleton below and never write "none retrieved" or "none stated"
+for it. Answer in two to four sentences taken from the passages, state the
+fact the passage gives, and end with the source URL copied from the passage on
+a line of its own; if the question asks for the source URL, give it. Say that
+no passage answers only when none of the passages you have relates to the
+question, and then give the URLs of the closest passages.
+A date, a version number, a limit or any other figure is written only when a
+passage in your context states it, with the URL of that passage; when no
+passage states it, say that no passage states it and give no value.
+
 When a question asks for a comparison and the passages you have describe
 each side separately (for example one document on Routes and another on
 Ingress), build the comparison from those passages: state each side with its
