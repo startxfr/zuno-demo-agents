@@ -43,6 +43,14 @@ HTTPROUTE_NOT_INGRESS = re.compile(
 MISSING_SIDE_NO_CLAIMS = re.compile(
     r"when a side is \"none retrieved\", write \"none stated\" for the differences.{0,40}under \"not stated by any passage\" write only the names of the missing topics"
     r".{0,160}never a sentence that says what the missing side is or does")
+# (j) v1.2.6: the skeleton is for comparisons only; any other question gets a short answer with the passage URL, never "none retrieved" (live check
+# #11 of 2026-11-22/23: 4 of 8 replies to "What is a namespace in OpenShift?" were "None retrieved."), and no figure without a passage URL (c2: RHEL 12 date)
+NON_COMPARISON_SHORT_ANSWER = re.compile(
+    r"for a question that does not ask to compare two things, never use the comparison skeleton below and never write \"none retrieved\" or \"none stated\" for it"
+    r".{0,200}end with the source url copied from the passage")
+NO_FIGURE_WITHOUT_URL = re.compile(
+    r"a date, a version number, a limit or any other figure is written only when a passage in your context states it, with the url of that passage"
+    r".{0,120}give no value")
 ONLY_FROM_PASSAGES = re.compile(r"only from the passages in your context or returned by your searches.{0,120}no passage covers one side, say that no passage covers it")
 
 
@@ -90,11 +98,19 @@ class ComparisonFromSeparatePassages(unittest.TestCase):
         self.assertRegex(normalised(), MISSING_SIDE_NO_CLAIMS,
                          "answer-technical-question.md lost the rule that a side with no passage gets 'none stated' differences and only topic names under 'Not stated by any passage'")
 
+    def test_a_question_that_is_not_a_comparison_gets_a_short_answer_with_the_passage_url(self):
+        self.assertRegex(normalised(), NON_COMPARISON_SHORT_ANSWER,
+                         "answer-technical-question.md lost the rule that only a comparison uses the skeleton and any other question gets a short answer ending with the passage URL")
+
+    def test_no_date_or_figure_without_a_passage_url(self):
+        self.assertRegex(normalised(), NO_FIGURE_WITHOUT_URL,
+                         "answer-technical-question.md lost the rule that a date or figure is written only with the URL of a passage that states it")
+
     def test_the_patterns_do_not_match_a_bare_prompt(self):
         bare = ("answer the technical question from the passages you are given and cite their source urls. if no passage states the "
                 "answer explicitly, say so and give what the closest passages do say.")
         for pattern in (BUILD_FROM_PASSAGES, NO_DECLINE, NO_INVENTED_DIFFERENCE, ONLY_FROM_PASSAGES, NO_SUBSTITUTE_CONCEPT, SKELETON, COPY_URL,
-                        HTTPROUTE_NOT_INGRESS, MISSING_SIDE_NO_CLAIMS):
+                        HTTPROUTE_NOT_INGRESS, MISSING_SIDE_NO_CLAIMS, NON_COMPARISON_SHORT_ANSWER, NO_FIGURE_WITHOUT_URL):
             self.assertIsNone(pattern.search(bare), pattern.pattern)
 
 
