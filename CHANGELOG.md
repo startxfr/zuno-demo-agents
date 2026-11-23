@@ -2,6 +2,23 @@
 
 Written by the release chain (`.github/workflows/release.yml`) on `stable`; never edit it on `devel` or `main`.
 
+## v1.2.8 - 2026-11-23
+
+Agents:
+
+- `advantage` 1.0.3
+- `arkos` 1.1.0
+- `cognos` 1.0.2
+- `comage` 1.0.3
+- `finage` 1.1.0
+- `naveo` 1.0.1
+- `soursage` 1.0.4
+- `tekos` 1.1.3
+
+Changes:
+
+- fix(tekos): plain question rules in their own section after the comparison rules, a router sentence, a Source line shape (b44c0ba)
+
 ## v1.2.7 - 2026-11-23
 
 Agents:
