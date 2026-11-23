@@ -46,15 +46,18 @@ MISSING_SIDE_NO_CLAIMS = re.compile(
 # (j) v1.2.6: the skeleton is for comparisons only; any other question gets a short answer with the passage URL, never "none retrieved" (live check
 # #11 of 2026-11-22/23: 4 of 8 replies to "What is a namespace in OpenShift?" were "None retrieved."), and no figure without a passage URL (c2: RHEL 12 date)
 NON_COMPARISON_SHORT_ANSWER = re.compile(
-    r"for a question that does not ask to compare two things, never use the comparison skeleton below and never write \"none retrieved\" or \"none stated\" for it"
-    r".{0,400}end with that passage's source url copied")
-# (k) v1.2.7: v1.2.6 made the live check #11 worse (8 of 8 replies "no passage defines a namespace", 4 of 8 before): a passage that describes the
-# thing is enough, no formal definition needed, and the figure rule covers dates, versions and numeric limits only
+    r"plain question rules \(a question that does not ask to compare two things; these rules never apply to a comparison\)\. "
+    r"never write \"none retrieved\" or \"none stated\" for such a question\..{0,200}source: <url copied from the passage that supports them>")
+# (k) v1.2.8: v1.2.6 made live check #11 worse (0 of 8 replies cite a URL, 4 of 8 before) and v1.2.7 only half repaired it while one q2 run slipped:
+# the plain-question rules are their own section after the comparison rules, a router sentence picks the section, a describing passage is enough,
+# and the figure rule covers dates, versions and numeric limits only
+ROUTER_SENTENCE = re.compile(
+    r"first decide what kind of question it is\. a question that asks to compare two things follows the comparison rules below\..{0,200}never uses the comparison skeleton")
 DESCRIBED_IS_ENOUGH = re.compile(
-    r"a passage does not need to contain a formal definition to answer, and you never say that no passage defines something when a passage describes it")
+    r"a passage does not need to contain a formal definition, and you never say that no passage defines something when a passage describes it")
 NO_FIGURE_WITHOUT_URL = re.compile(
-    r"a date, a version number or a numeric limit is written only when a passage in your context states it, with the url of that passage"
-    r".{0,120}give no value\. this applies to those values only, not to explanations or descriptions")
+    r"a date, a version number or a numeric limit is written only when a passage in your context states it, with the url of that passage; otherwise give no value for it"
+    r".{0,60}this applies to those values only, not to explanations or descriptions")
 ONLY_FROM_PASSAGES = re.compile(r"only from the passages in your context or returned by your searches.{0,120}no passage covers one side, say that no passage covers it")
 
 
@@ -106,6 +109,10 @@ class ComparisonFromSeparatePassages(unittest.TestCase):
         self.assertRegex(normalised(), NON_COMPARISON_SHORT_ANSWER,
                          "answer-technical-question.md lost the rule that only a comparison uses the skeleton and any other question gets a short answer ending with the passage URL")
 
+    def test_a_router_sentence_sends_a_comparison_and_any_other_question_to_their_own_rules(self):
+        self.assertRegex(normalised(), ROUTER_SENTENCE,
+                         "answer-technical-question.md lost the sentence that sends a comparison to the comparison rules and any other question to the plain question rules")
+
     def test_a_passage_that_describes_the_thing_is_enough_to_answer(self):
         self.assertRegex(normalised(), DESCRIBED_IS_ENOUGH,
                          "answer-technical-question.md lost the rule that a passage describing the thing answers, with no formal definition needed")
@@ -118,7 +125,7 @@ class ComparisonFromSeparatePassages(unittest.TestCase):
         bare = ("answer the technical question from the passages you are given and cite their source urls. if no passage states the "
                 "answer explicitly, say so and give what the closest passages do say.")
         for pattern in (BUILD_FROM_PASSAGES, NO_DECLINE, NO_INVENTED_DIFFERENCE, ONLY_FROM_PASSAGES, NO_SUBSTITUTE_CONCEPT, SKELETON, COPY_URL,
-                        HTTPROUTE_NOT_INGRESS, MISSING_SIDE_NO_CLAIMS, NON_COMPARISON_SHORT_ANSWER, DESCRIBED_IS_ENOUGH, NO_FIGURE_WITHOUT_URL):
+                        HTTPROUTE_NOT_INGRESS, MISSING_SIDE_NO_CLAIMS, NON_COMPARISON_SHORT_ANSWER, ROUTER_SENTENCE, DESCRIBED_IS_ENOUGH, NO_FIGURE_WITHOUT_URL):
             self.assertIsNone(pattern.search(bare), pattern.pattern)
 
 
