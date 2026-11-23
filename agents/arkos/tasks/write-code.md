@@ -31,8 +31,9 @@ It is a direct branch of the `plan_draft_write` workflow: after the plan
 step, it answers from the user's message alone, with no retrieval and no
 tool call, so `allowed_tools` and `allowed_knowledge` are empty.
 
-Model routing (`policies/model-routing/model-routing-policy.yaml`): Arkos is
-a C3 agent, so this task runs on local models only, at every level:
+Model routing (`policies/model-routing/model-routing-policy.yaml`): this task
+carries `local_only_for` at every level, so it runs on local models only
+whatever the C2 ceiling of Arkos:
 gpt-oss-20b first, the local quality model as fallback. The code model
 `mistral-codestral` is eligible for C1 and C2 only and never serves it; coding
 with Codestral on C1/C2 data is Tekos's `write-code` task. If every local

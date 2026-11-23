@@ -28,10 +28,13 @@ zuno:
       max_turns: 6
       token_budget: 6000
   model:
-    preferred_classification: C3
+    preferred_classification: C2
     notes: >-
-      C3 because sovereign-marked DAT workflows must run on local models
-      only.
+      C2 (was C3 until v1.2.4): the architecture material is C2. Sovereign
+      DAT workflows, structure-demo and write-code keep running on local
+      models through local_only_for in
+      policies/model-routing/model-routing-policy.yaml, not through the
+      ceiling.
   delegation:
     targets:
       - agent: tekos

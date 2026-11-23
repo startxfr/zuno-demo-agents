@@ -517,6 +517,10 @@ tools:
   # gitops/charts/openshift-rbac-groups) is reused instead of inventing a
   # new Keycloak group: real humans already trusted with cluster-admin-tier
   # access to the AI platform, not a broader "any console user" grant.
+  #
+  # 2026-11-23: the other platform groups `ocp-ai-dev`, `ocp-paas-dev` and `ocp-paas-ops` join `ocp-ai-ops` on
+  # aap.platform.audit, so all four platform personas read the AAP state. aap.cluster.audit (the launch, `write`)
+  # takes `ocp-paas-ops` only on top of `ocp-ai-ops`: write stays with the admin groups.
   - tool: aap.platform.audit
     access: read
     capability: aap.platform.audit
@@ -535,6 +539,9 @@ tools:
       - board
       - cdp
       - ocp-ai-ops
+      - ocp-ai-dev
+      - ocp-paas-dev
+      - ocp-paas-ops
 
   - tool: aap.cluster.audit
     access: write
@@ -556,9 +563,12 @@ tools:
       - board
       - cdp
       - ocp-ai-ops
+      - ocp-paas-ops
 
   # zuno-demo ADR-0600 (WP-206): governed, read-only Kubernetes reads (components behind the `k8s` backend,
-  # gitops/charts/mcp-k8s). Operations group only: `ocp-ai-ops` (admin on the zuno-* namespaces). `aap_ops`
+  # gitops/charts/mcp-k8s). Platform groups only: `ocp-ai-ops` (admin on the zuno-* namespaces) and, since
+  # 2026-11-23, the three other platform personas' groups `ocp-ai-dev`, `ocp-paas-dev` and `ocp-paas-ops`, so every
+  # platform persona can read the cluster and its metrics through Tekos. `aap_ops`
   # (also held by the consultant personas and the Dify/OpenClaw service accounts) is NOT admitted. The server's own ServiceAccount does the read (`view` per namespace, no Secret, no ConfigMap
   # data); these entries decide who may call it. Logs can carry secrets an application printed, hence C2.
   - tool: k8s.resource.read
@@ -571,6 +581,9 @@ tools:
     min_classification: C2
     allowed_groups:
       - ocp-ai-ops
+      - ocp-ai-dev
+      - ocp-paas-dev
+      - ocp-paas-ops
 
   - tool: k8s.resource.list
     access: read
@@ -582,6 +595,9 @@ tools:
     min_classification: C2
     allowed_groups:
       - ocp-ai-ops
+      - ocp-ai-dev
+      - ocp-paas-dev
+      - ocp-paas-ops
 
   - tool: k8s.events.read
     access: read
@@ -593,6 +609,9 @@ tools:
     min_classification: C2
     allowed_groups:
       - ocp-ai-ops
+      - ocp-ai-dev
+      - ocp-paas-dev
+      - ocp-paas-ops
 
   - tool: k8s.logs.read
     access: read
@@ -604,6 +623,9 @@ tools:
     min_classification: C2
     allowed_groups:
       - ocp-ai-ops
+      - ocp-ai-dev
+      - ocp-paas-dev
+      - ocp-paas-ops
 
   - tool: metrics.query
     access: read
@@ -615,6 +637,9 @@ tools:
     min_classification: C2
     allowed_groups:
       - ocp-ai-ops
+      - ocp-ai-dev
+      - ocp-paas-dev
+      - ocp-paas-ops
 
   # ADR-0415: stable-diffusion-xl image generation via OVHcloud AI
   # Endpoints, for advantage/cognos/comage's preferred image model. Policy

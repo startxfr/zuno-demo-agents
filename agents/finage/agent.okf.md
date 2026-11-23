@@ -28,10 +28,11 @@ zuno:
     - monthly-invoice-report
     - check-my-drive-and-mail
   model:
-    preferred_classification: C2
+    preferred_classification: C3
     local_only: true
     notes: >-
-      Placeholder pending the live acceptance gate; C2 default.
+      C3 (was C2 until v1.2.4): finance material is C3 and C3 is served by
+      local models only, so the ceiling alone keeps it in the cluster.
       ADR-0416:
       `local_only: true` makes Finage local-model-only
       unconditionally, at every classification including C1 - finance

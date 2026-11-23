@@ -31,11 +31,14 @@ zuno:
   rag:
     top_k: 5
   model:
-    preferred_classification: C1
+    preferred_classification: C2
     notes: >-
-      Public product documentation and general technical Q&A are C1 (SaaS
-      model use allowed). Confluence content is C2, and its tool policy keeps
-      it on local models even though this agent's ceiling is C1. The model
+      Public product documentation and general technical Q&A are C1. The
+      agent's ceiling is C2 because it reads Confluence content (C2) and,
+      for the platform personas, cluster logs and AAP state (C2), so every
+      call is routed at C2 at least. Confluence content stays on local
+      models through the tool policy and the tasks' local_only_for, and C2
+      leaves out the C1-only SaaS models (gemini, mistral). The model
       catalog and each task's preference live in
       policies/models/model-catalog.yaml and
       policies/model-routing/model-routing-policy.yaml; the resolved chain is
